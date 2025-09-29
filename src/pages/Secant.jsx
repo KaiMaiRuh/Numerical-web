@@ -1,8 +1,270 @@
+import { useState, useRef, useEffect } from "react";
+
 export default function Secant() {
+  const [expr, setExpr] = useState("");
+  const [x0, setX0] = useState("");
+  const [x1, setX1] = useState("");
+  const [tol, setTol] = useState("");
+  const [maxIter, setMaxIter] = useState("");
+  const [iterations, setIterations] = useState([]);
+  const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
+  const [root, setRoot] = useState("-");
+  const [iters, setIters] = useState("-");
+  const canvasRef = useRef(null);
+
+  // --- Helper ---
+  function makeFunc(expr) {
+    if (!expr || !expr.trim()) return null;
+    let s = expr.replace(/\^/g, "**");
+    s = s.replace(/\bln\s*\(/gi, "log(");
+    s = s.replace(/\bpi\b/gi, "PI");
+    s = s.replace(/\be\b/gi, "E");
+    try {
+      return new Function("x", "with(Math){ return (" + s + "); }");
+    } catch {
+      return null;
+    }
+  }
+
+  function secant(func, x0, x1, tol, maxIter) {
+    let iterations = [];
+    let f0 = func(x0), f1 = func(x1);
+
+    iterations.push({ iter: 0, x: x0, fx: f0, error: null });
+    iterations.push({ iter: 1, x: x1, fx: f1, error: null });
+
+    for (let i = 2; i <= maxIter; i++) {
+      if (f1 - f0 === 0) return { error: "หารด้วยศูนย์ (f1 - f0 = 0)" };
+
+      let x2 = x1 - f1 * (x1 - x0) / (f1 - f0);
+      let f2 = func(x2);
+      let err = Math.abs(x2 - x1) / Math.abs(x2);
+
+      iterations.push({ iter: i, x: x2, fx: f2, error: err });
+
+      if (Math.abs(f2) < tol || err < tol) {
+        return { root: x2, iterations, converged: true };
+      }
+
+      x0 = x1; f0 = f1;
+      x1 = x2; f1 = f2;
+    }
+    return { root: x1, iterations, converged: false };
+  }
+
+  function formatNum(x) {
+    if (x === null) return "-";
+    if (!isFinite(x)) return String(x);
+    return Number(x).toPrecision(6).replace(/(?:\.0+$)|(?:(?<=\.[0-9]*[1-9])0+$)/, "");
+  }
+
+  // --- Draw Plot ---
+  function drawPlot(func, iterations) {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = "#061022";
+    ctx.fillRect(0, 0, W, H);
+
+    if (iterations.length === 0) return;
+
+    // Zoom to iterations
+    const xs = iterations.map(it => it.x);
+    const ys = iterations.map(it => it.fx);
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const minY = Math.min(...ys), maxY = Math.max(...ys);
+    const padX = (maxX - minX) * 0.3 || 1;
+    const padY = (maxY - minY) * 0.3 || 1;
+    const xmin = minX - padX, xmax = maxX + padX;
+    const ymin = minY - padY, ymax = maxY + padY;
+
+    const mapX = (x) => ((x - xmin) / (xmax - xmin)) * W;
+    const mapY = (y) => H - ((y - ymin) / (ymax - ymin)) * H;
+
+    // Axis
+    ctx.strokeStyle = "rgba(255,255,255,0.1)";
+    if (ymin < 0 && ymax > 0) {
+      const y0 = mapY(0);
+      ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y0); ctx.stroke();
+    }
+    if (xmin < 0 && xmax > 0) {
+      const x0 = mapX(0);
+      ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0, H); ctx.stroke();
+    }
+
+    // Function curve
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#8ab4ff";
+    const N = 500;
+    let started = false;
+    for (let i = 0; i < N; i++) {
+      const x = xmin + (xmax - xmin) * i / (N - 1);
+      let y;
+      try { y = func(x); } catch { y = NaN; }
+      if (!isFinite(y)) { started = false; continue; }
+      const px = mapX(x), py = mapY(y);
+      if (!started) { ctx.moveTo(px, py); started = true; }
+      else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+
+    // Iterations points + secant lines
+    iterations.forEach((it, idx) => {
+      const px = mapX(it.x), py = mapY(it.fx);
+
+      if (idx > 0) {
+        const prev = iterations[idx - 1];
+        ctx.beginPath();
+        ctx.moveTo(mapX(prev.x), mapY(prev.fx));
+        ctx.lineTo(px, py);
+        ctx.strokeStyle = "#22c55e";
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      ctx.beginPath();
+      ctx.arc(px, py, idx === iterations.length - 1 ? 6 : 3, 0, 2 * Math.PI);
+      ctx.fillStyle = idx === iterations.length - 1 ? "#fb923c" : "#f97316";
+      ctx.fill();
+
+      ctx.fillStyle = "#e2e8f0";
+      ctx.font = "12px sans-serif";
+      ctx.fillText("x" + idx, px - 10, mapY(0) + 14);
+    });
+  }
+
+  // --- Handlers ---
+  const handleRun = () => {
+    const func = makeFunc(expr);
+    if (!func) { setStatus("สถานะ: สมการไม่ถูกต้อง"); return; }
+    const x0val = parseFloat(x0);
+    const x1val = parseFloat(x1);
+    const tolVal = parseFloat(tol);
+    const maxVal = parseInt(maxIter, 10);
+
+    if (isNaN(x0val) || isNaN(x1val)) { setStatus("สถานะ: x0/x1 ไม่ถูกต้อง"); return; }
+    if (!isFinite(tolVal) || tolVal <= 0) { setStatus("สถานะ: tol ต้องเป็นจำนวนบวก"); return; }
+    if (!Number.isInteger(maxVal) || maxVal <= 0) { setStatus("สถานะ: Max Iteration ต้องเป็นจำนวนเต็มบวก"); return; }
+
+    const res = secant(func, x0val, x1val, tolVal, maxVal);
+    if (res.error) { setStatus("สถานะ: " + res.error); return; }
+
+    setIterations(res.iterations);
+    setStatus("สถานะ: เสร็จสิ้น " + (res.converged ? "(converged)" : "(ไม่ converged)"));
+    setIters(res.iterations.length);
+    setRoot(formatNum(res.root));
+    drawPlot(func, res.iterations);
+  };
+
+  const handleReset = () => {
+    setExpr(""); setX0(""); setX1(""); setTol(""); setMaxIter("");
+    setIterations([]); setStatus("สถานะ: รีเซ็ตแล้ว");
+    setIters("-"); setRoot("-");
+    drawPlot(() => 0, []);
+  };
+
+  useEffect(() => { drawPlot(() => 0, []); }, []);
+
+  // --- Render ---
   return (
-    <div className="p-6">
-      <h1 className="text-xl font-bold text-cyan-400">Newton-Raphson Method</h1>
-      <p className="mt-2 text-gray-300">หน้านี้สำหรับ Newton-Raphson</p>
+    <div className="max-w-6xl mx-auto p-6">
+      <header className="flex items-center justify-between gap-4 mb-4">
+        <h1 className="text-xl font-bold text-cyan-400">Secant Method</h1>
+        <div className="text-sm text-gray-400">ตาราง + กราฟ แสดงการทำงาน</div>
+      </header>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Input */}
+        <div className="bg-slate-800 rounded-lg p-4 shadow">
+          <label className="block text-sm text-gray-400 mb-1">สมการ f(x)</label>
+          <input type="text" value={expr} onChange={(e) => setExpr(e.target.value)}
+            placeholder="เช่น x^3 - x - 2"
+            className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700 mb-3" />
+
+          <div className="flex gap-3 mb-3">
+            <div className="flex-1">
+              <label className="block text-sm text-gray-400 mb-1">ค่า x0</label>
+              <input type="number" value={x0} onChange={(e) => setX0(e.target.value)}
+                placeholder="เช่น 1"
+                className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" />
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm text-gray-400 mb-1">ค่า x1</label>
+              <input type="number" value={x1} onChange={(e) => setX1(e.target.value)}
+                placeholder="เช่น 2"
+                className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" />
+            </div>
+          </div>
+
+          <div className="flex gap-3 mb-3">
+            <div className="flex-1">
+              <label className="block text-sm text-gray-400 mb-1">Error</label>
+              <input type="text" value={tol} onChange={(e) => setTol(e.target.value)}
+                placeholder="เช่น 1e-6"
+                className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" />
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm text-gray-400 mb-1">Max Iteration</label>
+              <input type="number" value={maxIter} onChange={(e) => setMaxIter(e.target.value)}
+                placeholder="เช่น 50"
+                className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" />
+            </div>
+          </div>
+
+          <div className="flex gap-3 mb-4">
+            <button onClick={handleRun}
+              className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-semibold py-2 rounded">คำนวณ</button>
+            <button onClick={handleReset}
+              className="flex-1 border border-slate-600 text-gray-400 py-2 rounded hover:bg-slate-700">รีเซ็ต</button>
+          </div>
+
+          <div className="text-sm">
+            <div>{status}</div>
+            <div>Iterations: {iters}</div>
+            <div>Root: {root}</div>
+          </div>
+
+          {/* Table */}
+          {iterations.length > 0 && (
+            <div className="overflow-auto max-h-64 mt-3">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="bg-slate-700 text-gray-400">
+                    <th className="p-2 text-right">iter</th>
+                    <th className="p-2 text-right">x</th>
+                    <th className="p-2 text-right">f(x)</th>
+                    <th className="p-2 text-right">error</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {iterations.map((r) => (
+                    <tr key={r.iter} className="border-b border-slate-700">
+                      <td className="p-2 text-right">{r.iter}</td>
+                      <td className="p-2 text-right">{formatNum(r.x)}</td>
+                      <td className="p-2 text-right">{formatNum(r.fx)}</td>
+                      <td className="p-2 text-right">{r.error === null ? "-" : formatNum(r.error)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Graph */}
+        <div className="bg-slate-800 rounded-lg p-4 shadow">
+          <label className="block text-sm text-gray-400 mb-2">กราฟฟังก์ชัน + Secant</label>
+          <canvas ref={canvasRef} width={800} height={320}
+            className="w-full h-72 bg-slate-900 rounded"></canvas>
+          <div className="text-xs text-gray-400 mt-2">
+            เส้นเขียว = เส้น secant ระหว่างแต่ละจุด, จุดส้ม = ค่าที่ได้, จุดส้มใหญ่ = ค่าสุดท้าย  
+            Label = x0, x1, x2 …
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
