@@ -50,7 +50,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="p-6 min-h-screen flex flex-col justify-center items-center bg-slate-900">
+    <div className="min-h-screen w-full flex flex-col justify-center items-center p-6 bg-slate-900">
       <h1 className="text-3xl font-bold text-cyan-400 mb-8 text-center">
         Numerical Methods
       </h1>
