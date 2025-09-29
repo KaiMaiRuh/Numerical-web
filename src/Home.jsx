@@ -50,19 +50,19 @@ export default function Home() {
   ];
 
   return (
-    <div className="p-6">
+    <div className="p-6 min-h-screen flex flex-col justify-center items-center bg-slate-900">
       <h1 className="text-3xl font-bold text-cyan-400 mb-8 text-center">
         Numerical Methods
       </h1>
 
       {/* flex wrapper ให้ grid อยู่กลางจอ */}
-      <div className="flex justify-center">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="flex justify-center items-center w-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto">
           {categories.map((cat) => (
             <div
               key={cat.title}
-              className="bg-slate-800 rounded-xl p-5 shadow-lg w-72
-                         transform transition duration-300 
+              className="bg-slate-800 rounded-xl p-5 shadow-lg border border-cyan-700 w-72
+                         transform transition-all duration-300 
                          hover:scale-105 hover:shadow-2xl"
             >
               <h2 className="text-lg font-semibold text-cyan-300 mb-3 text-center">
