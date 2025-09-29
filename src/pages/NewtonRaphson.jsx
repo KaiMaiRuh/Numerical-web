@@ -11,7 +11,7 @@ export default function NewtonRaphson() {
   const [iters, setIters] = useState("-");
   const canvasRef = useRef(null);
 
-  // แปลง string เป็นฟังก์ชัน
+  // --- Helper Functions ---
   function makeFunc(expr) {
     if (!expr || !expr.trim()) return null;
     let s = expr.replace(/\^/g, "**");
@@ -25,13 +25,11 @@ export default function NewtonRaphson() {
     }
   }
 
-  // หาอนุพันธ์ด้วย h เล็ก ๆ
   function derivative(func, x) {
     const h = 1e-6;
     return (func(x + h) - func(x - h)) / (2 * h);
   }
 
-  // Newton-Raphson algorithm
   function newtonRaphson(func, x0, tol, maxIter) {
     let iterations = [];
     let x = x0;
@@ -60,12 +58,10 @@ export default function NewtonRaphson() {
   function formatNum(x) {
     if (x === null) return "-";
     if (!isFinite(x)) return String(x);
-    return Number(x)
-      .toPrecision(6)
-      .replace(/(?:\.0+$)|(?:(?<=\.[0-9]*[1-9])0+$)/, "");
+    return Number(x).toPrecision(6).replace(/(?:\.0+$)|(?:(?<=\.[0-9]*[1-9])0+$)/, "");
   }
 
-  // ฟังก์ชันวาดกราฟ
+  // --- Draw Plot ---
   function drawPlot(func, iterations) {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -76,15 +72,13 @@ export default function NewtonRaphson() {
 
     if (iterations.length === 0) return;
 
-    // === ซูมรอบ ๆ iteration ===
+    // Zoom รอบ iteration
     const iterXs = iterations.map(it => it.x);
     const iterYs = iterations.map(it => it.fx);
-
     const minX = Math.min(...iterXs);
     const maxX = Math.max(...iterXs);
     const padX = (maxX - minX) * 0.3 || 1;
     const xmin = minX - padX, xmax = maxX + padX;
-
     const minY = Math.min(...iterYs);
     const maxY = Math.max(...iterYs);
     const padY = (maxY - minY) * 0.3 || 1;
@@ -93,24 +87,18 @@ export default function NewtonRaphson() {
     const mapX = (x) => ((x - xmin) / (xmax - xmin)) * W;
     const mapY = (y) => H - ((y - ymin) / (ymax - ymin)) * H;
 
-    // แกน
+    // Axis
     ctx.strokeStyle = "rgba(255,255,255,0.1)";
     if (ymin < 0 && ymax > 0) {
       const y0 = mapY(0);
-      ctx.beginPath();
-      ctx.moveTo(0, y0);
-      ctx.lineTo(W, y0);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y0); ctx.stroke();
     }
     if (xmin < 0 && xmax > 0) {
       const x0 = mapX(0);
-      ctx.beginPath();
-      ctx.moveTo(x0, 0);
-      ctx.lineTo(x0, H);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0, H); ctx.stroke();
     }
 
-    // กราฟ f(x)
+    // Function curve
     ctx.beginPath();
     ctx.lineWidth = 2;
     ctx.strokeStyle = "#8ab4ff";
@@ -127,26 +115,34 @@ export default function NewtonRaphson() {
     }
     ctx.stroke();
 
-    // วาดเส้น tangent ของแต่ละ iteration
-    iterations.forEach((it, idx) => {
-      if (idx === iterations.length - 1) return; // ไม่ต้องวาดเส้นสุดท้าย
-      const x = it.x, y = it.fx;
-      const slope = derivative(func, x);
-      const x2 = iterations[idx + 1].x;
-      const y2 = 0; // จุดที่ตัดแกน x
-
-      ctx.beginPath();
-      ctx.moveTo(mapX(x), mapY(y));
-      ctx.lineTo(mapX(x2), mapY(y2));
-      ctx.strokeStyle = "#22c55e";
-      ctx.setLineDash([4, 4]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    });
-
-    // จุด iteration
+    // Tangent + labels
     iterations.forEach((it, idx) => {
       const px = mapX(it.x), py = mapY(it.fx);
+
+      if (idx < iterations.length - 1) {
+        const x2 = iterations[idx + 1].x;
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(mapX(x2), mapY(0));
+        ctx.strokeStyle = "#22c55e";
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Vertical line to X axis
+      ctx.beginPath();
+      ctx.moveTo(px, py);
+      ctx.lineTo(px, mapY(0));
+      ctx.strokeStyle = "rgba(255,255,255,0.2)";
+      ctx.stroke();
+
+      // Label under X axis
+      ctx.fillStyle = "#e2e8f0";
+      ctx.font = "12px sans-serif";
+      ctx.fillText("x" + idx, px - 10, mapY(0) + 14);
+
+      // Points
       ctx.beginPath();
       ctx.arc(px, py, idx === iterations.length - 1 ? 6 : 3, 0, 2 * Math.PI);
       ctx.fillStyle = idx === iterations.length - 1 ? "#fb923c" : "#f97316";
@@ -154,14 +150,13 @@ export default function NewtonRaphson() {
     });
   }
 
+  // --- Handlers ---
   const handleRun = () => {
     const func = makeFunc(expr);
     if (!func) { setStatus("สถานะ: สมการไม่ถูกต้อง"); return; }
-
     const x0val = parseFloat(x0);
     const tolVal = parseFloat(tol);
     const maxVal = parseInt(maxIter, 10);
-
     if (isNaN(x0val)) { setStatus("สถานะ: x0 ไม่ถูกต้อง"); return; }
     if (!isFinite(tolVal) || tolVal <= 0) { setStatus("สถานะ: tol ต้องเป็นจำนวนบวก"); return; }
     if (!Number.isInteger(maxVal) || maxVal <= 0) { setStatus("สถานะ: Max Iteration ต้องเป็นจำนวนเต็มบวก"); return; }
@@ -180,11 +175,12 @@ export default function NewtonRaphson() {
     setExpr(""); setX0(""); setTol(""); setMaxIter("");
     setIterations([]); setStatus("สถานะ: รีเซ็ตแล้ว");
     setIters("-"); setRoot("-");
-    drawPlot(() => 0, []); // เคลียร์กราฟ
+    drawPlot(() => 0, []);
   };
 
   useEffect(() => { drawPlot(() => 0, []); }, []);
 
+  // --- Render ---
   return (
     <div className="max-w-6xl mx-auto p-6">
       <header className="flex items-center justify-between gap-4 mb-4">
@@ -196,55 +192,37 @@ export default function NewtonRaphson() {
         {/* Input Card */}
         <div className="bg-slate-800 rounded-lg p-4 shadow">
           <label className="block text-sm text-gray-400 mb-1">สมการ f(x)</label>
-          <input
-            type="text"
-            value={expr}
-            onChange={(e) => setExpr(e.target.value)}
+          <input type="text" value={expr} onChange={(e) => setExpr(e.target.value)}
             placeholder="เช่น x^3 - x - 2"
-            className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700 mb-3"
-          />
+            className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700 mb-3" />
 
           <div className="mb-3">
             <label className="block text-sm text-gray-400 mb-1">ค่า x0</label>
-            <input
-              type="number"
-              value={x0}
-              onChange={(e) => setX0(e.target.value)}
+            <input type="number" value={x0} onChange={(e) => setX0(e.target.value)}
               placeholder="เช่น 1.5"
-              className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700"
-            />
+              className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" />
           </div>
 
           <div className="flex gap-3 mb-3">
             <div className="flex-1">
               <label className="block text-sm text-gray-400 mb-1">Error</label>
-              <input
-                type="text"
-                value={tol}
-                onChange={(e) => setTol(e.target.value)}
+              <input type="text" value={tol} onChange={(e) => setTol(e.target.value)}
                 placeholder="เช่น 1e-6"
-                className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700"
-              />
+                className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" />
             </div>
             <div className="flex-1">
               <label className="block text-sm text-gray-400 mb-1">Max Iteration</label>
-              <input
-                type="number"
-                value={maxIter}
-                onChange={(e) => setMaxIter(e.target.value)}
+              <input type="number" value={maxIter} onChange={(e) => setMaxIter(e.target.value)}
                 placeholder="เช่น 50"
-                className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700"
-              />
+                className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700" />
             </div>
           </div>
 
           <div className="flex gap-3 mb-4">
-            <button onClick={handleRun} className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-semibold py-2 rounded">
-              คำนวณ
-            </button>
-            <button onClick={handleReset} className="flex-1 border border-slate-600 text-gray-400 py-2 rounded hover:bg-slate-700">
-              รีเซ็ต
-            </button>
+            <button onClick={handleRun}
+              className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-semibold py-2 rounded">คำนวณ</button>
+            <button onClick={handleReset}
+              className="flex-1 border border-slate-600 text-gray-400 py-2 rounded hover:bg-slate-700">รีเซ็ต</button>
           </div>
 
           <div className="text-sm">
@@ -280,13 +258,14 @@ export default function NewtonRaphson() {
           )}
         </div>
 
-        {/* Graph Card */}
+        {/* Graph */}
         <div className="bg-slate-800 rounded-lg p-4 shadow">
           <label className="block text-sm text-gray-400 mb-2">กราฟฟังก์ชัน + Iterations</label>
-          <canvas ref={canvasRef} width={800} height={320} className="w-full h-72 bg-slate-900 rounded"></canvas>
+          <canvas ref={canvasRef} width={800} height={320}
+            className="w-full h-72 bg-slate-900 rounded"></canvas>
           <div className="text-xs text-gray-400 mt-2">
             จุดส้ม = ค่าที่ได้ในแต่ละ iteration, จุดส้มใหญ่ = ค่าสุดท้าย  
-            เส้นเขียว = เส้นสัมผัส f(x) ที่ x<sub>i</sub>
+            เส้นเขียว = เส้นสัมผัส f(x) ที่ x<sub>i</sub>, Label = x0, x1, x2 …
           </div>
         </div>
       </div>
