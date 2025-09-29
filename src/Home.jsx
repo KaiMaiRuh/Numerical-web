@@ -15,7 +15,7 @@ export default function Home() {
       topics: [
         { id: "gauss-elim", name: "Gauss Elimination", path: "/gauss-elim" },
         { id: "gauss-jordan", name: "Gauss-Jordan", path: "/gauss-jordan" },
-        { id: "lu-decomp", name: "LU Decomposition", path: "/lu" },
+        { id: "lu", name: "LU Decomposition", path: "/lu" },
       ],
     },
     {
@@ -50,33 +50,40 @@ export default function Home() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold text-cyan-400 mb-6">
+    <div className="p-6">
+      <h1 className="text-3xl font-bold text-cyan-400 mb-8 text-center">
         Numerical Methods
       </h1>
 
-      {categories.map((cat) => (
-        <div
-          key={cat.title}
-          className="bg-slate-800 rounded-lg p-5 shadow-lg"
-        >
-          <h2 className="text-xl font-semibold text-cyan-300 mb-3">
-            {cat.title}
-          </h2>
-          <ul className="space-y-2">
-            {cat.topics.map((t) => (
-              <li
-                key={t.id}
-                className="bg-slate-700 p-3 rounded-md hover:bg-slate-600 transition-colors"
-              >
-                <Link to={t.path} className="block">
-                  {t.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
+      {/* flex wrapper ให้ grid อยู่กลางจอ */}
+      <div className="flex justify-center">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {categories.map((cat) => (
+            <div
+              key={cat.title}
+              className="bg-slate-800 rounded-xl p-5 shadow-lg w-72
+                         transform transition duration-300 
+                         hover:scale-105 hover:shadow-2xl"
+            >
+              <h2 className="text-lg font-semibold text-cyan-300 mb-3 text-center">
+                {cat.title}
+              </h2>
+              <ul className="space-y-2">
+                {cat.topics.map((t) => (
+                  <li
+                    key={t.id}
+                    className="bg-slate-700 p-2 rounded-md hover:bg-slate-600 transition-colors"
+                  >
+                    <Link to={t.path} className="block text-center">
+                      {t.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
     </div>
   );
 }
