@@ -1,24 +1,11 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Home() {
-  const [topics, setTopics] = useState([
+  const topics = [
     { id: 1, name: "Bisection Method", path: "/bisection" },
-    { id: 2, name: "Newton-Raphson", path: "/newton" },
-  ]);
-
-  const [newTopic, setNewTopic] = useState("");
-
-  const addTopic = () => {
-    if (!newTopic.trim()) return;
-    const id = Date.now();
-    setTopics([...topics, { id, name: newTopic, path: `/custom-${id}` }]);
-    setNewTopic("");
-  };
-
-  const removeTopic = (id) => {
-    setTopics(topics.filter((t) => t.id !== id));
-  };
+    { id: 2, name: "Newton-Raphson Method", path: "/newton" },
+    { id: 3, name: "Secant Method", path: "/secant" },
+  ];
 
   return (
     <div className="max-w-2xl mx-auto p-6">
@@ -39,30 +26,9 @@ export default function Home() {
               >
                 {t.name}
               </Link>
-              <button
-                onClick={() => removeTopic(t.id)}
-                className="text-sm text-red-400 hover:text-red-300"
-              >
-                ลบ
-              </button>
             </li>
           ))}
         </ul>
-
-        <div className="mt-4 flex gap-2">
-          <input
-            value={newTopic}
-            onChange={(e) => setNewTopic(e.target.value)}
-            placeholder="เพิ่มหัวข้อใหม่..."
-            className="flex-1 px-3 py-2 bg-slate-900 border border-slate-600 rounded-md"
-          />
-          <button
-            onClick={addTopic}
-            className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-900 rounded-md font-semibold"
-          >
-            เพิ่ม
-          </button>
-        </div>
       </div>
     </div>
   );

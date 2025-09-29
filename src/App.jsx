@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./Home";
 import Bisection from "./pages/Bisection";
+import NewtonRaphson from "./pages/NewtonRaphson";
+import Secant from "./pages/Secant";
 
 function App() {
   return (
@@ -8,7 +10,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/bisection" element={<Bisection />} />
-        {/* เพิ่มหน้าอื่นๆ ได้ */}
+        <Route path="/newton" element={<NewtonRaphson />} />
+        <Route path="/secant" element={<Secant />} />
       </Routes>
     </BrowserRouter>
   );
