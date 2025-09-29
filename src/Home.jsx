@@ -6,7 +6,9 @@ export default function Home() {
       title: "1. Root of Equation",
       topics: [
         { id: "bisection", name: "Bisection Method", path: "/bisection" },
-        { id: "newton", name: "Newton-Raphson Method", path: "/newton" },
+        { id: "falsepo", name: "False-Position Method", path: "/falsepo" },
+        { id: "onepoint", name: "One-Point Method", path: "/onepoint" },
+        { id: "newtonrap", name: "Newton Raphson Method", path: "/newtonrap" },
         { id: "secant", name: "Secant Method", path: "/secant" },
       ],
     },

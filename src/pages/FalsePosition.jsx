@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-export default function Bisection() {
+export default function FalsePosition() {
   const [expr, setExpr] = useState("");
   const [xl, setXl] = useState("");
   const [xr, setXr] = useState("");
@@ -26,38 +26,38 @@ export default function Bisection() {
     }
   }
 
-  // Bisection algorithm
-  function bisection(func, a, b, tol, maxIter) {
+  // False Position algorithm
+  function falsePosition(func, a, b, tol, maxIter) {
     let fa = func(a), fb = func(b);
     if (!isFinite(fa) || !isFinite(fb))
       return { error: "f(x) ไม่สามารถประเมินค่าได้" };
     if (fa * fb > 0)
       return { error: "f(a) และ f(b) ไม่มีเครื่องหมายตรงข้าม" };
 
-    let iterations = [], xm = null, prev_xm = null;
+    let iterations = [], x1 = null, prev_x1 = null;
 
     for (let i = 0; i <= maxIter; i++) {
-      xm = (a + b) / 2;
-      let fxm = func(xm);
-      let err = prev_xm === null ? null : Math.abs((xm - prev_xm) / xm);
+      x1 = (a * fb - b * fa) / (fb - fa); // สูตร False Position
+      let fx1 = func(x1);
+      let err = prev_x1 === null ? null : Math.abs((x1 - prev_x1) / x1);
 
-      iterations.push({ iter: i, xl: a, xr: b, xm, fxm, error: err });
+      iterations.push({ iter: i, xl: a, xr: b, x1, fx1, error: err });
 
-      if (!isFinite(fxm)) return { error: "f(xm) คำนวณไม่ได้" };
-      if (Math.abs(fxm) === 0 || (err !== null && err <= tol)) {
-        return { root: xm, iterations, converged: true };
+      if (!isFinite(fx1)) return { error: "f(x1) คำนวณไม่ได้" };
+      if (Math.abs(fx1) === 0 || (err !== null && err <= tol)) {
+        return { root: x1, iterations, converged: true };
       }
 
-      if (fa * fxm < 0) {
-        b = xm; fb = fxm;
+      if (fa * fx1 < 0) {
+        b = x1; fb = fx1;
       } else {
-        a = xm; fa = fxm;
+        a = x1; fa = fx1;
       }
 
-      prev_xm = xm;
+      prev_x1 = x1;
     }
 
-    return { root: xm, iterations, converged: false };
+    return { root: x1, iterations, converged: false };
   }
 
   function formatNum(x) {
@@ -119,9 +119,9 @@ export default function Bisection() {
     }
     ctx.stroke();
 
-    // draw XM points
+    // draw X1 points
     iterations.forEach((it) => {
-      const px = mapX(it.xm), py = mapY(it.fxm);
+      const px = mapX(it.x1), py = mapY(it.fx1);
       ctx.beginPath();
       ctx.arc(px, py, 3, 0, 2 * Math.PI);
       ctx.fillStyle = "#f97316";
@@ -141,7 +141,7 @@ export default function Bisection() {
 
     if (iterations.length) {
       const last = iterations[iterations.length - 1];
-      const px = mapX(last.xm), py = mapY(last.fxm);
+      const px = mapX(last.x1), py = mapY(last.fx1);
       ctx.beginPath(); ctx.arc(px, py, 6, 0, 2 * Math.PI);
       ctx.fillStyle = "#fb923c"; ctx.fill();
     }
@@ -160,7 +160,7 @@ export default function Bisection() {
     if (!isFinite(tolVal) || tolVal <= 0) { setStatus("สถานะ: Error (tol) ต้องเป็นจำนวนบวก เช่น 1e-6"); return; }
     if (!Number.isInteger(maxVal) || maxVal <= 0) { setStatus("สถานะ: Max Iteration ต้องเป็นจำนวนเต็มบวก เช่น 50"); return; }
 
-    const res = bisection(func, a, b, tolVal, maxVal);
+    const res = falsePosition(func, a, b, tolVal, maxVal);
     if (res.error) { setStatus("สถานะ: " + res.error); return; }
 
     setIterations(res.iterations);
@@ -183,7 +183,7 @@ export default function Bisection() {
   return (
     <div className="max-w-6xl mx-auto p-6">
       <header className="flex items-center justify-between gap-4 mb-4">
-        <h1 className="text-xl font-bold text-cyan-400">Bisection Method</h1>
+        <h1 className="text-xl font-bold text-cyan-400">False Position Method</h1>
         <div className="text-sm text-gray-400">ตาราง + กราฟ แสดงการทำงาน</div>
       </header>
 
@@ -275,8 +275,8 @@ export default function Bisection() {
                     <th className="p-2 text-right">iter</th>
                     <th className="p-2 text-right">xl</th>
                     <th className="p-2 text-right">xr</th>
-                    <th className="p-2 text-right">xm</th>
-                    <th className="p-2 text-right">f(xm)</th>
+                    <th className="p-2 text-right">x1</th>
+                    <th className="p-2 text-right">f(x1)</th>
                     <th className="p-2 text-right">error</th>
                   </tr>
                 </thead>
@@ -286,8 +286,8 @@ export default function Bisection() {
                       <td className="p-2 text-right">{r.iter}</td>
                       <td className="p-2 text-right">{formatNum(r.xl)}</td>
                       <td className="p-2 text-right">{formatNum(r.xr)}</td>
-                      <td className="p-2 text-right">{formatNum(r.xm)}</td>
-                      <td className="p-2 text-right">{formatNum(r.fxm)}</td>
+                      <td className="p-2 text-right">{formatNum(r.x1)}</td>
+                      <td className="p-2 text-right">{formatNum(r.fx1)}</td>
                       <td className="p-2 text-right">
                         {r.error === null ? "-" : formatNum(r.error)}
                       </td>
@@ -309,7 +309,7 @@ export default function Bisection() {
             className="w-full h-72 bg-slate-900 rounded"
           ></canvas>
           <div className="text-xs text-gray-400 mt-2">
-            เขียว = XL, แดง = XR, ส้ม = XM ทุก iteration (วงใหญ่ = XM สุดท้าย)
+            เขียว = XL, แดง = XR, ส้ม = X1 ทุก iteration (วงใหญ่ = X1 สุดท้าย)
           </div>
         </div>
       </div>
