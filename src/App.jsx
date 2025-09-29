@@ -1,15 +1,14 @@
-// src/App.jsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./Home";
 import Bisection from "./pages/Bisection";
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/Numerical-web">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/bisection" element={<Bisection />} />
-        {/* เพิ่มหน้าอื่นๆได้ */}
+        {/* เพิ่มหน้าอื่นๆ ได้ */}
       </Routes>
     </BrowserRouter>
   );
