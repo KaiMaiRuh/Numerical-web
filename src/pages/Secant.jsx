@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 
+// ฟังก์ชันหลักสำหรับ Secant Method
 export default function Secant() {
+  // State สำหรับเก็บค่าต่าง ๆ
   const [expr, setExpr] = useState("");
   const [x0, setX0] = useState("");
   const [x1, setX1] = useState("");
@@ -12,7 +14,7 @@ export default function Secant() {
   const [iters, setIters] = useState("-");
   const canvasRef = useRef(null);
 
-  // --- Helper ---
+  // ฟังก์ชันแปลง string เป็น function (รับสมการจาก input)
   function makeFunc(expr) {
     if (!expr || !expr.trim()) return null;
     let s = expr.replace(/\^/g, "**");
@@ -26,13 +28,16 @@ export default function Secant() {
     }
   }
 
+  // ฟังก์ชันหลักสำหรับคำนวณ Secant Method
   function secant(func, x0, x1, tol, maxIter) {
     let iterations = [];
     let f0 = func(x0), f1 = func(x1);
 
+    // เก็บค่าเริ่มต้น (iter=0, iter=1)
     iterations.push({ iter: 0, x: x0, fx: f0, error: null });
     iterations.push({ iter: 1, x: x1, fx: f1, error: null });
 
+    // วนลูปคำนวณแต่ละ iteration
     for (let i = 2; i <= maxIter; i++) {
       if (f1 - f0 === 0) return { error: "หารด้วยศูนย์ (f1 - f0 = 0)" };
 
@@ -42,23 +47,27 @@ export default function Secant() {
 
       iterations.push({ iter: i, x: x2, fx: f2, error: err });
 
+      // เช็คเงื่อนไขหยุด
       if (Math.abs(f2) < tol || err < tol) {
         return { root: x2, iterations, converged: true };
       }
 
+      // ปรับค่า x0, x1 สำหรับ iteration ถัดไป
       x0 = x1; f0 = f1;
       x1 = x2; f1 = f2;
     }
+    // ถ้าไม่ converge
     return { root: x1, iterations, converged: false };
   }
 
+  // ฟังก์ชันจัดรูปแบบตัวเลข
   function formatNum(x) {
     if (x === null) return "-";
     if (!isFinite(x)) return String(x);
     return Number(x).toPrecision(6).replace(/(?:\.0+$)|(?:(?<=\.[0-9]*[1-9])0+$)/, "");
   }
 
-  // --- Draw Plot ---
+  // ฟังก์ชันวาดกราฟผลลัพธ์และจุด iteration
   function drawPlot(func, iterations) {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -69,7 +78,7 @@ export default function Secant() {
 
     if (iterations.length === 0) return;
 
-    // Zoom to iterations
+    // กำหนดขอบเขตกราฟจากค่าที่ได้
     const xs = iterations.map(it => it.x);
     const ys = iterations.map(it => it.fx);
     const minX = Math.min(...xs), maxX = Math.max(...xs);
@@ -79,10 +88,11 @@ export default function Secant() {
     const xmin = minX - padX, xmax = maxX + padX;
     const ymin = minY - padY, ymax = maxY + padY;
 
+    // ฟังก์ชันแปลงค่าพิกัด
     const mapX = (x) => ((x - xmin) / (xmax - xmin)) * W;
     const mapY = (y) => H - ((y - ymin) / (ymax - ymin)) * H;
 
-    // Axis
+    // วาดแกน x, y
     ctx.strokeStyle = "rgba(255,255,255,0.1)";
     if (ymin < 0 && ymax > 0) {
       const y0 = mapY(0);
@@ -93,7 +103,7 @@ export default function Secant() {
       ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0, H); ctx.stroke();
     }
 
-    // Function curve
+    // วาดกราฟฟังก์ชัน
     ctx.beginPath();
     ctx.lineWidth = 2;
     ctx.strokeStyle = "#8ab4ff";
@@ -110,10 +120,11 @@ export default function Secant() {
     }
     ctx.stroke();
 
-    // Iterations points + secant lines
+    // วาดจุด iteration และเส้น secant
     iterations.forEach((it, idx) => {
       const px = mapX(it.x), py = mapY(it.fx);
 
+      // วาดเส้น secant ระหว่างจุดก่อนหน้า
       if (idx > 0) {
         const prev = iterations[idx - 1];
         ctx.beginPath();
@@ -125,19 +136,22 @@ export default function Secant() {
         ctx.setLineDash([]);
       }
 
+      // วาดจุด iteration
       ctx.beginPath();
       ctx.arc(px, py, idx === iterations.length - 1 ? 6 : 3, 0, 2 * Math.PI);
       ctx.fillStyle = idx === iterations.length - 1 ? "#fb923c" : "#f97316";
       ctx.fill();
 
+      // Label ใต้แกน x
       ctx.fillStyle = "#e2e8f0";
       ctx.font = "12px sans-serif";
       ctx.fillText("x" + idx, px - 10, mapY(0) + 14);
     });
   }
 
-  // --- Handlers ---
+  // --- ส่วนจัดการ input และผลลัพธ์ ---
   const handleRun = () => {
+    // สร้างฟังก์ชันจากสมการ
     const func = makeFunc(expr);
     if (!func) { setStatus("สถานะ: สมการไม่ถูกต้อง"); return; }
     const x0val = parseFloat(x0);
@@ -145,13 +159,16 @@ export default function Secant() {
     const tolVal = parseFloat(tol);
     const maxVal = parseInt(maxIter, 10);
 
+    // ตรวจสอบความถูกต้องของ input
     if (isNaN(x0val) || isNaN(x1val)) { setStatus("สถานะ: x0/x1 ไม่ถูกต้อง"); return; }
     if (!isFinite(tolVal) || tolVal <= 0) { setStatus("สถานะ: tol ต้องเป็นจำนวนบวก"); return; }
     if (!Number.isInteger(maxVal) || maxVal <= 0) { setStatus("สถานะ: Max Iteration ต้องเป็นจำนวนเต็มบวก"); return; }
 
+    // เรียกฟังก์ชันคำนวณ
     const res = secant(func, x0val, x1val, tolVal, maxVal);
     if (res.error) { setStatus("สถานะ: " + res.error); return; }
 
+    // อัปเดตผลลัพธ์
     setIterations(res.iterations);
     setStatus("สถานะ: เสร็จสิ้น " + (res.converged ? "(converged)" : "(ไม่ converged)"));
     setIters(res.iterations.length);
@@ -159,6 +176,7 @@ export default function Secant() {
     drawPlot(func, res.iterations);
   };
 
+  // --- รีเซ็ต input และกราฟ ---
   const handleReset = () => {
     setExpr(""); setX0(""); setX1(""); setTol(""); setMaxIter("");
     setIterations([]); setStatus("สถานะ: รีเซ็ตแล้ว");
@@ -166,9 +184,10 @@ export default function Secant() {
     drawPlot(() => 0, []);
   };
 
+  // --- วาดกราฟเริ่มต้นเมื่อโหลดหน้า ---
   useEffect(() => { drawPlot(() => 0, []); }, []);
 
-  // --- Render ---
+  // --- ส่วนแสดงผลหน้าจอ ---
   return (
     <div className="max-w-6xl mx-auto p-6">
       <header className="flex items-center justify-between gap-4 mb-4">
@@ -177,7 +196,7 @@ export default function Secant() {
       </header>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Input */}
+        {/* Input Card: รับค่าต่าง ๆ จากผู้ใช้ */}
         <div className="bg-slate-800 rounded-lg p-4 shadow">
           <label className="block text-sm text-gray-400 mb-1">สมการ f(x)</label>
           <input type="text" value={expr} onChange={(e) => setExpr(e.target.value)}
@@ -221,13 +240,14 @@ export default function Secant() {
               className="flex-1 border border-slate-600 text-gray-400 py-2 rounded hover:bg-slate-700">รีเซ็ต</button>
           </div>
 
+          {/* แสดงผลสถานะและผลลัพธ์ */}
           <div className="text-sm">
             <div>{status}</div>
             <div>Iterations: {iters}</div>
             <div>Root: {root}</div>
           </div>
 
-          {/* Table */}
+          {/* Table: แสดงผลการคำนวณแต่ละ iteration */}
           {iterations.length > 0 && (
             <div className="overflow-auto max-h-64 mt-3">
               <table className="w-full text-sm border-collapse">
@@ -254,7 +274,7 @@ export default function Secant() {
           )}
         </div>
 
-        {/* Graph */}
+        {/* Graph Card: แสดงกราฟฟังก์ชันและจุด iteration */}
         <div className="bg-slate-800 rounded-lg p-4 shadow">
           <label className="block text-sm text-gray-400 mb-2">กราฟฟังก์ชัน + Secant</label>
           <canvas ref={canvasRef} width={800} height={320}

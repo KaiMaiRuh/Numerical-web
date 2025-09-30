@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 
+// ฟังก์ชันหลักสำหรับ False Position Method
 export default function FalsePosition() {
+  // State สำหรับเก็บค่าต่าง ๆ
   const [expr, setExpr] = useState("");
   const [xl, setXl] = useState("");
   const [xr, setXr] = useState("");
@@ -12,7 +14,7 @@ export default function FalsePosition() {
   const [iters, setIters] = useState("-");
   const canvasRef = useRef(null);
 
-  // ฟังก์ชันแปลง string เป็น function
+  // ฟังก์ชันแปลง string เป็น function (รับสมการจาก input)
   function makeFunc(expr) {
     if (!expr || !expr.trim()) return null;
     let s = expr.replace(/\^/g, "**");
@@ -26,16 +28,17 @@ export default function FalsePosition() {
     }
   }
 
-  // False Position algorithm
+  // ฟังก์ชันหลักสำหรับคำนวณ False Position
   function falsePosition(func, a, b, tol, maxIter) {
     let fa = func(a), fb = func(b);
+    // ตรวจสอบค่าเริ่มต้น
     if (!isFinite(fa) || !isFinite(fb))
       return { error: "f(x) ไม่สามารถประเมินค่าได้" };
     if (fa * fb > 0)
       return { error: "f(a) และ f(b) ไม่มีเครื่องหมายตรงข้าม" };
 
     let iterations = [], x1 = null, prev_x1 = null;
-
+    // วนลูปคำนวณแต่ละ iteration
     for (let i = 0; i <= maxIter; i++) {
       x1 = (a * fb - b * fa) / (fb - fa); // สูตร False Position
       let fx1 = func(x1);
@@ -43,23 +46,25 @@ export default function FalsePosition() {
 
       iterations.push({ iter: i, xl: a, xr: b, x1, fx1, error: err });
 
+      // ตรวจสอบค่าที่คำนวณได้
       if (!isFinite(fx1)) return { error: "f(x1) คำนวณไม่ได้" };
+      // เช็คเงื่อนไขหยุด
       if (Math.abs(fx1) === 0 || (err !== null && err <= tol)) {
         return { root: x1, iterations, converged: true };
       }
-
+      // ปรับขอบเขต a, b
       if (fa * fx1 < 0) {
         b = x1; fb = fx1;
       } else {
         a = x1; fa = fx1;
       }
-
       prev_x1 = x1;
     }
-
+    // ถ้าไม่ converge
     return { root: x1, iterations, converged: false };
   }
 
+  // ฟังก์ชันจัดรูปแบบตัวเลข
   function formatNum(x) {
     if (x === null) return "-";
     if (!isFinite(x)) return String(x);
@@ -68,7 +73,7 @@ export default function FalsePosition() {
       .replace(/(?:\.0+$)|(?:(?<=\.[0-9]*[1-9])0+$)/, "");
   }
 
-  // ฟังก์ชันวาดกราฟ
+  // ฟังก์ชันวาดกราฟผลลัพธ์และจุด iteration
   function drawPlot(func, xl, xr, iterations) {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -77,6 +82,7 @@ export default function FalsePosition() {
     ctx.fillStyle = "#061022";
     ctx.fillRect(0, 0, W, H);
 
+    // กำหนดขอบเขตกราฟ
     const pad = (xr - xl) * 0.2 || 1;
     const xmin = xl - pad, xmax = xr + pad;
     const N = 500;
@@ -94,10 +100,11 @@ export default function FalsePosition() {
     if (ymin === Infinity) { ymin = -1; ymax = 1; }
     const ypad = (ymax - ymin) * 0.2 || 1; ymin -= ypad; ymax += ypad;
 
+    // ฟังก์ชันแปลงค่าพิกัด
     const mapX = (x) => ((x - xmin) / (xmax - xmin)) * W;
     const mapY = (y) => H - ((y - ymin) / (ymax - ymin)) * H;
 
-    // draw axis
+    // วาดแกน x, y
     ctx.strokeStyle = "rgba(255,255,255,0.1)";
     if (ymin < 0 && ymax > 0) {
       const y0 = mapY(0); ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y0); ctx.stroke();
@@ -106,7 +113,7 @@ export default function FalsePosition() {
       const x0 = mapX(0); ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0, H); ctx.stroke();
     }
 
-    // draw function
+    // วาดกราฟฟังก์ชัน
     ctx.beginPath();
     ctx.lineWidth = 2;
     ctx.strokeStyle = "#8ab4ff";
@@ -119,7 +126,7 @@ export default function FalsePosition() {
     }
     ctx.stroke();
 
-    // draw X1 points
+    // วาดจุด X1 ของแต่ละ iteration
     iterations.forEach((it) => {
       const px = mapX(it.x1), py = mapY(it.fx1);
       ctx.beginPath();
@@ -128,7 +135,7 @@ export default function FalsePosition() {
       ctx.fill();
     });
 
-    // draw XL, XR
+    // วาดเส้น XL, XR
     const drawMarker = (x, color, label) => {
       const px = mapX(x);
       ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H);
@@ -139,6 +146,7 @@ export default function FalsePosition() {
     drawMarker(xl, "#22c55e", "XL");
     drawMarker(xr, "#ef4444", "XR");
 
+    // วาดจุด X1 สุดท้าย (วงใหญ่)
     if (iterations.length) {
       const last = iterations[iterations.length - 1];
       const px = mapX(last.x1), py = mapY(last.fx1);
@@ -147,22 +155,28 @@ export default function FalsePosition() {
     }
   }
 
+  // --- ส่วนจัดการ input และผลลัพธ์ ---
   const handleRun = () => {
+    // สร้างฟังก์ชันจากสมการ
     const func = makeFunc(expr);
     if (!func) { setStatus("สถานะ: สมการไม่ถูกต้อง"); return; }
 
+    // แปลงค่าจาก input
     const a = parseFloat(xl), b = parseFloat(xr);
     const tolVal = parseFloat(tol);
     const maxVal = parseInt(maxIter, 10);
 
+    // ตรวจสอบความถูกต้องของ input
     if (isNaN(a) || isNaN(b)) { setStatus("สถานะ: XL/XR ไม่ถูกต้อง"); return; }
     if (a >= b) { setStatus("สถานะ: ต้องมี XL < XR"); return; }
     if (!isFinite(tolVal) || tolVal <= 0) { setStatus("สถานะ: Error (tol) ต้องเป็นจำนวนบวก เช่น 1e-6"); return; }
     if (!Number.isInteger(maxVal) || maxVal <= 0) { setStatus("สถานะ: Max Iteration ต้องเป็นจำนวนเต็มบวก เช่น 50"); return; }
 
+    // เรียกฟังก์ชันคำนวณ
     const res = falsePosition(func, a, b, tolVal, maxVal);
     if (res.error) { setStatus("สถานะ: " + res.error); return; }
 
+    // อัปเดตผลลัพธ์
     setIterations(res.iterations);
     setStatus("สถานะ: เสร็จสิ้น " + (res.converged ? "(converged)" : "(ไม่ converged)"));
     setIters(res.iterations.length);
@@ -170,16 +184,19 @@ export default function FalsePosition() {
     drawPlot(func, a, b, res.iterations);
   };
 
+  // --- รีเซ็ต input และกราฟ ---
   const handleReset = () => {
     setExpr(""); setXl(""); setXr(""); setTol(""); setMaxIter("");
     setIterations([]); setStatus("สถานะ: รีเซ็ตแล้ว"); setIters("-"); setRoot("-");
     drawPlot(makeFunc("x"), -5, 5, []);
   };
 
+  // --- วาดกราฟเริ่มต้นเมื่อโหลดหน้า ---
   useEffect(() => {
     drawPlot(makeFunc("x"), -5, 5, []);
   }, []);
 
+  // --- ส่วนแสดงผลหน้าจอ ---
   return (
     <div className="max-w-6xl mx-auto p-6">
       <header className="flex items-center justify-between gap-4 mb-4">
@@ -188,7 +205,7 @@ export default function FalsePosition() {
       </header>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Input Card */}
+        {/* Input Card: รับค่าต่าง ๆ จากผู้ใช้ */}
         <div className="bg-slate-800 rounded-lg p-4 shadow">
           <label className="block text-sm text-gray-400 mb-1">สมการ f(x)</label>
           <input
@@ -260,13 +277,14 @@ export default function FalsePosition() {
             </button>
           </div>
 
+          {/* แสดงผลสถานะและผลลัพธ์ */}
           <div className="text-sm">
             <div>{status}</div>
             <div>Iterations: {iters}</div>
             <div>Root: {root}</div>
           </div>
 
-          {/* Table */}
+          {/* Table: แสดงผลการคำนวณแต่ละ iteration */}
           {iterations.length > 0 && (
             <div className="overflow-auto max-h-64 mt-3">
               <table className="w-full text-sm border-collapse">
@@ -299,7 +317,7 @@ export default function FalsePosition() {
           )}
         </div>
 
-        {/* Graph Card */}
+        {/* Graph Card: แสดงกราฟฟังก์ชันและจุด iteration */}
         <div className="bg-slate-800 rounded-lg p-4 shadow">
           <label className="block text-sm text-gray-400 mb-2">กราฟฟังก์ชัน</label>
           <canvas

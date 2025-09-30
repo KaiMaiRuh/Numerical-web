@@ -1,6 +1,8 @@
+// หน้า Home รวมลิงก์ไปแต่ละ Numerical Method
 import { Link } from "react-router-dom";
 
 export default function Home() {
+  // กำหนดหมวดหมู่และหัวข้อแต่ละ Numerical Method
   const categories = [
     {
       title: "1. Root of Equation",
@@ -51,8 +53,10 @@ export default function Home() {
     },
   ];
 
+  // ส่วนแสดงผลหน้า Home
   return (
     <div className="min-h-screen w-full flex flex-col justify-center items-center p-6 bg-slate-900">
+      {/* หัวข้อหลัก */}
       <h1 className="text-3xl font-bold text-cyan-400 mb-8 text-center">
         Numerical Methods
       </h1>
@@ -60,6 +64,7 @@ export default function Home() {
       {/* flex wrapper ให้ grid อยู่กลางจอ */}
       <div className="flex justify-center items-center w-full">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto">
+          {/* วนลูปสร้างกล่องแต่ละหมวดหมู่ */}
           {categories.map((cat) => (
             <div
               key={cat.title}
@@ -67,10 +72,12 @@ export default function Home() {
                          transform transition-all duration-300 
                          hover:scale-105 hover:shadow-2xl"
             >
+              {/* ชื่อหมวดหมู่ */}
               <h2 className="text-lg font-semibold text-cyan-300 mb-3 text-center">
                 {cat.title}
               </h2>
               <ul className="space-y-2">
+                {/* วนลูปสร้างลิงก์แต่ละหัวข้อ */}
                 {cat.topics.map((t) => (
                   <li
                     key={t.id}
