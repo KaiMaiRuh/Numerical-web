@@ -3,40 +3,49 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  animation: fadeIn 0.8s ease-in-out;
 }
 
 .logo {
   height: 6em;
   padding: 1.5em;
   will-change: filter;
-  transition: filter 300ms;
+  transition: filter 300ms, transform 0.4s ease;
 }
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em #58a6ffaa);
+  transform: scale(1.05);
 }
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 2em #79b8ffaa);
 }
 
+/* หมุนโลโก้ */
 @keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
-
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
   }
 }
 
+/* การ์ด */
 .card {
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
   padding: 2em;
+  color: #c9d1d9;
+  transition: transform 0.3s ease, box-shadow 0.4s ease;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
 }
 
+/* ข้อความเล็ก */
 .read-the-docs {
-  color: #888;
+  color: #8b949e;
 }

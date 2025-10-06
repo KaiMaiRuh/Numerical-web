@@ -2,20 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ✨ เอฟเฟกต์เฟดเข้าทั้งหน้า */
 body {
-  @apply bg-slate-900 text-gray-100;
+  @apply text-gray-100;
+  background-color: #0d1117;
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  color: #c9d1d9;
+  animation: fadeIn 0.8s ease-in-out;
 }
+
+/* เฟดอินตอนโหลด */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color-scheme: dark;
+  color: #c9d1d9;
+  background-color: #0d1117;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -23,20 +33,28 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ลิงก์ */
 a {
   font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+  color: #58a6ff;
+  text-decoration: none;
+  transition: color 0.3s ease;
 }
 a:hover {
-  color: #535bf2;
+  color: #79b8ff;
+  text-shadow: 0 0 8px #58a6ff;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* หัวข้อ */
+h1, h2, h3, h4 {
+  color: #c9d1d9;
+  transition: text-shadow 0.3s ease;
+}
+h1:hover, h2:hover {
+  text-shadow: 0 0 10px #58a6ff;
 }
 
+/* ปุ่มทั่วไป */
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -44,27 +62,109 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #161b22;
+  color: #c9d1d9;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: all 0.25s ease;
+  box-shadow: 0 0 0 rgba(88, 166, 255, 0);
 }
 button:hover {
-  border-color: #646cff;
+  border-color: #58a6ff;
+  background-color: #1c2330;
+  box-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
 }
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+/* ปุ่มคำนวณ */
+.btn-primary {
+  background-color: #238636;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+.btn-primary:hover {
+  background-color: #2ea043;
+  box-shadow: 0 0 15px rgba(35, 134, 54, 0.5);
+}
+
+/* ปุ่มลบ / รีเซ็ต */
+.btn-danger {
+  background-color: #da3633;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+.btn-danger:hover {
+  background-color: #f85149;
+  box-shadow: 0 0 15px rgba(218, 54, 51, 0.5);
+}
+
+/* การ์ด / กล่องคอนเทนต์ */
+.card {
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  padding: 1.5rem;
+  color: #c9d1d9;
+  transition: box-shadow 0.4s ease, transform 0.3s ease;
+}
+.card:hover {
+  box-shadow: 0 0 20px rgba(88, 166, 255, 0.2);
+  transform: translateY(-4px);
+}
+
+/* ข้อความรอง */
+.text-muted {
+  color: #8b949e;
+}
+
+/* ตาราง */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #c9d1d9;
+}
+th, td {
+  padding: 0.5rem;
+  border-bottom: 1px solid #30363d;
+}
+th {
+  background-color: #161b22;
+  color: #8b949e;
+}
+tbody tr:hover {
+  background-color: #1c2330;
+  transition: background-color 0.2s ease;
+}
+/* 🎬 เอฟเฟกต์เฟดเข้าทีละส่วน */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
   }
-  a:hover {
-    color: #747bff;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  button {
-    background-color: #f9f9f9;
-  }
+}
+
+.fade-in {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.fade-in-delay1 {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out 0.2s forwards;
+}
+
+.fade-in-delay2 {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out 0.4s forwards;
+}
+
+.fade-in-delay3 {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out 0.6s forwards;
 }
