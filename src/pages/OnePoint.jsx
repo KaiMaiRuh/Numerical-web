@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import PageHeader from "../components/PageHeader";
 
 export default function OnePoint() {
   const [fxExpr, setFxExpr] = useState("");
@@ -148,10 +149,7 @@ export default function OnePoint() {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <header className="flex items-center justify-between gap-4 mb-4">
-        <h1 className="text-xl font-bold text-cyan-400">One-Point Iteration</h1>
-        <div className="text-sm text-gray-400">แปลง f(x) → f2(x) อัตโนมัติ</div>
-      </header>
+      <PageHeader title="One-Point Iteration" subtitle="แปลง f(x) → f2(x) อัตโนมัติ" />
 
       <div className="bg-slate-800 rounded-lg p-4 shadow">
         {/* f(x) */}

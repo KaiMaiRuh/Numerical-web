@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { getBisectionProblems, saveBisectionProblem, deleteBisectionProblem } from "../services/BisectionService";
+import * as BisectionService from "../services/BisectionService";
+import useProblems from "../hooks/useProblems";
 import { bisection as runBisection } from "../algorithms/bisection";
 import GraphCanvas from "../components/GraphCanvas";
 import ResultsTable from "../components/ResultsTable";
 import SavedProblems from "../components/SavedProblems";
+import PageHeader from "../components/PageHeader";
 import { makeFunc, formatNum } from "../utils/math";
 
 export default function Bisection() {
@@ -16,8 +18,7 @@ export default function Bisection() {
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
   const [root, setRoot] = useState("-");
   const [iters, setIters] = useState("-");
-  const [problems, setProblems] = useState([]);
-  const [removingIds, setRemovingIds] = useState(new Set());
+  const { problems, removingIds, refresh, saveProblem, deleteProblem } = useProblems(BisectionService);
   // canvas rendering moved to GraphCanvas component
 
   // ---------- helpers ----------
@@ -65,15 +66,10 @@ export default function Bisection() {
 
   // Graph rendering moved into GraphCanvas
 
-  // ---------- Firestore ----------
-  async function refreshProblems() {
-    const data = await getBisectionProblems();
-    setProblems(data);
-  }
-
+  // problems/removingIds/save/delete handled by useProblems hook
   useEffect(() => {
-    refreshProblems().catch(console.error);
-  }, []);
+    refresh().catch(console.error);
+  }, [refresh]);
 
   const handleSaveProblem = async () => {
     if (!expr || !xl || !xr || !tol || !maxIter) {
@@ -81,8 +77,7 @@ export default function Bisection() {
       return;
     }
     try {
-      await saveBisectionProblem({ expr, xl, xr, tol, maxIter });
-      await refreshProblems();
+      await saveProblem({ expr, xl, xr, tol, maxIter });
       alert("บันทึกแล้ว!");
     } catch (e) {
       console.error("บันทึกโจทย์ผิดพลาด:", e);
@@ -98,29 +93,13 @@ export default function Bisection() {
     setMaxIter(p.maxIter ?? "");
   };
 
-  const handleDeleteProblem = async (p) => {
+  const handleDeleteProblem = (p) => {
     if (!confirm(`ลบโจทย์นี้ไหม?\n${p.expr}`)) return;
     try {
-      // add animation class
-      setRemovingIds((s) => new Set(s).add(p.id));
-      // wait for animation then delete
-      setTimeout(async () => {
-        await deleteBisectionProblem(p.id);
-        await refreshProblems();
-        setRemovingIds((s) => {
-          const n = new Set(s);
-          n.delete(p.id);
-          return n;
-        });
-      }, 480);
+      deleteProblem(p.id);
     } catch (e) {
       console.error("ลบโจทย์ผิดพลาด:", e);
       alert("ลบไม่สำเร็จ");
-      setRemovingIds((s) => {
-        const n = new Set(s);
-        n.delete(p.id);
-        return n;
-      });
     }
   };
 
@@ -150,16 +129,17 @@ export default function Bisection() {
   const handleReset = () => {
     setExpr(""); setXl(""); setXr(""); setTol(""); setMaxIter("");
     setIterations([]); setStatus("สถานะ: รีเซ็ตแล้ว"); setIters("-"); setRoot("-");
-    drawPlot(makeFunc("x"), -5, 5, []);
+    // GraphCanvas will render default when iterations empty
   };
 
   // ---------- UI ----------
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <header className="flex items-center justify-between gap-4 mb-4 fade-in">
-        <h1 className="text-xl font-bold text-cyan-400">Bisection Method</h1>
-        <div className="text-sm text-gray-400">ตาราง + กราฟ แสดงการทำงาน</div>
-      </header>
+      <PageHeader
+        title="Bisection Method"
+        subtitle="ตาราง + กราฟ แสดงการทำงาน"
+        actions={[{ label: '💾 Save', onClick: handleSaveProblem, variant: 'primary', title: 'Save current problem' }]}
+      />
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Input */}

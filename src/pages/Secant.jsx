@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import PageHeader from "../components/PageHeader";
 
 // ฟังก์ชันหลักสำหรับ Secant Method
 export default function Secant() {
@@ -190,10 +191,7 @@ export default function Secant() {
   // --- ส่วนแสดงผลหน้าจอ ---
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <header className="flex items-center justify-between gap-4 mb-4">
-        <h1 className="text-xl font-bold text-cyan-400">Secant Method</h1>
-        <div className="text-sm text-gray-400">ตาราง + กราฟ แสดงการทำงาน</div>
-      </header>
+      <PageHeader title="Secant Method" subtitle="ตาราง + กราฟ แสดงการทำงาน" />
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Input Card: รับค่าต่าง ๆ จากผู้ใช้ */}
