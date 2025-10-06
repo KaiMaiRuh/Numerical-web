@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getBisectionProblems, saveBisectionProblem, deleteBisectionProblem } from "../services/BisectionService";
+import { bisection as runBisection } from "../algorithms/bisection";
 import GraphCanvas from "../components/GraphCanvas";
 import ResultsTable from "../components/ResultsTable";
 import SavedProblems from "../components/SavedProblems";
@@ -137,7 +138,7 @@ export default function Bisection() {
     if (!isFinite(tolVal) || tolVal <= 0) { setStatus("สถานะ: Error (tol) ต้องเป็นจำนวนบวก เช่น 1e-6"); return; }
     if (!Number.isInteger(maxVal) || maxVal <= 0) { setStatus("สถานะ: Max Iteration ต้องเป็นจำนวนเต็มบวก เช่น 50"); return; }
 
-    const res = bisection(func, a, b, tolVal, maxVal);
+  const res = runBisection(func, a, b, tolVal, maxVal);
     if (res.error) { setStatus("สถานะ: " + res.error); return; }
 
     setIterations(res.iterations);
