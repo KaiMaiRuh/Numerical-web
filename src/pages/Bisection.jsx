@@ -135,11 +135,7 @@ export default function Bisection() {
   // ---------- UI ----------
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <PageHeader
-        title="Bisection Method"
-        subtitle="ตาราง + กราฟ แสดงการทำงาน"
-        actions={[{ label: '💾 Save', onClick: handleSaveProblem, variant: 'primary', title: 'Save current problem' }]}
-      />
+      <PageHeader title="Bisection Method" subtitle="ตาราง + กราฟ แสดงการทำงาน" />
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Input */}
@@ -219,7 +215,7 @@ export default function Bisection() {
             onClick={handleSaveProblem}
             className="w-full btn-primary glow-btn py-2 rounded mb-3"
           >
-            💾 บันทึกโจทย์นี้
+            บันทึกโจทย์
           </button>
 
           <div className="text-sm mb-2">
@@ -230,7 +226,7 @@ export default function Bisection() {
 
           {problems.length > 0 && (
             <div className="mt-2">
-              <h2 className="text-sm text-gray-400 mb-2">📘 โจทย์ที่บันทึกไว้:</h2>
+              <h2 className="text-sm text-gray-400 mb-2">โจทย์ที่บันทึกไว้:</h2>
               <ul className="text-xs text-gray-300 bg-slate-900 rounded p-2 max-h-48 overflow-auto">
                 {problems.map((p) => (
                   <li key={p.id} className={`flex items-center justify-between gap-2 border-b border-slate-700 py-1 ${removingIds.has(p.id) ? 'fade-out' : ''}`}>
@@ -270,7 +266,7 @@ export default function Bisection() {
 
       {/* ตารางผลลัพธ์ */}
       <ResultsTable iterations={iterations} />
-      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© Numerical Web — ฝีมือคุณ</div>
+      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>
   );
 }

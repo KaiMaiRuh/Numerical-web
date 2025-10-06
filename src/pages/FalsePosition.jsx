@@ -139,14 +139,14 @@ export default function FalsePosition() {
       {/* Cards */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Input Card */}
-        <div className="bg-[#161b22] rounded-lg p-4 border border-[#30363d] fade-in-delay1">
+  <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
           <label className="block text-sm text-gray-400 mb-1">สมการ f(x)</label>
           <input
             type="text"
             value={expr}
             onChange={(e) => setExpr(e.target.value)}
             placeholder="เช่น x^3 - x - 2 หรือ sin(x)"
-            className="w-full px-3 py-2 rounded bg-[#0d1117] border border-[#30363d] mb-3 text-gray-200"
+            className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700 mb-3"
           />
 
           <div className="flex gap-3 mb-3">
@@ -157,7 +157,7 @@ export default function FalsePosition() {
                 value={xl}
                 onChange={(e) => setXl(e.target.value)}
                 placeholder="เช่น 1"
-                className="w-full px-3 py-2 rounded bg-[#0d1117] border border-[#30363d] text-gray-200"
+                className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700"
               />
             </div>
             <div className="flex-1">
@@ -167,7 +167,7 @@ export default function FalsePosition() {
                 value={xr}
                 onChange={(e) => setXr(e.target.value)}
                 placeholder="เช่น 2"
-                className="w-full px-3 py-2 rounded bg-[#0d1117] border border-[#30363d] text-gray-200"
+                className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700"
               />
             </div>
           </div>
@@ -180,7 +180,7 @@ export default function FalsePosition() {
                 value={tol}
                 onChange={(e) => setTol(e.target.value)}
                 placeholder="เช่น 1e-6"
-                className="w-full px-3 py-2 rounded bg-[#0d1117] border border-[#30363d] text-gray-200"
+                className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700"
               />
             </div>
             <div className="flex-1">
@@ -190,7 +190,7 @@ export default function FalsePosition() {
                 value={maxIter}
                 onChange={(e) => setMaxIter(e.target.value)}
                 placeholder="เช่น 50"
-                className="w-full px-3 py-2 rounded bg-[#0d1117] border border-[#30363d] text-gray-200"
+                className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700"
               />
             </div>
           </div>
@@ -206,7 +206,7 @@ export default function FalsePosition() {
 
           {/* Save / Load / Delete */}
           <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">
-            💾 บันทึกโจทย์นี้
+            บันทึกโจทย์นี้
           </button>
 
           <div className="text-sm mb-2">
@@ -217,8 +217,8 @@ export default function FalsePosition() {
 
           {problems.length > 0 && (
             <div className="mt-2">
-              <h2 className="text-sm text-gray-400 mb-2">📘 โจทย์ที่บันทึกไว้:</h2>
-              <ul className="text-xs text-gray-300 bg-[#0d1117] rounded p-2 max-h-48 overflow-auto border border-[#30363d]">
+              <h2 className="text-sm text-gray-400 mb-2">โจทย์ที่บันทึกไว้:</h2>
+              <ul className="text-xs text-gray-300 bg-slate-900 rounded p-2 max-h-48 overflow-auto border border-slate-700">
                 {problems.map((p) => (
                   <li
                     key={p.id}
@@ -247,9 +247,9 @@ export default function FalsePosition() {
         </div>
 
         {/* Graph Card */}
-        <div className="bg-[#161b22] rounded-lg p-4 border border-[#30363d] fade-in-delay2">
+        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <label className="block text-sm text-gray-400 mb-2">กราฟฟังก์ชัน</label>
-          <div className="w-full h-72 bg-[#0d1117] rounded">
+          <div className="w-full h-72 bg-slate-900 rounded">
             <GraphCanvas func={makeFunc(expr) || ((x)=>x)} xl={parseFloat(xl) || -5} xr={parseFloat(xr) || 5} iterations={iterations} className="w-full h-72 rounded" />
           </div>
           <div className="text-xs text-gray-400 mt-2">
@@ -260,7 +260,7 @@ export default function FalsePosition() {
 
       {/* ตารางผลลัพธ์ (แยกออกมาเหมือน Bisection) */}
       <ResultsTable iterations={iterations} />
-      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© Numerical Web — ฝีมือคุณ</div>
+      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>
   );
 }
