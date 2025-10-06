@@ -57,7 +57,7 @@ export default function Home() {
   return (
     <div className="min-h-screen w-full flex flex-col justify-center items-center p-6 bg-slate-900">
       {/* หัวข้อหลัก */}
-      <h1 className="text-3xl font-bold text-cyan-400 mb-8 text-center">
+      <h1 className="text-3xl font-bold text-cyan-400 mb-8 text-center fade-in">
         Numerical Methods
       </h1>
 
@@ -69,8 +69,8 @@ export default function Home() {
             <div
               key={cat.title}
               className="bg-slate-800 rounded-xl p-5 shadow-lg border border-cyan-700 w-72
-                         transform transition-all duration-300 
-                         hover:scale-105 hover:shadow-2xl"
+                         transform transition-all duration-300 fade-in-delay1
+                         hover:scale-105 hover:shadow-2xl glow-btn"
             >
               {/* ชื่อหมวดหมู่ */}
               <h2 className="text-lg font-semibold text-cyan-300 mb-3 text-center">

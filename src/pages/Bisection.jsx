@@ -16,6 +16,7 @@ export default function Bisection() {
   const [root, setRoot] = useState("-");
   const [iters, setIters] = useState("-");
   const [problems, setProblems] = useState([]);
+  const [removingIds, setRemovingIds] = useState(new Set());
   const canvasRef = useRef(null);
 
   // ---------- helpers ----------
@@ -186,11 +187,26 @@ export default function Bisection() {
   const handleDeleteProblem = async (p) => {
     if (!confirm(`ลบโจทย์นี้ไหม?\n${p.expr}`)) return;
     try {
-      await deleteBisectionProblem(p.id);
-      await refreshProblems();
+      // add animation class
+      setRemovingIds((s) => new Set(s).add(p.id));
+      // wait for animation then delete
+      setTimeout(async () => {
+        await deleteBisectionProblem(p.id);
+        await refreshProblems();
+        setRemovingIds((s) => {
+          const n = new Set(s);
+          n.delete(p.id);
+          return n;
+        });
+      }, 480);
     } catch (e) {
       console.error("ลบโจทย์ผิดพลาด:", e);
       alert("ลบไม่สำเร็จ");
+      setRemovingIds((s) => {
+        const n = new Set(s);
+        n.delete(p.id);
+        return n;
+      });
     }
   };
 
@@ -227,14 +243,14 @@ export default function Bisection() {
   // ---------- UI ----------
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <header className="flex items-center justify-between gap-4 mb-4">
+      <header className="flex items-center justify-between gap-4 mb-4 fade-in">
         <h1 className="text-xl font-bold text-cyan-400">Bisection Method</h1>
         <div className="text-sm text-gray-400">ตาราง + กราฟ แสดงการทำงาน</div>
       </header>
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Input */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow">
+  <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
           <label className="block text-sm text-gray-400 mb-1">สมการ f(x)</label>
           <input
             type="text"
@@ -293,13 +309,13 @@ export default function Bisection() {
           <div className="flex gap-3 mb-4">
             <button
               onClick={handleRun}
-              className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-semibold py-2 rounded"
+              className="flex-1 btn-primary glow-btn py-2 rounded font-semibold"
             >
               คำนวณ
             </button>
             <button
               onClick={handleReset}
-              className="flex-1 border border-slate-600 text-gray-400 py-2 rounded hover:bg-slate-700"
+              className="flex-1 btn-danger border border-slate-600 py-2 rounded"
             >
               รีเซ็ต
             </button>
@@ -308,7 +324,7 @@ export default function Bisection() {
           {/* บันทึก/โหลด/ลบโจทย์ */}
           <button
             onClick={handleSaveProblem}
-            className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-semibold py-2 rounded mb-3"
+            className="w-full btn-primary glow-btn py-2 rounded mb-3"
           >
             💾 บันทึกโจทย์นี้
           </button>
@@ -324,18 +340,18 @@ export default function Bisection() {
               <h2 className="text-sm text-gray-400 mb-2">📘 โจทย์ที่บันทึกไว้:</h2>
               <ul className="text-xs text-gray-300 bg-slate-900 rounded p-2 max-h-48 overflow-auto">
                 {problems.map((p) => (
-                  <li key={p.id} className="flex items-center justify-between gap-2 border-b border-slate-700 py-1">
+                  <li key={p.id} className={`flex items-center justify-between gap-2 border-b border-slate-700 py-1 ${removingIds.has(p.id) ? 'fade-out' : ''}`}>
                     <span className="truncate">{p.expr}</span>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleLoadProblem(p)}
-                        className="text-slate-900 bg-sky-400 hover:bg-sky-300 px-2 py-0.5 rounded"
+                        className="text-slate-900 btn-primary px-2 py-0.5 rounded"
                       >
                         โหลด
                       </button>
                       <button
                         onClick={() => handleDeleteProblem(p)}
-                        className="text-slate-900 bg-rose-400 hover:bg-rose-300 px-2 py-0.5 rounded"
+                        className="text-slate-900 btn-danger px-2 py-0.5 rounded glow-btn"
                       >
                         ลบ
                       </button>
@@ -348,7 +364,7 @@ export default function Bisection() {
         </div>
 
         {/* Graph */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow">
+        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <label className="block text-sm text-gray-400 mb-2">กราฟฟังก์ชัน</label>
           <canvas ref={canvasRef} width={800} height={320} className="w-full h-72 bg-slate-900 rounded"></canvas>
           <div className="text-xs text-gray-400 mt-2">
@@ -359,7 +375,7 @@ export default function Bisection() {
 
       {/* ตารางผลลัพธ์ */}
       {iterations.length > 0 && (
-        <div className="bg-slate-800 rounded-lg p-4 shadow mt-6 overflow-auto">
+        <div className="bg-slate-800 rounded-lg p-4 shadow mt-6 overflow-auto fade-in-delay2">
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="bg-slate-700 text-gray-200">
@@ -386,6 +402,7 @@ export default function Bisection() {
           </table>
         </div>
       )}
+      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© Numerical Web — ฝีมือคุณ</div>
     </div>
   );
 }

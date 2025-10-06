@@ -168,3 +168,42 @@ tbody tr:hover {
   opacity: 0;
   animation: fadeInUp 0.8s ease-out 0.6s forwards;
 }
+
+/* เฟดออกแบบนุ่ม ๆ สำหรับการลบรายการ */
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(8px); }
+}
+.fade-out {
+  animation: fadeOut 0.45s ease-in forwards;
+}
+
+/* ปุ่มมี glow เล็กน้อยเมื่อโฮเวอร์ (เหมาะกับธีม Cyber Night) */
+.glow-btn {
+  transition: box-shadow 220ms ease, transform 160ms ease, background-color 160ms ease;
+}
+.glow-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(88,166,255,0.16), 0 0 18px rgba(88,166,255,0.06) inset;
+}
+
+/* ปุ่มธีมมืดที่เน้น neon */
+.btn-primary {
+  background-color: #071025; /* very dark */
+  color: #c9d1d9;
+  border: 1px solid rgba(88,166,255,0.12);
+  box-shadow: 0 0 8px rgba(88,166,255,0.02);
+}
+.btn-primary:hover {
+  background-color: #0b1630;
+  box-shadow: 0 0 18px rgba(88,166,255,0.22);
+}
+.btn-danger {
+  background-color: #2a0f0f;
+  color: #ffd6d6;
+  border: 1px solid rgba(240,84,84,0.12);
+}
+.btn-danger:hover {
+  background-color: #3b0f11;
+  box-shadow: 0 0 14px rgba(240,84,84,0.18);
+}
