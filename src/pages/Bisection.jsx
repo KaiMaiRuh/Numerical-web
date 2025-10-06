@@ -402,7 +402,7 @@ export default function Bisection() {
           </table>
         </div>
       )}
-      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© Numerical Web — ฝีมือคุณ</div>
+      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© 2025 Numer-Web — Developed by KaiMaiRuh</div>
     </div>
   );
 }
