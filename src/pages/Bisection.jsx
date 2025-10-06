@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from "react";
-import {
-  getBisectionProblems,
-  saveBisectionProblem,
-  deleteBisectionProblem,
-} from "../services/BisectionService";
+import { useState, useEffect } from "react";
+import { getBisectionProblems, saveBisectionProblem, deleteBisectionProblem } from "../services/BisectionService";
+import GraphCanvas from "../components/GraphCanvas";
+import ResultsTable from "../components/ResultsTable";
+import SavedProblems from "../components/SavedProblems";
+import { makeFunc, formatNum } from "../utils/math";
 
 export default function Bisection() {
   const [expr, setExpr] = useState("");
@@ -17,21 +17,10 @@ export default function Bisection() {
   const [iters, setIters] = useState("-");
   const [problems, setProblems] = useState([]);
   const [removingIds, setRemovingIds] = useState(new Set());
-  const canvasRef = useRef(null);
+  // canvas rendering moved to GraphCanvas component
 
   // ---------- helpers ----------
-  function makeFunc(e) {
-    if (!e || !e.trim()) return null;
-    let s = e.replace(/\^/g, "**");
-    s = s.replace(/\bln\s*\(/gi, "log(");
-    s = s.replace(/\bpi\b/gi, "PI");
-    s = s.replace(/\be\b/gi, "E");
-    try {
-      return new Function("x", "with(Math){ return (" + s + "); }");
-    } catch {
-      return null;
-    }
-  }
+  // makeFunc imported from ../utils/math
 
   // ✅ Bisection ที่คำนวณถูกต้อง (x1 ต่อรอบ แล้วค่อยอัปเดตช่วง)
   function bisection(func, a, b, tol, maxIter) {
@@ -71,84 +60,9 @@ export default function Bisection() {
     return { root: (a + b) / 2, iterations: rows, converged: false };
   }
 
-  function formatNum(x) {
-    if (x === null || Number.isNaN(x)) return "-";
-    if (!isFinite(x)) return String(x);
-    return Number(x).toPrecision(8)
-      .replace(/(?:\.0+$)|(?:(?<=\.[0-9]*[1-9])0+$)/, "");
-  }
+  // formatNum imported from ../utils/math
 
-  function drawPlot(func, xl, xr, iterations) {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = "#061022";
-    ctx.fillRect(0, 0, W, H);
-
-    const pad = (xr - xl) * 0.2 || 1;
-    const xmin = xl - pad, xmax = xr + pad;
-    const N = 500;
-    let xs = [], ys = [], ymin = Infinity, ymax = -Infinity;
-    for (let i = 0; i < N; i++) {
-      const x = xmin + ((xmax - xmin) * i) / (N - 1);
-      let y; try { y = func(x); } catch { y = NaN; }
-      xs.push(x); ys.push(y);
-      if (isFinite(y)) { if (y < ymin) ymin = y; if (y > ymax) ymax = y; }
-    }
-    if (ymin === Infinity) { ymin = -1; ymax = 1; }
-    const ypad = (ymax - ymin) * 0.2 || 1; ymin -= ypad; ymax += ypad;
-
-    const mapX = (x) => ((x - xmin) / (xmax - xmin)) * W;
-    const mapY = (y) => H - ((y - ymin) / (ymax - ymin)) * H;
-
-    ctx.strokeStyle = "rgba(255,255,255,0.1)";
-    if (ymin < 0 && ymax > 0) {
-      const y0 = mapY(0); ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y0); ctx.stroke();
-    }
-    if (xmin < 0 && xmax > 0) {
-      const x0 = mapX(0); ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0, H); ctx.stroke();
-    }
-
-    ctx.beginPath();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "#8ab4ff";
-    let started = false;
-    for (let i = 0; i < N; i++) {
-      const x = xs[i], y = ys[i];
-      if (!isFinite(y)) { started = false; continue; }
-      const px = mapX(x), py = mapY(y);
-      if (!started) { ctx.moveTo(px, py); started = true; }
-      else ctx.lineTo(px, py);
-    }
-    ctx.stroke();
-
-    // จุด x1 ของแต่ละ iteration
-    iterations.forEach((it) => {
-      const px = mapX(it.x1), py = mapY(it.fx1);
-      ctx.beginPath(); ctx.arc(px, py, 3, 0, 2 * Math.PI);
-      ctx.fillStyle = "#f97316"; ctx.fill();
-    });
-
-    // เส้น XL/XR
-    const drawMarker = (x, color, label) => {
-      const px = mapX(x);
-      ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H);
-      ctx.strokeStyle = color; ctx.stroke();
-      ctx.fillStyle = color; ctx.font = "12px sans-serif";
-      ctx.fillText(label + "=" + formatNum(x), px + 6, 18);
-    };
-    drawMarker(xl, "#22c55e", "XL");
-    drawMarker(xr, "#ef4444", "XR");
-
-    // วง x1 สุดท้าย
-    if (iterations.length) {
-      const last = iterations[iterations.length - 1];
-      const px = mapX(last.x1), py = mapY(last.fx1);
-      ctx.beginPath(); ctx.arc(px, py, 6, 0, 2 * Math.PI);
-      ctx.fillStyle = "#fb923c"; ctx.fill();
-    }
-  }
+  // Graph rendering moved into GraphCanvas
 
   // ---------- Firestore ----------
   async function refreshProblems() {
@@ -158,7 +72,6 @@ export default function Bisection() {
 
   useEffect(() => {
     refreshProblems().catch(console.error);
-    drawPlot(makeFunc("x"), -5, 5, []);
   }, []);
 
   const handleSaveProblem = async () => {
@@ -229,9 +142,8 @@ export default function Bisection() {
 
     setIterations(res.iterations);
     setStatus("สถานะ: เสร็จสิ้น " + (res.converged ? "(converged)" : "(ไม่ converged)"));
-    setIters(Math.max(0, res.iterations.length - 1)); // ไม่นับ iter 0 ที่ยังไม่มี error
+    setIters(Math.max(0, res.iterations.length - 1));
     setRoot(formatNum(res.root));
-    drawPlot(func, a, b, res.iterations);
   };
 
   const handleReset = () => {
@@ -366,7 +278,9 @@ export default function Bisection() {
         {/* Graph */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <label className="block text-sm text-gray-400 mb-2">กราฟฟังก์ชัน</label>
-          <canvas ref={canvasRef} width={800} height={320} className="w-full h-72 bg-slate-900 rounded"></canvas>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphCanvas func={makeFunc(expr) || ((x)=>x)} xl={parseFloat(xl) || -5} xr={parseFloat(xr) || 5} iterations={iterations} className="w-full h-72 rounded" />
+          </div>
           <div className="text-xs text-gray-400 mt-2">
             เขียว = XL, แดง = XR, ส้ม = x1 ทุก iteration (วงใหญ่ = x1 สุดท้าย)
           </div>
@@ -374,35 +288,8 @@ export default function Bisection() {
       </div>
 
       {/* ตารางผลลัพธ์ */}
-      {iterations.length > 0 && (
-        <div className="bg-slate-800 rounded-lg p-4 shadow mt-6 overflow-auto fade-in-delay2">
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="bg-slate-700 text-gray-200">
-                <th className="p-2 text-right">iter</th>
-                <th className="p-2 text-right">xl</th>
-                <th className="p-2 text-right">xr</th>
-                <th className="p-2 text-right">x1</th>
-                <th className="p-2 text-right">f(x1)</th>
-                <th className="p-2 text-right">error</th>
-              </tr>
-            </thead>
-            <tbody>
-              {iterations.map((r) => (
-                <tr key={r.iter} className="border-b border-slate-700 text-gray-100">
-                  <td className="p-2 text-right">{r.iter}</td>
-                  <td className="p-2 text-right">{formatNum(r.xl)}</td>
-                  <td className="p-2 text-right">{formatNum(r.xr)}</td>
-                  <td className="p-2 text-right">{formatNum(r.x1)}</td>
-                  <td className="p-2 text-right">{formatNum(r.fx1)}</td>
-                  <td className="p-2 text-right">{r.error === null ? "-" : formatNum(r.error)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© 2025 Numer-Web — Developed by KaiMaiRuh</div>
+      <ResultsTable iterations={iterations} />
+      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© Numerical Web — ฝีมือคุณ</div>
     </div>
   );
 }

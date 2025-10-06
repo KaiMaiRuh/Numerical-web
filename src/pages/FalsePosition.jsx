@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from "react";
-import {
-  getFalsePositionProblems,
-  saveFalsePositionProblem,
-  deleteFalsePositionProblem,
-} from "../services/FalsePositionService";
+import { useState, useEffect } from "react";
+import { getFalsePositionProblems, saveFalsePositionProblem, deleteFalsePositionProblem } from "../services/FalsePositionService";
+import GraphCanvas from "../components/GraphCanvas";
+import ResultsTable from "../components/ResultsTable";
+import SavedProblems from "../components/SavedProblems";
+import { makeFunc, formatNum } from "../utils/math";
 
 export default function FalsePosition() {
   const [expr, setExpr] = useState("");
@@ -17,21 +17,9 @@ export default function FalsePosition() {
   const [iters, setIters] = useState("-");
   const [problems, setProblems] = useState([]);
   const [removingIds, setRemovingIds] = useState(new Set());
-  const canvasRef = useRef(null);
 
   // ---------- helpers ----------
-  function makeFunc(e) {
-    if (!e || !e.trim()) return null;
-    let s = e.replace(/\^/g, "**");
-    s = s.replace(/\bln\s*\(/gi, "log(");
-    s = s.replace(/\bpi\b/gi, "PI");
-    s = s.replace(/\be\b/gi, "E");
-    try {
-      return new Function("x", "with(Math){ return (" + s + "); }");
-    } catch {
-      return null;
-    }
-  }
+  // makeFunc imported from utils
 
   // ✅ False Position (Regula Falsi)
   function falsePosition(func, a, b, tol, maxIter) {
@@ -71,87 +59,9 @@ export default function FalsePosition() {
     return { root: (a * fb - b * fa) / (fb - fa), iterations: rows, converged: false };
   }
 
-  function formatNum(x) {
-    if (x === null || Number.isNaN(x)) return "-";
-    if (!isFinite(x)) return String(x);
-    return Number(x).toPrecision(8)
-      .replace(/(?:\.0+$)|(?:(?<=\.[0-9]*[1-9])0+$)/, "");
-  }
+  // formatNum imported from utils
 
-  function drawPlot(func, xl, xr, iterations) {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = "#0d1117"; // Cyber Night bg
-    ctx.fillRect(0, 0, W, H);
-
-    const pad = (xr - xl) * 0.2 || 1;
-    const xmin = xl - pad, xmax = xr + pad;
-    const N = 500;
-    let xs = [], ys = [], ymin = Infinity, ymax = -Infinity;
-    for (let i = 0; i < N; i++) {
-      const x = xmin + ((xmax - xmin) * i) / (N - 1);
-      let y; try { y = func(x); } catch { y = NaN; }
-      xs.push(x); ys.push(y);
-      if (isFinite(y)) { if (y < ymin) ymin = y; if (y > ymax) ymax = y; }
-    }
-    if (ymin === Infinity) { ymin = -1; ymax = 1; }
-    const ypad = (ymax - ymin) * 0.2 || 1; ymin -= ypad; ymax += ypad;
-
-    const mapX = (x) => ((x - xmin) / (xmax - xmin)) * W;
-    const mapY = (y) => H - ((y - ymin) / (ymax - ymin)) * H;
-
-    // axes
-    ctx.strokeStyle = "rgba(255,255,255,0.15)";
-    if (ymin < 0 && ymax > 0) {
-      const y0 = mapY(0); ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y0); ctx.stroke();
-    }
-    if (xmin < 0 && xmax > 0) {
-      const x0 = mapX(0); ctx.beginPath(); ctx.moveTo(x0, 0); ctx.lineTo(x0, H); ctx.stroke();
-    }
-
-    // curve
-    ctx.beginPath();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "#58a6ff"; // Cyber accent
-    let started = false;
-    for (let i = 0; i < N; i++) {
-      const x = xs[i], y = ys[i];
-      if (!isFinite(y)) { started = false; continue; }
-      const px = mapX(x), py = mapY(y);
-      if (!started) { ctx.moveTo(px, py); started = true; }
-      else ctx.lineTo(px, py);
-    }
-    ctx.stroke();
-
-    // iteration points x1
-    iterations.forEach((it) => {
-      const px = mapX(it.x1), py = mapY(it.fx1);
-      ctx.beginPath(); ctx.arc(px, py, 3, 0, 2 * Math.PI);
-      ctx.fillStyle = "#f97316"; ctx.fill();
-    });
-
-    // markers
-    const drawMarker = (x, color, label) => {
-      const px = mapX(x);
-      ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H);
-      ctx.strokeStyle = color; ctx.stroke();
-      ctx.fillStyle = color; ctx.font = "12px sans-serif";
-      ctx.fillText(label + "=" + formatNum(x), px + 6, 18);
-    };
-    drawMarker(xl, "#22c55e", "XL");
-    drawMarker(xr, "#ef4444", "XR");
-
-    // last x1 big
-    if (iterations.length) {
-      const last = iterations[iterations.length - 1];
-      const px = mapX(last.x1), py = mapY(last.fx1);
-      ctx.beginPath(); ctx.arc(px, py, 6, 0, 2 * Math.PI);
-      ctx.fillStyle = "#fb923c"; ctx.fill();
-    }
-  }
+  // graph rendering delegated to GraphCanvas
 
   // ---------- Firestore ----------
   async function refreshProblems() {
@@ -161,7 +71,6 @@ export default function FalsePosition() {
 
   useEffect(() => {
     refreshProblems().catch(console.error);
-    drawPlot(makeFunc("x"), -5, 5, []);
   }, []);
 
   const handleSaveProblem = async () => {
@@ -226,9 +135,8 @@ export default function FalsePosition() {
 
     setIterations(res.iterations);
     setStatus("สถานะ: เสร็จสิ้น " + (res.converged ? "(converged)" : "(ไม่ converged)"));
-    setIters(Math.max(0, res.iterations.length - 1)); // ให้เหมือน Bisection (ไม่รวม iter แรกที่ error = null)
+    setIters(Math.max(0, res.iterations.length - 1));
     setRoot(formatNum(res.root));
-    drawPlot(func, a, b, res.iterations);
   };
 
   const handleReset = () => {
@@ -359,12 +267,9 @@ export default function FalsePosition() {
         {/* Graph Card */}
         <div className="bg-[#161b22] rounded-lg p-4 border border-[#30363d] fade-in-delay2">
           <label className="block text-sm text-gray-400 mb-2">กราฟฟังก์ชัน</label>
-          <canvas
-            ref={canvasRef}
-            width={800}
-            height={320}
-            className="w-full h-72 bg-[#0d1117] rounded"
-          ></canvas>
+          <div className="w-full h-72 bg-[#0d1117] rounded">
+            <GraphCanvas func={makeFunc(expr) || ((x)=>x)} xl={parseFloat(xl) || -5} xr={parseFloat(xr) || 5} iterations={iterations} className="w-full h-72 rounded" />
+          </div>
           <div className="text-xs text-gray-400 mt-2">
             เขียว = XL, แดง = XR, ส้ม = X1 ทุก iteration (วงใหญ่ = X1 สุดท้าย)
           </div>
@@ -372,36 +277,8 @@ export default function FalsePosition() {
       </div>
 
       {/* ตารางผลลัพธ์ (แยกออกมาเหมือน Bisection) */}
-      {iterations.length > 0 && (
-        <div className="bg-[#161b22] rounded-lg p-4 border border-[#30363d] mt-6 overflow-auto fade-in-delay2">
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="bg-[#161b22] text-[#8b949e]">
-                <th className="p-2 text-right">iter</th>
-                <th className="p-2 text-right">xl</th>
-                <th className="p-2 text-right">xr</th>
-                <th className="p-2 text-right">x1</th>
-                <th className="p-2 text-right">f(x1)</th>
-                <th className="p-2 text-right">error</th>
-              </tr>
-            </thead>
-            <tbody>
-              {iterations.map((r) => (
-                <tr key={r.iter} className="border-b border-[#30363d] text-gray-100 hover:bg-[#1c2330]">
-                  <td className="p-2 text-right">{r.iter}</td>
-                  <td className="p-2 text-right">{formatNum(r.xl)}</td>
-                  <td className="p-2 text-right">{formatNum(r.xr)}</td>
-                  <td className="p-2 text-right">{formatNum(r.x1)}</td>
-                  <td className="p-2 text-right">{formatNum(r.fx1)}</td>
-                  <td className="p-2 text-right">{r.error === null ? "-" : formatNum(r.error)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© 2025 Numer-Web — Developed by KaiMaiRuh</div>
+      <ResultsTable iterations={iterations} />
+      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© Numerical Web — ฝีมือคุณ</div>
     </div>
   );
 }
