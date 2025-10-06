@@ -1,5 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import PageHeader from "../components/PageHeader";
+import useProblems from "../hooks/useProblems";
+import * as NewtonService from "../services/NewtonRaphsonService";
+import SavedProblems from "../components/SavedProblems";
+import ResultsTableSimple from "../components/ResultsTableSimple";
 
 // ฟังก์ชันหลักสำหรับ Newton-Raphson Method
 export default function NewtonRaphson() {
@@ -13,6 +17,38 @@ export default function NewtonRaphson() {
   const [root, setRoot] = useState("-");
   const [iters, setIters] = useState("-");
   const canvasRef = useRef(null);
+  const { problems, removingIds, refresh, saveProblem, deleteProblem } = useProblems(NewtonService);
+
+  const handleSaveProblem = async () => {
+    if (!expr || !x0 || !tol || !maxIter) {
+      alert("กรอกให้ครบก่อนบันทึกนะ");
+      return;
+    }
+    try {
+      await saveProblem({ expr, x0, tol, maxIter });
+      alert("บันทึกแล้ว!");
+    } catch (e) {
+      console.error("บันทึกโจทย์ผิดพลาด:", e);
+      alert("บันทึกไม่สำเร็จ ลองเช็ค Firestore rules/console");
+    }
+  };
+
+  const handleLoadProblem = (p) => {
+    setExpr(p.expr ?? "");
+    setX0(p.x0 ?? "");
+    setTol(p.tol ?? "");
+    setMaxIter(p.maxIter ?? "");
+  };
+
+  const handleDeleteProblem = (p) => {
+    if (!confirm(`ลบโจทย์นี้ไหม?\n${p.expr}`)) return;
+    try {
+      deleteProblem(p.id);
+    } catch (e) {
+      console.error("ลบโจทย์ผิดพลาด:", e);
+      alert("ลบไม่สำเร็จ");
+    }
+  };
 
   // ฟังก์ชันแปลง string เป็น function (รับสมการจาก input)
   function makeFunc(expr) {
@@ -197,6 +233,8 @@ export default function NewtonRaphson() {
 
   // --- วาดกราฟเริ่มต้นเมื่อโหลดหน้า ---
   useEffect(() => { drawPlot(() => 0, []); }, []);
+  // load saved problems on mount
+  useEffect(() => { refresh().catch(console.error); }, [refresh]);
 
   // --- ส่วนแสดงผลหน้าจอ ---
   return (
@@ -204,8 +242,8 @@ export default function NewtonRaphson() {
       <PageHeader title="Newton-Raphson Method" subtitle="ตาราง + กราฟ แสดงการทำงาน" />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Input Card: รับค่าต่าง ๆ จากผู้ใช้ */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow">
+  {/* Input Card: รับค่าต่าง ๆ จากผู้ใช้ */}
+  <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
           <label className="block text-sm text-gray-400 mb-1">สมการ f(x)</label>
           <input type="text" value={expr} onChange={(e) => setExpr(e.target.value)}
             placeholder="เช่น x^3 - x - 2"
@@ -235,10 +273,17 @@ export default function NewtonRaphson() {
 
           <div className="flex gap-3 mb-4">
             <button onClick={handleRun}
-              className="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-semibold py-2 rounded">คำนวณ</button>
+              className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">คำนวณ</button>
             <button onClick={handleReset}
-              className="flex-1 border border-slate-600 text-gray-400 py-2 rounded hover:bg-slate-700">รีเซ็ต</button>
+              className="flex-1 btn-danger border border-slate-600 py-2 rounded">รีเซ็ต</button>
           </div>
+
+          <button
+            onClick={handleSaveProblem}
+            className="w-full btn-primary glow-btn py-2 rounded mb-3"
+          >
+            บันทึกโจทย์
+          </button>
 
           {/* แสดงผลสถานะและผลลัพธ์ */}
           <div className="text-sm">
@@ -247,35 +292,11 @@ export default function NewtonRaphson() {
             <div>Root: {root}</div>
           </div>
 
-          {/* Table: แสดงผลการคำนวณแต่ละ iteration */}
-          {iterations.length > 0 && (
-            <div className="overflow-auto max-h-64 mt-3">
-              <table className="w-full text-sm border-collapse">
-                <thead>
-                  <tr className="bg-slate-700 text-gray-400">
-                    <th className="p-2 text-right">iter</th>
-                    <th className="p-2 text-right">x</th>
-                    <th className="p-2 text-right">f(x)</th>
-                    <th className="p-2 text-right">error</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {iterations.map((r) => (
-                    <tr key={r.iter} className="border-b border-slate-700">
-                      <td className="p-2 text-right">{r.iter}</td>
-                      <td className="p-2 text-right">{formatNum(r.x)}</td>
-                      <td className="p-2 text-right">{formatNum(r.fx)}</td>
-                      <td className="p-2 text-right">{r.error === null ? "-" : formatNum(r.error)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
         </div>
 
-        {/* Graph Card: แสดงกราฟฟังก์ชันและจุด iteration */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow">
+  {/* Graph Card: แสดงกราฟฟังก์ชันและจุด iteration */}
+  <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <label className="block text-sm text-gray-400 mb-2">กราฟฟังก์ชัน + Iterations</label>
           <canvas ref={canvasRef} width={800} height={320}
             className="w-full h-72 bg-slate-900 rounded"></canvas>
@@ -284,6 +305,10 @@ export default function NewtonRaphson() {
             เส้นเขียว = เส้นสัมผัส f(x) ที่ x<sub>i</sub>, Label = x0, x1, x2 …
           </div>
         </div>
+      </div>
+      {/* Big results table below both cards */}
+      <div className="mt-6">
+        <ResultsTableSimple iterations={iterations} />
       </div>
     </div>
   );
