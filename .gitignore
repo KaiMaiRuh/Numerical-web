@@ -38,3 +38,5 @@ Thumbs.db
 *.sw?
 *.bak
 *.tmp
+
+src/COMMENTS_TH.md
