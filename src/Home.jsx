@@ -8,9 +8,9 @@ export default function Home() {
       title: "1. Root of Equation",
       topics: [
         { id: "bisection", name: "Bisection Method", path: "/bisection" },
-        { id: "falseposition", name: "False Position Method (Regula Falsi)", path: "/falseposition" },
+        { id: "falseposition", name: "False Position Method", path: "/falseposition" },
         { id: "onepoint", name: "One-Point Iteration", path: "/onepoint" },
-        { id: "taylor", name: "Taylor Series Approximation", path: "/taylor" },
+        { id: "taylor", name: "Taylor Series", path: "/taylor" },
         { id: "newtonraphson", name: "Newton–Raphson Method", path: "/newtonraphson" },
         { id: "secant", name: "Secant Method", path: "/secant" },
       ],
