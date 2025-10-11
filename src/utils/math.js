@@ -1,7 +1,9 @@
-export function formatNum(x) {
+export function formatNum(x, sig = 6) {
+  // Returns a human-friendly numeric string. Default: 6 significant digits.
   if (x === null || Number.isNaN(x)) return "-";
   if (!isFinite(x)) return String(x);
-  return Number(x).toPrecision(8).replace(/(?:\.0+$)|(?:(?<=\.[0-9]*[1-9])0+$)/, "");
+  // Use Number(toPrecision) then strip trailing zeros where appropriate
+  return Number(x).toPrecision(sig).replace(/(?:\.0+$)|(?:(?<=\.[0-9]*[1-9])0+$)/, "");
 }
 
 export function makeFunc(expr) {

@@ -3,8 +3,8 @@ import * as BisectionService from "../services/BisectionService";
 import useProblems from "../hooks/useProblems";
 import { bisection as runBisection } from "../algorithms/bisection";
 import GraphCanvas from "../components/GraphCanvas";
-import ResultsTable from "../components/ResultsTable";
 import SavedProblems from "../components/SavedProblems";
+import ResultsTable from "../components/ResultsTable";
 import PageHeader from "../components/PageHeader";
 import { makeFunc, formatNum } from "../utils/math";
 
@@ -24,43 +24,7 @@ export default function Bisection() {
   // ---------- helpers ----------
   // makeFunc imported from ../utils/math
 
-  // ✅ Bisection ที่คำนวณถูกต้อง (x1 ต่อรอบ แล้วค่อยอัปเดตช่วง)
-  function bisection(func, a, b, tol, maxIter) {
-    let fa = func(a), fb = func(b);
-    if (!isFinite(fa) || !isFinite(fb))
-      return { error: "f(x) ไม่สามารถประเมินค่าได้" };
-    if (fa * fb > 0)
-      return { error: "f(a) และ f(b) ต้องต่างเครื่องหมาย" };
-
-    const rows = [];
-    let prev = null;
-
-    for (let i = 0; i <= maxIter; i++) {
-      const x1 = (a + b) / 2;
-      const fx1 = func(x1);
-
-      let err = null;
-      if (prev !== null) {
-        const denom = Math.abs(x1) > 1e-12 ? Math.abs(x1) : 1;
-        err = Math.abs(x1 - prev) / denom; // relative approx error
-      }
-
-      rows.push({ iter: i, xl: a, xr: b, x1, fx1, error: err });
-
-      if (!isFinite(fx1)) return { error: "f(x1) คำนวณไม่ได้" };
-      if (Math.abs(fx1) === 0 || (err !== null && err <= tol)) {
-        return { root: x1, iterations: rows, converged: true };
-      }
-
-      if (fa * fx1 < 0) {
-        b = x1; fb = fx1;
-      } else {
-        a = x1; fa = fx1;
-      }
-      prev = x1;
-    }
-    return { root: (a + b) / 2, iterations: rows, converged: false };
-  }
+  // Bisection algorithm delegated to src/algorithms/bisection (imported as runBisection)
 
   // formatNum imported from ../utils/math
 
@@ -71,19 +35,6 @@ export default function Bisection() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  const handleSaveProblem = async () => {
-    if (!expr || !xl || !xr || !tol || !maxIter) {
-      alert("กรอกให้ครบก่อนบันทึกนะ");
-      return;
-    }
-    try {
-      await saveProblem({ expr, xl, xr, tol, maxIter });
-      alert("บันทึกแล้ว!");
-    } catch (e) {
-      console.error("บันทึกโจทย์ผิดพลาด:", e);
-      alert("บันทึกไม่สำเร็จ ลองเช็ค Firestore rules/console");
-    }
-  };
 
   const handleLoadProblem = (p) => {
     setExpr(p.expr ?? "");
@@ -100,6 +51,20 @@ export default function Bisection() {
     } catch (e) {
       console.error("ลบโจทย์ผิดพลาด:", e);
       alert("ลบไม่สำเร็จ");
+    }
+  };
+
+  const handleSaveProblem = async () => {
+    if (!expr || !xl || !xr || !tol || !maxIter) {
+      alert("กรอกให้ครบก่อนบันทึกนะ");
+      return;
+    }
+    try {
+      await saveProblem({ expr, xl, xr, tol, maxIter });
+      alert("บันทึกแล้ว!");
+    } catch (e) {
+      console.error("บันทึกโจทย์ผิดพลาด:", e);
+      alert("บันทึกไม่สำเร็จ ลองเช็ค Firestore rules/console");
     }
   };
 
@@ -224,32 +189,7 @@ export default function Bisection() {
             <div>Root: {root}</div>
           </div>
 
-          {problems.length > 0 && (
-            <div className="mt-2">
-              <h2 className="text-sm text-gray-400 mb-2">โจทย์ที่บันทึกไว้:</h2>
-              <ul className="text-xs text-gray-300 bg-slate-900 rounded p-2 max-h-48 overflow-auto">
-                {problems.map((p) => (
-                  <li key={p.id} className={`flex items-center justify-between gap-2 border-b border-slate-700 py-1 ${removingIds.has(p.id) ? 'fade-out' : ''}`}>
-                    <span className="truncate">{p.expr}</span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleLoadProblem(p)}
-                        className="text-slate-900 btn-primary px-2 py-0.5 rounded"
-                      >
-                        โหลด
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProblem(p)}
-                        className="text-slate-900 btn-danger px-2 py-0.5 rounded glow-btn"
-                      >
-                        ลบ
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
         </div>
 
         {/* Graph */}

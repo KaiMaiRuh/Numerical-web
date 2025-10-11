@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import PageHeader from "../components/PageHeader";
+import { makeFunc, formatNum } from "../utils/math";
 
 export default function OnePoint() {
   const [fxExpr, setFxExpr] = useState("");
@@ -13,25 +14,7 @@ export default function OnePoint() {
   const [lambdaPreview, setLambdaPreview] = useState(null);
   const [f2String, setF2String] = useState(""); // แสดง f2(x) ให้ผู้ใช้เห็น
 
-  // ---------- Utils ----------
-  function makeFunc(expr) {
-    if (!expr || !expr.trim()) return null;
-    let s = expr.replace(/\^/g, "**");
-    s = s.replace(/\bln\s*\(/gi, "log(");
-    s = s.replace(/\bpi\b/gi, "PI");
-    s = s.replace(/\be\b/gi, "E");
-    try {
-      return new Function("x", "with(Math){ return (" + s + "); }");
-    } catch {
-      return null;
-    }
-  }
-
-  function formatNum(x) {
-    if (x === null) return "-";
-    if (!isFinite(x)) return String(x);
-    return Number(x).toPrecision(8).replace(/(?:\.0+$)|(?:(?<=\.[0-9]*[1-9])0+$)/, "");
-  }
+  // use makeFunc and formatNum from ../utils/math
 
   // อนุพันธ์เชิงตัวเลขแบบ central difference
   function numericDerivative(f, x) {
