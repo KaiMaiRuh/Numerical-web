@@ -4,6 +4,7 @@ import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
+import linearInterpolation from "../algorithms/linearInterp";
 
 export default function LinearInterp() {
   const [x1, setX1] = useState("");
@@ -20,11 +21,7 @@ export default function LinearInterp() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ----------- สูตร Linear Interpolation -----------
-  const linearInterpolation = (x1, y1, x2, y2, x) => {
-    const fx = y1 + ((y2 - y1) / (x2 - x1)) * (x - x1);
-    return fx;
-  };
+  // Algorithm moved to src/algorithms/linearInterp.js
 
   // ----------- Handlers -----------
   const handleRun = () => {

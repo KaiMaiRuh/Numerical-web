@@ -4,6 +4,7 @@ import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
+import conjugateGradient from "../algorithms/conjugateGradient";
 
 export default function ConjugateGradient() {
   const [size, setSize] = useState(3);
@@ -20,50 +21,7 @@ export default function ConjugateGradient() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ---------- Algorithm: Conjugate Gradient ----------
-  const conjugateGradient = (A, b, x0, tol, maxIter) => {
-    const n = A.length;
-    let x = [...x0];
-    let r = Array(n).fill(0);
-    let p = Array(n).fill(0);
-    const results = [];
-
-    // r0 = b - A*x0
-    for (let i = 0; i < n; i++) {
-      let Ax = 0;
-      for (let j = 0; j < n; j++) Ax += A[i][j] * x0[j];
-      r[i] = b[i] - Ax;
-      p[i] = r[i];
-    }
-
-    let rsOld = r.reduce((sum, val) => sum + val * val, 0);
-
-    for (let iter = 1; iter <= maxIter; iter++) {
-      const Ap = Array(n).fill(0);
-      for (let i = 0; i < n; i++) {
-        for (let j = 0; j < n; j++) Ap[i] += A[i][j] * p[j];
-      }
-
-      const alpha = rsOld / p.reduce((sum, val, i) => sum + val * Ap[i], 0);
-
-      for (let i = 0; i < n; i++) x[i] += alpha * p[i];
-      for (let i = 0; i < n; i++) r[i] -= alpha * Ap[i];
-
-      const rsNew = r.reduce((sum, val) => sum + val * val, 0);
-      const error = Math.sqrt(rsNew);
-
-      results.push({ iter, x: [...x], error });
-
-      if (Math.sqrt(rsNew) < tol) return { solution: x, iterations: results, converged: true };
-
-      const beta = rsNew / rsOld;
-      for (let i = 0; i < n; i++) p[i] = r[i] + beta * p[i];
-      rsOld = rsNew;
-    }
-
-    return { solution: x, iterations: results, converged: false };
-  };
-
+  // algorithm moved to src/algorithms/conjugateGradient.js
   // ---------- Handlers ----------
   const handleRun = () => {
     try {

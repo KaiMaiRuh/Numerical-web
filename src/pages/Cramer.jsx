@@ -4,6 +4,7 @@ import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
+import cramer, { determinant as detFn } from "../algorithms/cramer";
 
 export default function Cramer() {
   const [size, setSize] = useState(3); // ขนาดของเมทริกซ์ n x n
@@ -17,36 +18,12 @@ export default function Cramer() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ----------- Helper functions -----------
-  const determinant = (matrix) => {
-    const n = matrix.length;
-    if (n === 1) return matrix[0][0];
-    if (n === 2) return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
-
-    let det = 0;
-    for (let i = 0; i < n; i++) {
-      const subMatrix = matrix.slice(1).map((row) => row.filter((_, j) => j !== i));
-      det += matrix[0][i] * determinant(subMatrix) * (i % 2 === 0 ? 1 : -1);
-    }
-    return det;
-  };
-
-  const solveCramer = (A, b) => {
-    const detA = determinant(A);
-    if (Math.abs(detA) < 1e-12) return { error: "Determinant = 0 (ไม่มีคำตอบหรือมีหลายคำตอบ)" };
-    const n = A.length;
-    const results = [];
-    for (let i = 0; i < n; i++) {
-      const Ai = A.map((row, r) => row.map((val, c) => (c === i ? b[r] : val)));
-      results.push(determinant(Ai) / detA);
-    }
-    return { detA, results };
-  };
+  // use algorithm functions from src/algorithms/cramer.js
 
   // ----------- Handlers -----------
   const handleRun = () => {
     try {
-      const res = solveCramer(A, b);
+      const res = cramer(A, b);
       if (res.error) {
         setStatus("สถานะ: " + res.error);
         setSolution([]);

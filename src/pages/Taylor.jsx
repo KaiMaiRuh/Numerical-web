@@ -3,7 +3,7 @@ import * as TaylorService from "../services/TaylorService";
 import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
-import { derivative, evaluate, factorial } from "mathjs";
+import taylorApprox from "../algorithms/taylor";
 import { formatNum } from "../utils/math";
 
 export default function Taylor() {
@@ -23,23 +23,6 @@ export default function Taylor() {
   }, [refresh]);
 
   // ----------- Calculation -----------
-  const taylorApprox = (expr, x0, x, n) => {
-    const terms = [];
-    let sum = 0;
-    let currentExpr = expr;
-
-    for (let i = 0; i <= n; i++) {
-      const fx0 = evaluate(currentExpr, { x: x0 });
-      const term = (fx0 * Math.pow(x - x0, i)) / factorial(i);
-      sum += term;
-      terms.push({ i, fx0, term });
-
-      // เตรียมอนุพันธ์ถัดไป
-      currentExpr = derivative(currentExpr, "x").toString();
-    }
-
-    return { result: sum, terms };
-  };
 
   // ----------- Handlers -----------
   const handleRun = () => {

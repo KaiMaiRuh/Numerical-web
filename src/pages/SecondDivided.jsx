@@ -4,6 +4,7 @@ import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
+import secondDividedDiff from "../algorithms/secondDivided";
 
 export default function SecondDivided() {
   const [x0, setX0] = useState(1);
@@ -27,19 +28,7 @@ export default function SecondDivided() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ---------------- Calculation ----------------
-  const secondDividedDiff = (x0, x1, x2, fx0, fx1, fx2, x) => {
-    const f01 = (fx1 - fx0) / (x1 - x0);
-    const f12 = (fx2 - fx1) / (x2 - x1);
-    const f012 = (f12 - f01) / (x2 - x0);
-
-    const Px =
-      fx0 +
-      f01 * (x - x0) +
-      f012 * (x - x0) * (x - x1);
-
-    return { f01, f12, f012, Px };
-  };
+  // Algorithm moved to src/algorithms/secondDivided.js
 
   // ---------------- Handlers ----------------
   const handleRun = () => {

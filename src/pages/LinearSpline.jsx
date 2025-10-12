@@ -4,6 +4,7 @@ import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
+import linearSpline from "../algorithms/linearSpline";
 
 export default function LinearSpline() {
   const [xValues, setXValues] = useState(["", "", ""]);
@@ -19,27 +20,7 @@ export default function LinearSpline() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ----------- สูตร Linear Spline -----------
-  const linearSpline = (xs, ys, x) => {
-    const n = xs.length;
-    let segs = [];
-
-    // สร้างสมการเส้นตรงแต่ละช่วง
-    for (let i = 0; i < n - 1; i++) {
-      const slope = (ys[i + 1] - ys[i]) / (xs[i + 1] - xs[i]);
-      const intercept = ys[i] - slope * xs[i];
-      segs.push({ i, x1: xs[i], x2: xs[i + 1], slope, intercept });
-    }
-
-    // หาช่วงที่ x อยู่
-    let found = segs.find((s) => x >= s.x1 && x <= s.x2);
-    if (!found) {
-      throw new Error("ค่า x อยู่นอกขอบเขตข้อมูล");
-    }
-
-    const fx = found.slope * x + found.intercept;
-    return { fx, segs, found };
-  };
+  // Algorithm moved to src/algorithms/linearSpline.js
 
   // ----------- Handlers -----------
   const handleRun = () => {

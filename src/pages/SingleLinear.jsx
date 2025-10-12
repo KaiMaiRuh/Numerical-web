@@ -4,6 +4,7 @@ import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
+import solveSingleLinearRegression from "../algorithms/singleLinear";
 
 export default function SingleLinear() {
   const [points, setPoints] = useState([
@@ -22,22 +23,7 @@ export default function SingleLinear() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ---------- Helper Function ----------
-  const solveSingleLinearRegression = (pts, xPred) => {
-    const n = pts.length;
-    if (n < 2) return { error: "ต้องมีข้อมูลอย่างน้อย 2 จุด" };
-
-    const sumX = pts.reduce((s, p) => s + p.x, 0);
-    const sumY = pts.reduce((s, p) => s + p.y, 0);
-    const sumXY = pts.reduce((s, p) => s + p.x * p.y, 0);
-    const sumX2 = pts.reduce((s, p) => s + p.x * p.x, 0);
-
-    const b = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX ** 2);
-    const a = (sumY - b * sumX) / n;
-
-    const yPred = a + b * xPred;
-    return { a, b, yPred };
-  };
+  // Algorithm moved to src/algorithms/singleLinear.js
 
   // ---------- Handlers ----------
   const handleRun = () => {

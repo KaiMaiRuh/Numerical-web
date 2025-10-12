@@ -4,6 +4,7 @@ import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
+import solveQuadraticSpline from "../algorithms/quadraticSpline";
 
 export default function QuadraticSpline() {
   const [points, setPoints] = useState([
@@ -22,45 +23,7 @@ export default function QuadraticSpline() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ----------- Helper functions -----------
-  const solveQuadraticSpline = (pts, x) => {
-    if (pts.length < 3) return { error: "ต้องมีจุดอย่างน้อย 3 จุด" };
-    const n = pts.length - 1;
-    const a = [];
-    const b = [];
-    const c = [];
-
-    // step 1: coefficients from quadratic spline equations
-    for (let i = 0; i < n; i++) {
-      const x0 = pts[i].x;
-      const x1 = pts[i + 1].x;
-      const y0 = pts[i].y;
-      const y1 = pts[i + 1].y;
-      const h = x1 - x0;
-      if (h === 0) return { error: "ค่าของ x ซ้ำกัน" };
-
-      // Simplified fitting (แบบ local quadratic)
-      // S_i(x) = a_i + b_i*(x-x_i) + c_i*(x-x_i)^2
-      // ใช้สมการ 3 จุดต่อ segment
-      a[i] = y0;
-      b[i] = (y1 - y0) / h;
-      c[i] = 0; // ใช้ 0 เป็นค่าเริ่มต้น (สามารถปรับให้ smooth ต่อเนื่องได้ แต่เอา basic ก่อน)
-    }
-
-    // หา segment ที่ x อยู่
-    let i = 0;
-    for (let j = 0; j < n; j++) {
-      if (x >= pts[j].x && x <= pts[j + 1].x) {
-        i = j;
-        break;
-      }
-    }
-
-    const dx = x - pts[i].x;
-    const y = a[i] + b[i] * dx + c[i] * dx * dx;
-
-    return { a, b, c, y };
-  };
+  // Algorithm moved to src/algorithms/quadraticSpline.js
 
   // ----------- Handlers -----------
   const handleRun = () => {

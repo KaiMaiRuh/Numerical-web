@@ -3,8 +3,8 @@ import * as SingleTrapService from "../services/SingleTrapezoidalService";
 import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
-import { evaluate } from "mathjs";
 import { formatNum } from "../utils/math";
+import trapezoidal from "../algorithms/singleTrapezoidal";
 
 export default function SingleTrapezoidal() {
   const [expr, setExpr] = useState("x^2 + 1");
@@ -20,20 +20,7 @@ export default function SingleTrapezoidal() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ---------------- Calculation ----------------
-  const f = (x) => {
-    try {
-      return evaluate(expr, { x });
-    } catch {
-      throw new Error("ไม่สามารถประเมินสมการได้");
-    }
-  };
-
-  const trapezoidal = (a, b, f) => {
-    const h = b - a;
-    const I = (h / 2) * (f(a) + f(b));
-    return I;
-  };
+  // Algorithm moved to src/algorithms/singleTrapezoidal.js
 
   // ---------------- Handlers ----------------
   const handleRun = () => {

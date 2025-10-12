@@ -4,6 +4,7 @@ import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
+import lagrange from "../algorithms/lagrangeInterp";
 
 export default function LagrangeInterp() {
   const [xValues, setXValues] = useState(["", "", ""]);
@@ -19,27 +20,7 @@ export default function LagrangeInterp() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ----------- สูตร Lagrange Interpolation -----------
-  const lagrange = (xs, ys, x) => {
-    const n = xs.length;
-    let fx = 0;
-    let detail = [];
-
-    for (let i = 0; i < n; i++) {
-      let Li = 1;
-      let LiStr = `L${i}(x) = `;
-      for (let j = 0; j < n; j++) {
-        if (i !== j) {
-          Li *= (x - xs[j]) / (xs[i] - xs[j]);
-          LiStr += `((x - ${xs[j]})/(${xs[i]} - ${xs[j]})) `;
-        }
-      }
-      const term = ys[i] * Li;
-      fx += term;
-      detail.push({ i, Li, term, LiStr });
-    }
-    return { fx, detail };
-  };
+  // Algorithm moved to src/algorithms/lagrangeInterp.js
 
   // ----------- Handlers -----------
   const handleRun = () => {

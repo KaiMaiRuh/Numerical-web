@@ -4,6 +4,7 @@ import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
+import quadraticInterpolation from "../algorithms/quadraticInterp";
 
 export default function QuadraticInterp() {
   const [xValues, setXValues] = useState(["", "", ""]);
@@ -18,23 +19,7 @@ export default function QuadraticInterp() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ----------- สูตร Quadratic Interpolation -----------
-  const quadraticInterpolation = (xs, ys, x) => {
-    if (xs.length !== 3 || ys.length !== 3) throw new Error("ต้องมีข้อมูล 3 จุดเท่านั้น");
-
-    const [x0, x1, x2] = xs;
-    const [y0, y1, y2] = ys;
-
-    const L0 =
-      ((x - x1) * (x - x2)) / ((x0 - x1) * (x0 - x2));
-    const L1 =
-      ((x - x0) * (x - x2)) / ((x1 - x0) * (x1 - x2));
-    const L2 =
-      ((x - x0) * (x - x1)) / ((x2 - x0) * (x2 - x1));
-
-    const fx = y0 * L0 + y1 * L1 + y2 * L2;
-    return { fx, L0, L1, L2 };
-  };
+  // Algorithm moved to src/algorithms/quadraticInterp.js
 
   // ----------- Handlers -----------
   const handleRun = () => {

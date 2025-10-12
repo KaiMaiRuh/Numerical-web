@@ -4,6 +4,7 @@ import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
+import gaussJordan from "../algorithms/gaussJordan";
 
 export default function GaussJordan() {
   const [size, setSize] = useState(3);
@@ -17,34 +18,7 @@ export default function GaussJordan() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ---------- Algorithm: Gauss–Jordan Elimination ----------
-  const gaussJordan = (A, b) => {
-    const n = A.length;
-    const M = A.map((row, i) => [...row, b[i]]); // Augmented matrix [A | b]
-
-    // Forward + Backward elimination
-    for (let i = 0; i < n; i++) {
-      if (Math.abs(M[i][i]) < 1e-12) return { error: "Pivot = 0 (ควรใช้ Partial Pivoting)" };
-
-      // Normalize the pivot row
-      const pivot = M[i][i];
-      for (let j = 0; j <= n; j++) M[i][j] /= pivot;
-
-      // Eliminate other rows
-      for (let k = 0; k < n; k++) {
-        if (k === i) continue;
-        const factor = M[k][i];
-        for (let j = 0; j <= n; j++) {
-          M[k][j] -= factor * M[i][j];
-        }
-      }
-    }
-
-    // Extract solution (last column)
-    const x = M.map((row) => row[n]);
-    return { solution: x, matrix: M };
-  };
-
+  // algorithm moved to src/algorithms/gaussJordan.js
   // ---------- Handlers ----------
   const handleRun = () => {
     try {

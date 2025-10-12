@@ -3,8 +3,8 @@ import * as ForwardDividedService from "../services/ForwardDividedService";
 import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
-import { factorial } from "mathjs";
 import { formatNum } from "../utils/math";
+import newtonForward from "../algorithms/forwardDivided";
 
 export default function ForwardDivided() {
   const [xValues, setXValues] = useState([1, 2, 3, 4]);
@@ -21,37 +21,7 @@ export default function ForwardDivided() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ----------- Helper function: Generate Forward Difference Table -----------
-  const forwardDiffTable = (y) => {
-    const n = y.length;
-    const table = [y.slice()];
-    for (let i = 1; i < n; i++) {
-      const prev = table[i - 1];
-      const diff = [];
-      for (let j = 0; j < prev.length - 1; j++) {
-        diff.push(prev[j + 1] - prev[j]);
-      }
-      table.push(diff);
-    }
-    return table;
-  };
-
-  const newtonForward = (xVals, yVals, x) => {
-    const n = xVals.length;
-    const h = xVals[1] - xVals[0];
-    const table = forwardDiffTable(yVals);
-    const u = (x - xVals[0]) / h;
-
-    let sum = yVals[0];
-    for (let i = 1; i < n; i++) {
-      let term = table[i][0];
-      for (let j = 0; j < i; j++) {
-        term *= (u - j);
-      }
-      sum += term / factorial(i);
-    }
-    return { result: sum, table };
-  };
+  // algorithm moved to src/algorithms/forwardDivided.js
 
   // ---------------- Handlers ----------------
   const handleRun = () => {

@@ -4,6 +4,7 @@ import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
+import jacobiIteration from "../algorithms/jacobi";
 
 export default function Jacobi() {
   const [size, setSize] = useState(3);
@@ -20,34 +21,7 @@ export default function Jacobi() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ---------- Algorithm: Jacobi Iteration ----------
-  const jacobiIteration = (A, b, x0, tol, maxIter) => {
-    const n = A.length;
-    let xOld = [...x0];
-    let xNew = Array(n).fill(0);
-    const results = [];
-
-    for (let iter = 1; iter <= maxIter; iter++) {
-      for (let i = 0; i < n; i++) {
-        let sum = 0;
-        for (let j = 0; j < n; j++) {
-          if (i !== j) sum += A[i][j] * xOld[j];
-        }
-        if (Math.abs(A[i][i]) < 1e-12) return { error: "Pivot = 0 ที่แถว " + (i + 1) };
-        xNew[i] = (b[i] - sum) / A[i][i];
-      }
-
-      // คำนวณ error (norm infinity)
-      const error = Math.max(...xNew.map((xi, i) => Math.abs((xi - xOld[i]) / (xi || 1))));
-      results.push({ iter, values: [...xNew], error });
-
-      if (error < tol) return { solution: xNew, iterations: results, converged: true };
-      xOld = [...xNew];
-    }
-
-    return { solution: xNew, iterations: results, converged: false };
-  };
-
+  // algorithm moved to src/algorithms/jacobi.js
   // ---------- Handlers ----------
   const handleRun = () => {
     try {

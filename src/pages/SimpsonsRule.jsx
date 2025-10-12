@@ -3,8 +3,8 @@ import * as SimpsonsService from "../services/SimpsonsService";
 import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
-import { evaluate } from "mathjs";
 import { formatNum } from "../utils/math";
+import simpsonsRule from "../algorithms/simpsonsRule";
 
 export default function SimpsonsRule() {
   const [expr, setExpr] = useState("x^2 + 1");
@@ -22,33 +22,7 @@ export default function SimpsonsRule() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ---------------- Calculation ----------------
-  const f = (x) => {
-    try {
-      return evaluate(expr, { x });
-    } catch {
-      throw new Error("ไม่สามารถประเมินสมการได้");
-    }
-  };
-
-  const simpsonsRule = (a, b, n, f) => {
-    if (n % 2 !== 0) throw new Error("n ต้องเป็นจำนวนคู่เท่านั้น");
-
-    const h = (b - a) / n;
-    let sum = f(a) + f(b);
-    const rows = [{ i: 0, x: a, fx: f(a) }];
-
-    for (let i = 1; i < n; i++) {
-      const xi = a + i * h;
-      const fx = f(xi);
-      sum += i % 2 === 0 ? 2 * fx : 4 * fx;
-      rows.push({ i, x: xi, fx });
-    }
-
-    rows.push({ i: n, x: b, fx: f(b) });
-    const I = (h / 3) * sum;
-    return { I, h, rows };
-  };
+  // Algorithm moved to src/algorithms/simpsonsRule.js
 
   // ---------------- Handlers ----------------
   const handleRun = () => {

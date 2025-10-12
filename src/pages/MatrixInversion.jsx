@@ -4,6 +4,7 @@ import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
+import solveByMatrixInversion from "../algorithms/matrixInversion";
 
 export default function MatrixInversion() {
   const [size, setSize] = useState(3);
@@ -17,57 +18,7 @@ export default function MatrixInversion() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ---------- Helper functions ----------
-  const identityMatrix = (n) => {
-    return Array.from({ length: n }, (_, i) =>
-      Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))
-    );
-  };
-
-  const invertMatrix = (A) => {
-    const n = A.length;
-    const M = A.map((row, i) => [...row, ...identityMatrix(n)[i]]);
-
-    // Gauss–Jordan elimination on [A | I]
-    for (let i = 0; i < n; i++) {
-      let pivot = M[i][i];
-      if (Math.abs(pivot) < 1e-12) return { error: "Pivot = 0 (ไม่สามารถหา Inverse ได้)" };
-
-      // Normalize pivot row
-      for (let j = 0; j < 2 * n; j++) M[i][j] /= pivot;
-
-      // Eliminate other rows
-      for (let k = 0; k < n; k++) {
-        if (k === i) continue;
-        const factor = M[k][i];
-        for (let j = 0; j < 2 * n; j++) {
-          M[k][j] -= factor * M[i][j];
-        }
-      }
-    }
-
-    // Extract inverse (right half of augmented matrix)
-    const inverse = M.map((row) => row.slice(n));
-    return { inverse };
-  };
-
-  const multiplyMatrixVector = (A, b) => {
-    const n = A.length;
-    const result = Array(n).fill(0);
-    for (let i = 0; i < n; i++) {
-      for (let j = 0; j < n; j++) {
-        result[i] += A[i][j] * b[j];
-      }
-    }
-    return result;
-  };
-
-  const solveByMatrixInversion = (A, b) => {
-    const res = invertMatrix(A);
-    if (res.error) return { error: res.error };
-    const x = multiplyMatrixVector(res.inverse, b);
-    return { solution: x, inverse: res.inverse };
-  };
+  // Algorithm moved to src/algorithms/matrixInversion.js
 
   // ---------- Handlers ----------
   const handleRun = () => {

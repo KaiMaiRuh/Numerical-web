@@ -4,6 +4,7 @@ import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
+import polynomialInterpolation from "../algorithms/polynomialInterp";
 
 export default function PolynomialInterp() {
   const [xValues, setXValues] = useState(["", "", "", ""]);
@@ -19,33 +20,7 @@ export default function PolynomialInterp() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ----------- สูตร Polynomial Interpolation (Newton’s Divided Difference) -----------
-  const dividedDifferences = (xs, ys) => {
-    const n = xs.length;
-    const table = Array.from({ length: n }, () => Array(n).fill(0));
-
-    for (let i = 0; i < n; i++) table[i][0] = ys[i];
-
-    for (let j = 1; j < n; j++) {
-      for (let i = 0; i < n - j; i++) {
-        table[i][j] = (table[i + 1][j - 1] - table[i][j - 1]) / (xs[i + j] - xs[i]);
-      }
-    }
-    return table;
-  };
-
-  const newtonPolynomial = (xs, table, x) => {
-    const n = xs.length;
-    let fx = table[0][0];
-    for (let i = 1; i < n; i++) {
-      let term = table[0][i];
-      for (let j = 0; j < i; j++) {
-        term *= (x - xs[j]);
-      }
-      fx += term;
-    }
-    return fx;
-  };
+  // Algorithm moved to src/algorithms/polynomialInterp.js
 
   // ----------- Handlers -----------
   const handleRun = () => {

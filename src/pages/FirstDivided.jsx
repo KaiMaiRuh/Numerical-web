@@ -5,6 +5,7 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 // import { evaluate } from "mathjs";
 import { formatNum } from "../utils/math";
+import firstDividedDiff from "../algorithms/firstDivided";
 
 export default function FirstDivided() {
   const [x0, setX0] = useState(1);
@@ -23,13 +24,7 @@ export default function FirstDivided() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ---------------- Calculation ----------------
-  const firstDividedDiff = (x0, x1, fx0, fx1, x) => {
-    const f01 = (fx1 - fx0) / (x1 - x0);
-    const Px = fx0 + f01 * (x - x0);
-    return { f01, Px };
-  };
-
+  // algorithm moved to src/algorithms/firstDivided.js
   // ---------------- Handlers ----------------
   const handleRun = () => {
     try {
