@@ -1,3 +1,4 @@
+// src/pages/QuadraticSpline.jsx
 import { useState, useEffect } from "react";
 import * as QuadraticSplineService from "../services/QuadraticSplineService";
 import useProblems from "../hooks/useProblems";
@@ -5,6 +6,8 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import solveQuadraticSpline from "../algorithms/quadraticSpline";
+import GraphInterpolation from "../components/graphs/GraphInterpolation";
+import TableInterpolation from "../components/tables/TableInterpolation";
 
 export default function QuadraticSpline() {
   const [points, setPoints] = useState([
@@ -14,6 +17,7 @@ export default function QuadraticSpline() {
   ]);
   const [xValue, setXValue] = useState("");
   const [yResult, setYResult] = useState(null);
+  const [segments, setSegments] = useState([]);
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
 
   const { problems, removingIds, refresh, saveProblem, deleteProblem } =
@@ -23,9 +27,6 @@ export default function QuadraticSpline() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // Algorithm moved to src/algorithms/quadraticSpline.js
-
-  // ----------- Handlers -----------
   const handleRun = () => {
     try {
       const xNum = parseFloat(xValue);
@@ -40,6 +41,7 @@ export default function QuadraticSpline() {
         return;
       }
       setYResult(res.y);
+      setSegments(res.segments || []);
       setStatus("สถานะ: คำนวณสำเร็จ");
     } catch (e) {
       console.error(e);
@@ -55,6 +57,7 @@ export default function QuadraticSpline() {
     ]);
     setXValue("");
     setYResult(null);
+    setSegments([]);
     setStatus("สถานะ: รีเซ็ตแล้ว");
   };
 
@@ -73,6 +76,7 @@ export default function QuadraticSpline() {
         points: JSON.stringify(points),
         xValue,
         expr: `Quadratic Spline (${points.length} points)`,
+        method: "quadratic_spline",
       };
       await saveProblem(payload);
       alert("บันทึกแล้ว!");
@@ -99,15 +103,15 @@ export default function QuadraticSpline() {
     deleteProblem(p.id);
   };
 
-  // ----------- UI -----------
   return (
     <div className="max-w-6xl mx-auto p-6">
       <PageHeader
-        title="Quadratic Spline"
-        subtitle="ประมาณค่า y ด้วย Quadratic Spline Interpolation"
+        title="Quadratic Spline Interpolation"
+        subtitle="การประมาณค่า f(x) ด้วย Quadratic Spline"
       />
 
       <div className="grid md:grid-cols-2 gap-6">
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
           <label className="block text-sm text-gray-400 mb-1">จุดข้อมูล (x, y)</label>
           <table className="text-sm border-collapse mb-3">
@@ -159,7 +163,9 @@ export default function QuadraticSpline() {
           </button>
 
           <div className="mb-3">
-            <label className="block text-sm text-gray-400 mb-1">ค่า x ที่ต้องการหาค่า y</label>
+            <label className="block text-sm text-gray-400 mb-1">
+              ค่า x ที่ต้องการหาค่า y
+            </label>
             <input
               type="number"
               value={xValue}
@@ -190,7 +196,7 @@ export default function QuadraticSpline() {
             บันทึกโจทย์
           </button>
 
-          <div className="text-sm mb-2">{status}</div>
+          <div className="text-sm mb-2 text-gray-300">{status}</div>
           <SavedProblems
             problems={problems}
             onLoad={handleLoadProblem}
@@ -199,20 +205,34 @@ export default function QuadraticSpline() {
           />
         </div>
 
+        {/* ===== Graph Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ผลลัพธ์</h3>
+          <h3 className="text-gray-300 mb-2">กราฟ Quadratic Spline</h3>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphInterpolation
+              points={points}
+              xTarget={parseFloat(xValue)}
+              method="Quadratic Spline"
+              className="w-full h-72"
+            />
+          </div>
+
           {yResult !== null ? (
-            <div className="text-sm text-gray-300">
-              y({xValue}) = <span className="font-semibold">{formatNum(yResult)}</span>
+            <div className="mt-3 text-sm text-gray-300">
+              y({xValue}) ≈ <b>{formatNum(yResult)}</b>
             </div>
           ) : (
-            <div className="text-sm text-gray-400">ยังไม่มีผลลัพธ์</div>
+            <div className="text-sm text-gray-400 mt-3">ยังไม่มีการคำนวณ</div>
           )}
-          <div className="mt-4 text-sm text-gray-400">
-            Quadratic Spline ใช้สำหรับประมาณค่าฟังก์ชันโดยใช้โพลิโนเมียลดีกรี 2 ระหว่างจุดข้อมูล
-          </div>
         </div>
       </div>
+
+      {/* ===== Table Section ===== */}
+      {segments.length > 0 && (
+        <div className="mt-6">
+          <TableInterpolation points={points} method="Quadratic Spline" />
+        </div>
+      )}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>

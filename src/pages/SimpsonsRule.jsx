@@ -1,16 +1,19 @@
+// src/pages/SimpsonsRule.jsx
 import { useState, useEffect } from "react";
 import * as SimpsonsService from "../services/SimpsonsService";
 import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
-import { formatNum } from "../utils/math";
+import { makeFunc, formatNum } from "../utils/math";
 import simpsonsRule from "../algorithms/simpsonsRule";
+import GraphIntegration from "../components/graphs/GraphIntegration";
+import TableIntegration from "../components/tables/TableIntegration";
 
 export default function SimpsonsRule() {
   const [expr, setExpr] = useState("x^2 + 1");
   const [a, setA] = useState(0);
   const [b, setB] = useState(2);
-  const [n, setN] = useState(4); // ต้องเป็นเลขคู่
+  const [n, setN] = useState(4);
   const [result, setResult] = useState("-");
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
   const [table, setTable] = useState([]);
@@ -22,10 +25,13 @@ export default function SimpsonsRule() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // Algorithm moved to src/algorithms/simpsonsRule.js
-
-  // ---------------- Handlers ----------------
   const handleRun = () => {
+    const f = makeFunc(expr);
+    if (!f) {
+      setStatus("สถานะ: ฟังก์ชันไม่ถูกต้อง");
+      return;
+    }
+
     try {
       const { I, h, rows } = simpsonsRule(a, b, n, f);
       setResult(I);
@@ -70,16 +76,17 @@ export default function SimpsonsRule() {
     if (confirm("ลบโจทย์นี้ไหม?")) deleteProblem(p.id);
   };
 
-  // ---------------- UI ----------------
+  const f = makeFunc(expr) || ((x) => x);
+
   return (
     <div className="max-w-6xl mx-auto p-6">
       <PageHeader
-        title="Simpson's Rule (1/3)"
+        title="Simpson’s Rule (1/3)"
         subtitle="การอินทิเกรตเชิงตัวเลขด้วย Simpson’s Composite Rule"
       />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Input Section */}
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
           <label className="block text-sm text-gray-400 mb-1">
             ฟังก์ชัน f(x)
@@ -88,8 +95,8 @@ export default function SimpsonsRule() {
             type="text"
             value={expr}
             onChange={(e) => setExpr(e.target.value)}
-            className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700 mb-3"
             placeholder="กรอกสมการ เช่น x^2 + 1"
+            className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700 mb-3"
           />
 
           <div className="grid grid-cols-3 gap-3 mb-3">
@@ -116,9 +123,7 @@ export default function SimpsonsRule() {
               <input
                 type="number"
                 value={n}
-                onChange={(e) =>
-                  setN(Math.max(2, parseInt(e.target.value) || 2))
-                }
+                onChange={(e) => setN(Math.max(2, parseInt(e.target.value) || 2))}
                 className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
               />
             </div>
@@ -146,7 +151,7 @@ export default function SimpsonsRule() {
             บันทึกโจทย์
           </button>
 
-          <div className="text-sm mb-2">{status}</div>
+          <div className="text-sm text-gray-300 mb-2">{status}</div>
 
           <SavedProblems
             problems={problems}
@@ -156,59 +161,39 @@ export default function SimpsonsRule() {
           />
         </div>
 
-        {/* Output Section */}
+        {/* ===== Output Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ผลลัพธ์</h3>
-          <div className="text-sm text-gray-400 mb-3">
-            ใช้สูตร Simpson’s 1/3 Rule:
-            <br />
-            I = (h / 3) [f(x₀) + 4∑f(xᵢ_คี่) + 2∑f(xᵢ_คู่) + f(xₙ)]
+          <h3 className="text-gray-300 mb-2">กราฟและผลลัพธ์</h3>
+          <div className="w-full h-72 bg-slate-900 rounded mb-3">
+            <GraphIntegration
+              func={f}
+              a={a}
+              b={b}
+              n={n}
+              method="Simpson’s Rule"
+              className="w-full h-72"
+            />
           </div>
-
-          {table.length > 0 && (
-            <div className="overflow-x-auto mb-3 text-sm text-gray-300">
-              <table className="min-w-full border border-slate-700">
-                <thead>
-                  <tr className="bg-slate-700">
-                    <th className="px-2 py-1 border border-slate-600">i</th>
-                    <th className="px-2 py-1 border border-slate-600">xᵢ</th>
-                    <th className="px-2 py-1 border border-slate-600">f(xᵢ)</th>
-                    <th className="px-2 py-1 border border-slate-600">Weight</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {table.map((row) => (
-                    <tr key={row.i}>
-                      <td className="px-2 py-1 border border-slate-700">
-                        {row.i}
-                      </td>
-                      <td className="px-2 py-1 border border-slate-700">
-                        {formatNum(row.x)}
-                      </td>
-                      <td className="px-2 py-1 border border-slate-700">
-                        {formatNum(row.fx)}
-                      </td>
-                      <td className="px-2 py-1 border border-slate-700 text-center">
-                        {row.i === 0 || row.i === table.length - 1
-                          ? "1"
-                          : row.i % 2 === 0
-                          ? "2"
-                          : "4"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
 
           {result !== "-" && (
             <div className="text-sm text-gray-300">
-              <p>ค่าประมาณของ I ≈ <b>{formatNum(result)}</b></p>
+              <p>
+                ค่าประมาณของ I ≈ <b>{formatNum(result)}</b>
+              </p>
+              <p className="text-gray-400 mt-1">
+                ใช้สูตร I = (h/3)[f(x₀) + 4∑f(xᵢ_คี่) + 2∑f(xᵢ_คู่) + f(xₙ)]
+              </p>
             </div>
           )}
         </div>
       </div>
+
+      {/* ===== Table Section ===== */}
+      {table.length > 0 && (
+        <div className="mt-6">
+          <TableIntegration rows={table} method="Simpson’s Rule" />
+        </div>
+      )}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
         © By KaiMaiRuh

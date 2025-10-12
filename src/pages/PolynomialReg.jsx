@@ -1,3 +1,4 @@
+// src/pages/PolynomialReg.jsx
 import { useState, useEffect } from "react";
 import * as PolynomialRegService from "../services/PolynomialRegService";
 import useProblems from "../hooks/useProblems";
@@ -5,11 +6,13 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import solvePolynomialRegression from "../algorithms/polynomialReg";
+import GraphRegression from "../components/graphs/GraphRegression";
+import TableRegression from "../components/tables/TableRegression";
 
 export default function PolynomialReg() {
   const [xValues, setXValues] = useState([1, 2, 3, 4]);
   const [yValues, setYValues] = useState([2.2, 2.8, 3.6, 4.5]);
-  const [degree, setDegree] = useState(2); // ลำดับของพหุนาม
+  const [degree, setDegree] = useState(2);
   const [coeffs, setCoeffs] = useState([]);
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
 
@@ -19,10 +22,6 @@ export default function PolynomialReg() {
   useEffect(() => {
     refresh().catch(console.error);
   }, [refresh]);
-
-  // Algorithm moved to src/algorithms/polynomialReg.js
-
-  // ----------- Handlers -----------
 
   const handleRun = () => {
     try {
@@ -51,6 +50,7 @@ export default function PolynomialReg() {
         y: JSON.stringify(yValues),
         degree,
         expr: `Polynomial Regression (deg=${degree})`,
+        method: "polynomial_regression",
       };
       await saveProblem(payload);
       alert("บันทึกแล้ว!");
@@ -73,17 +73,19 @@ export default function PolynomialReg() {
     if (confirm("ลบโจทย์นี้ไหม?")) deleteProblem(p.id);
   };
 
-  // ----------- UI -----------
+  const points = xValues.map((x, i) => ({ x: parseFloat(x), y: parseFloat(yValues[i]) }));
+
   return (
     <div className="max-w-6xl mx-auto p-6">
       <PageHeader
         title="Polynomial Regression"
-        subtitle="ประมาณค่าเชิงเส้นแบบพหุนาม (Polynomial Least Squares)"
+        subtitle="การประมาณค่าแบบพหุนาม (Polynomial Least Squares Regression)"
       />
 
       <div className="grid md:grid-cols-2 gap-6">
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
-          <label className="block text-sm text-gray-400 mb-1">ลำดับพหุนาม</label>
+          <label className="block text-sm text-gray-400 mb-1">ลำดับของพหุนาม (degree)</label>
           <input
             type="number"
             value={degree}
@@ -93,27 +95,23 @@ export default function PolynomialReg() {
             className="w-24 px-3 py-2 rounded bg-slate-900 border border-slate-700 mb-3"
           />
 
-          <label className="block text-sm text-gray-400 mb-1">ค่า x</label>
+          <label className="block text-sm text-gray-400 mb-1">ค่า x (คั่นด้วย ,)</label>
           <textarea
             value={xValues.join(", ")}
             onChange={(e) =>
               setXValues(
-                e.target.value
-                  .split(",")
-                  .map((v) => parseFloat(v.trim()) || 0)
+                e.target.value.split(",").map((v) => parseFloat(v.trim()) || 0)
               )
             }
             className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700 mb-3 text-sm"
           />
 
-          <label className="block text-sm text-gray-400 mb-1">ค่า y</label>
+          <label className="block text-sm text-gray-400 mb-1">ค่า y (คั่นด้วย ,)</label>
           <textarea
             value={yValues.join(", ")}
             onChange={(e) =>
               setYValues(
-                e.target.value
-                  .split(",")
-                  .map((v) => parseFloat(v.trim()) || 0)
+                e.target.value.split(",").map((v) => parseFloat(v.trim()) || 0)
               )
             }
             className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700 mb-3 text-sm"
@@ -141,7 +139,7 @@ export default function PolynomialReg() {
             บันทึกโจทย์
           </button>
 
-          <div className="text-sm mb-2">{status}</div>
+          <div className="text-sm text-gray-300 mb-2">{status}</div>
 
           <SavedProblems
             problems={problems}
@@ -151,24 +149,27 @@ export default function PolynomialReg() {
           />
         </div>
 
+        {/* ===== Graph Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ข้อมูล</h3>
-          <div className="text-sm text-gray-400">
-            Polynomial Regression ใช้ประมาณค่าแนวโค้งเชิงเส้นลำดับ
-            <b> m </b> ที่สอดคล้องกับข้อมูล (x, y)
-            โดยหาค่าสัมประสิทธิ์จากสมการ Normal Equation
+          <h3 className="text-gray-300 mb-2">กราฟ Polynomial Regression</h3>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphRegression
+              xValues={xValues}
+              yValues={yValues}
+              params={{ coeffs }}
+              model="polynomial"
+              degree={degree}
+              className="w-full h-72"
+            />
           </div>
 
           {coeffs.length > 0 && (
-            <div className="mt-4 text-sm text-gray-300">
-              <div className="mb-2">สมการพหุนาม:</div>
+            <div className="mt-3 text-sm text-gray-300">
+              <div className="font-semibold">สมการพหุนาม:</div>
               <div>
                 y ={" "}
                 {coeffs
-                  .map(
-                    (a, i) =>
-                      `${formatNum(a)}${i === 0 ? "" : `x^${i}`}`
-                  )
+                  .map((a, i) => `${formatNum(a)}${i === 0 ? "" : `x^${i}`}`)
                   .join(" + ")}
               </div>
             </div>
@@ -176,9 +177,19 @@ export default function PolynomialReg() {
         </div>
       </div>
 
-      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
-        © By KaiMaiRuh
-      </div>
+      {/* ===== Table Section ===== */}
+      {coeffs.length > 0 && (
+        <div className="mt-6">
+          <TableRegression
+            xValues={xValues}
+            yValues={yValues}
+            params={{ coeffs }}
+            model="polynomial"
+          />
+        </div>
+      )}
+
+      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>
   );
 }

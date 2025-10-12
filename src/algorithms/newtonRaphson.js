@@ -1,5 +1,5 @@
 // Newton-Raphson requires derivative; we'll approximate derivative numerically
-export function newtonRaphson(func, x0, _b_unused, tol = 1e-6, maxIter = 50) {
+export function newtonRaphson(func, x0, tol = 1e-6, maxIter = 50) {
   try {
     const iterations = [];
     let x = x0;

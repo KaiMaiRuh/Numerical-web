@@ -1,11 +1,16 @@
+// src/pages/CompositeSimpson.jsx
 import { useState, useEffect } from "react";
 import * as CompositeSimpsonService from "../services/CompositeSimpsonService";
 import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { evaluate } from "mathjs";
-import { formatNum } from "../utils/math";
+import { formatNum, makeFunc } from "../utils/math";
 import compositeSimpson from "../algorithms/compositeSimpson";
+
+// ✅ ระบบ unified ใหม่
+import GraphIntegration from "../components/graphs/GraphIntegration";
+import TableIntegration from "../components/tables/TableIntegration";
 
 export default function CompositeSimpson() {
   const [expr, setExpr] = useState("x^2 + 1");
@@ -31,8 +36,6 @@ export default function CompositeSimpson() {
       throw new Error("ไม่สามารถประเมินสมการได้");
     }
   };
-
-  // algorithm moved to src/algorithms/compositeSimpson.js
 
   // ---------------- Handlers ----------------
   const handleRun = () => {
@@ -80,6 +83,8 @@ export default function CompositeSimpson() {
     if (confirm("ลบโจทย์นี้ไหม?")) deleteProblem(p.id);
   };
 
+  const safeFunc = makeFunc(expr) || ((x) => x);
+
   // ---------------- UI ----------------
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -89,7 +94,7 @@ export default function CompositeSimpson() {
       />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Input Section */}
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
           <label className="block text-sm text-gray-400 mb-1">
             ฟังก์ชัน f(x)
@@ -156,7 +161,7 @@ export default function CompositeSimpson() {
             บันทึกโจทย์
           </button>
 
-          <div className="text-sm mb-2">{status}</div>
+          <div className="text-sm mb-2 text-gray-300">{status}</div>
 
           <SavedProblems
             problems={problems}
@@ -166,56 +171,36 @@ export default function CompositeSimpson() {
           />
         </div>
 
-        {/* Output Section */}
+        {/* ===== Graph Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ผลลัพธ์</h3>
-          <div className="text-sm text-gray-400 mb-3">
-            สูตร: I = (h/3) [f(x₀) + 4∑f(xᵢ_คี่) + 2∑f(xᵢ_คู่) + f(xₙ)]  
-            โดย h = (b - a)/n, n ต้องเป็นจำนวนคู่
+          <label className="block text-sm text-gray-400 mb-2">
+            พื้นที่ใต้กราฟ (Simpson’s Rule)
+          </label>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphIntegration
+              func={safeFunc}
+              a={a}
+              b={b}
+              table={table}
+              method="Simpson"
+              className="w-full h-72"
+            />
           </div>
 
-          {table.length > 0 && (
-            <div className="overflow-x-auto mb-3 text-sm text-gray-300">
-              <table className="min-w-full border border-slate-700">
-                <thead>
-                  <tr className="bg-slate-700">
-                    <th className="px-2 py-1 border border-slate-600">i</th>
-                    <th className="px-2 py-1 border border-slate-600">xᵢ</th>
-                    <th className="px-2 py-1 border border-slate-600">f(xᵢ)</th>
-                    <th className="px-2 py-1 border border-slate-600">Weight</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {table.map((row) => (
-                    <tr key={row.i}>
-                      <td className="px-2 py-1 border border-slate-700">{row.i}</td>
-                      <td className="px-2 py-1 border border-slate-700">
-                        {formatNum(row.x)}
-                      </td>
-                      <td className="px-2 py-1 border border-slate-700">
-                        {formatNum(row.fx)}
-                      </td>
-                      <td className="px-2 py-1 border border-slate-700 text-center">
-                        {row.i === 0 || row.i === table.length - 1
-                          ? "1"
-                          : row.i % 2 === 0
-                          ? "2"
-                          : "4"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
           {result !== "-" && (
-            <div className="text-sm text-gray-300">
-              <p>ค่าประมาณของ I ≈ <b>{formatNum(result)}</b></p>
+            <div className="mt-3 text-gray-300 text-sm">
+              ค่าประมาณของ I ≈ <b>{formatNum(result)}</b>
             </div>
           )}
         </div>
       </div>
+
+      {/* ===== Results Table ===== */}
+      {table.length > 0 && (
+        <div className="mt-6">
+          <TableIntegration table={table} method="Simpson" />
+        </div>
+      )}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
         © By KaiMaiRuh

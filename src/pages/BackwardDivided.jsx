@@ -3,13 +3,15 @@ import * as BackwardDividedService from "../services/BackwardDividedService";
 import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
+import GraphDifferentiation from "../components/graphs/GraphDifferentiation";
+import TableDifferentiation from "../components/tables/TableDifferentiation";
 import { formatNum } from "../utils/math";
 import newtonBackward, { backwardDiffTable } from "../algorithms/backwardDivided";
 
 export default function BackwardDivided() {
   const [xValues, setXValues] = useState([1, 2, 3, 4]);
   const [yValues, setYValues] = useState([1, 8, 27, 64]);
-  const [x, setX] = useState(3.5);
+  const [xTarget, setXTarget] = useState(3.5);
   const [result, setResult] = useState("-");
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
   const [table, setTable] = useState([]);
@@ -21,38 +23,38 @@ export default function BackwardDivided() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // algorithm logic moved to src/algorithms/backwardDivided.js
-
-  // ---------------- Handlers ----------------
+  // 🧮 Run Calculation
   const handleRun = () => {
     try {
-      const { result, table } = newtonBackward(xValues, yValues, x);
+      const { result, table } = newtonBackward(xValues, yValues, xTarget);
       setResult(result);
       setTable(table);
-      setStatus("สถานะ: คำนวณสำเร็จ");
+      setStatus("สถานะ: คำนวณสำเร็จ ✅");
     } catch (err) {
       console.error(err);
-      setStatus("สถานะ: เกิดข้อผิดพลาดในการคำนวณ");
+      setStatus("สถานะ: เกิดข้อผิดพลาดในการคำนวณ ❌");
       setResult("-");
       setTable([]);
     }
   };
 
+  // ♻️ Reset
   const handleReset = () => {
     setXValues([1, 2, 3, 4]);
     setYValues([1, 8, 27, 64]);
-    setX(3.5);
+    setXTarget(3.5);
     setResult("-");
     setStatus("สถานะ: รีเซ็ตแล้ว");
     setTable([]);
   };
 
+  // 💾 Save
   const handleSaveProblem = async () => {
     try {
       const payload = {
         x: JSON.stringify(xValues),
         y: JSON.stringify(yValues),
-        xFind: x,
+        xFind: xTarget,
         method: "backward_divided",
       };
       await saveProblem(payload);
@@ -62,21 +64,39 @@ export default function BackwardDivided() {
     }
   };
 
+  // 📥 Load
   const handleLoadProblem = (p) => {
     try {
       setXValues(JSON.parse(p.x));
       setYValues(JSON.parse(p.y));
-      setX(p.xFind);
+      setXTarget(p.xFind);
     } catch (err) {
       alert("ไม่สามารถโหลดโจทย์: ข้อมูลไม่ถูกต้อง");
     }
   };
 
+  // 🗑️ Delete
   const handleDeleteProblem = (p) => {
     if (confirm("ลบโจทย์นี้ไหม?")) deleteProblem(p.id);
   };
 
-  // ---------------- UI ----------------
+  // ฟังก์ชันอนุกรมประมาณ (ใช้กับกราฟ)
+  const approxFunc = (x) => {
+    const n = xValues.length;
+    const h = xValues[1] - xValues[0];
+    const diffTable = backwardDiffTable(yValues);
+    const xN = xValues[n - 1];
+    let u = (x - xN) / h;
+    let fx = yValues[n - 1];
+    let uTerm = 1;
+
+    for (let i = 1; i < n; i++) {
+      uTerm *= (u + i - 1) / i;
+      fx += uTerm * diffTable[i][n - 1];
+    }
+    return fx;
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-6">
       <PageHeader
@@ -87,9 +107,7 @@ export default function BackwardDivided() {
       <div className="grid md:grid-cols-2 gap-6">
         {/* Input Section */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
-          <label className="block text-sm text-gray-400 mb-1">
-            ค่า x (คั่นด้วย ,)
-          </label>
+          <label className="block text-sm text-gray-400 mb-1">ค่า x (คั่นด้วย ,)</label>
           <textarea
             value={xValues.join(", ")}
             onChange={(e) =>
@@ -100,9 +118,7 @@ export default function BackwardDivided() {
             className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700 mb-3 text-sm"
           />
 
-          <label className="block text-sm text-gray-400 mb-1">
-            ค่า f(x) (คั่นด้วย ,)
-          </label>
+          <label className="block text-sm text-gray-400 mb-1">ค่า f(x) (คั่นด้วย ,)</label>
           <textarea
             value={yValues.join(", ")}
             onChange={(e) =>
@@ -118,8 +134,8 @@ export default function BackwardDivided() {
           </label>
           <input
             type="number"
-            value={x}
-            onChange={(e) => setX(parseFloat(e.target.value))}
+            value={xTarget}
+            onChange={(e) => setXTarget(parseFloat(e.target.value))}
             className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700 mb-3"
           />
 
@@ -145,7 +161,7 @@ export default function BackwardDivided() {
             บันทึกโจทย์
           </button>
 
-          <div className="text-sm mb-2">{status}</div>
+          <div className="text-sm mb-2 text-gray-400">{status}</div>
 
           <SavedProblems
             problems={problems}
@@ -167,37 +183,33 @@ export default function BackwardDivided() {
           </div>
 
           {table.length > 0 && (
-            <div className="overflow-x-auto mb-3 text-sm text-gray-300">
-              <table className="min-w-full border border-slate-700">
-                <thead>
-                  <tr className="bg-slate-700">
-                    <th className="px-2 py-1 border border-slate-600">ลำดับ</th>
-                    <th className="px-2 py-1 border border-slate-600">∇ⁿ fₙ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {table.map((row, i) => (
-                    <tr key={i}>
-                      <td className="px-2 py-1 border border-slate-700 text-center">
-                        ∇{i === 0 ? "⁰" : i}
-                      </td>
-                      <td className="px-2 py-1 border border-slate-700">
-                        {row[row.length - 1] !== undefined
-                          ? formatNum(row[row.length - 1])
-                          : "-"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <TableDifferentiation
+              steps={table.map((row, i) => ({
+                x: i,
+                fx: row[row.length - 1],
+                d1: i === 1 ? row[row.length - 1] : undefined,
+                d2: i === 2 ? row[row.length - 1] : undefined,
+              }))}
+            />
           )}
 
           {result !== "-" && (
-            <div className="text-sm text-gray-300">
-              f({x}) ≈ <b>{formatNum(result)}</b>
+            <div className="text-sm text-gray-300 mt-4">
+              f({xTarget}) ≈ <b>{formatNum(result)}</b>
             </div>
           )}
+
+          {/* Graph */}
+          <div className="mt-6">
+            <h3 className="text-gray-300 mb-2">กราฟการประมาณค่า</h3>
+            <GraphDifferentiation
+              func={(x) => approxFunc(x)}
+              xPoints={xValues}
+              width={760}
+              height={300}
+              className="rounded"
+            />
+          </div>
         </div>
       </div>
 

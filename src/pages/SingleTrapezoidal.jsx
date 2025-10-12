@@ -1,10 +1,13 @@
+// src/pages/SingleTrapezoidal.jsx
 import { useState, useEffect } from "react";
-import * as SingleTrapService from "../services/SingleTrapezoidalService";
+import * as SingleTrapezoidalService from "../services/SingleTrapezoidalService";
 import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
-import { formatNum } from "../utils/math";
-import trapezoidal from "../algorithms/singleTrapezoidal";
+import { makeFunc, formatNum } from "../utils/math";
+import singleTrapezoidal from "../algorithms/singleTrapezoidal";
+import GraphIntegration from "../components/graphs/GraphIntegration";
+import TableIntegration from "../components/tables/TableIntegration";
 
 export default function SingleTrapezoidal() {
   const [expr, setExpr] = useState("x^2 + 1");
@@ -14,24 +17,31 @@ export default function SingleTrapezoidal() {
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
 
   const { problems, removingIds, refresh, saveProblem, deleteProblem } =
-    useProblems(SingleTrapService);
+    useProblems(SingleTrapezoidalService);
 
   useEffect(() => {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // Algorithm moved to src/algorithms/singleTrapezoidal.js
-
-  // ---------------- Handlers ----------------
   const handleRun = () => {
+    const f = makeFunc(expr);
+    if (!f) {
+      setStatus("สถานะ: ฟังก์ชันไม่ถูกต้อง");
+      return;
+    }
+
     try {
-      const I = trapezoidal(a, b, f);
+      const { I, h, fa, fb } = singleTrapezoidal(a, b, f);
       setResult(I);
-      setStatus("สถานะ: คำนวณสำเร็จ");
+      setStatus(
+        `สถานะ: คำนวณสำเร็จ (h = ${formatNum(h)}, f(a)=${formatNum(
+          fa
+        )}, f(b)=${formatNum(fb)})`
+      );
     } catch (err) {
       console.error(err);
-      setStatus("สถานะ: เกิดข้อผิดพลาดในการคำนวณ");
       setResult("-");
+      setStatus("สถานะ: " + (err.message || "เกิดข้อผิดพลาดในการคำนวณ"));
     }
   };
 
@@ -63,16 +73,17 @@ export default function SingleTrapezoidal() {
     if (confirm("ลบโจทย์นี้ไหม?")) deleteProblem(p.id);
   };
 
-  // ---------------- UI ----------------
+  const f = makeFunc(expr) || ((x) => x);
+
   return (
     <div className="max-w-6xl mx-auto p-6">
       <PageHeader
         title="Single Trapezoidal Rule"
-        subtitle="หาค่าประมาณเชิงตัวเลขของการอินทิเกรตแบบ Trapezoidal (หนึ่งช่วง)"
+        subtitle="การอินทิเกรตเชิงตัวเลขแบบ Trapezoidal (ช่วงเดียว)"
       />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Input Zone */}
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
           <label className="block text-sm text-gray-400 mb-1">
             ฟังก์ชัน f(x)
@@ -81,8 +92,8 @@ export default function SingleTrapezoidal() {
             type="text"
             value={expr}
             onChange={(e) => setExpr(e.target.value)}
-            className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700 mb-3"
             placeholder="กรอกสมการ เช่น x^2 + 1"
+            className="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700 mb-3"
           />
 
           <div className="flex gap-3 mb-3">
@@ -128,7 +139,7 @@ export default function SingleTrapezoidal() {
             บันทึกโจทย์
           </button>
 
-          <div className="text-sm mb-2">{status}</div>
+          <div className="text-sm text-gray-300 mb-2">{status}</div>
 
           <SavedProblems
             problems={problems}
@@ -138,14 +149,22 @@ export default function SingleTrapezoidal() {
           />
         </div>
 
-        {/* Output Zone */}
+        {/* ===== Output Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ผลลัพธ์</h3>
-          <div className="text-sm text-gray-400 mb-3">
-            ใช้สูตร: I = (h / 2) [f(a) + f(b)], โดย h = b - a
+          <h3 className="text-gray-300 mb-2">กราฟและผลลัพธ์</h3>
+          <div className="w-full h-72 bg-slate-900 rounded mb-3">
+            <GraphIntegration
+              func={f}
+              a={a}
+              b={b}
+              n={1}
+              method="Single Trapezoidal"
+              className="w-full h-72"
+            />
           </div>
+
           {result !== "-" && (
-            <div className="text-gray-300 text-sm">
+            <div className="text-sm text-gray-300">
               <p>h = {formatNum(b - a)}</p>
               <p>
                 f(a) = {formatNum(f(a))}, f(b) = {formatNum(f(b))}
@@ -153,10 +172,26 @@ export default function SingleTrapezoidal() {
               <p className="mt-2">
                 ค่าประมาณของ I ≈ <b>{formatNum(result)}</b>
               </p>
+              <p className="text-gray-400 mt-1">
+                ใช้สูตร: I = (h / 2) [f(a) + f(b)]
+              </p>
             </div>
           )}
         </div>
       </div>
+
+      {/* ===== Table Section ===== */}
+      {result !== "-" && (
+        <div className="mt-6">
+          <TableIntegration
+            rows={[
+              { x: a, fx: f(a) },
+              { x: b, fx: f(b) },
+            ]}
+            method="Single Trapezoidal"
+          />
+        </div>
+      )}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
         © By KaiMaiRuh

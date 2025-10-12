@@ -1,3 +1,4 @@
+// src/pages/NonlinearReg.jsx
 import { useState, useEffect } from "react";
 import * as NonlinearRegService from "../services/NonlinearRegService";
 import useProblems from "../hooks/useProblems";
@@ -5,6 +6,8 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import solveNonlinearRegression from "../algorithms/nonlinearReg";
+import GraphRegression from "../components/graphs/GraphRegression";
+import TableRegression from "../components/tables/TableRegression";
 
 export default function NonlinearReg() {
   const [xValues, setXValues] = useState([1, 2, 3, 4, 5]);
@@ -19,10 +22,6 @@ export default function NonlinearReg() {
   useEffect(() => {
     refresh().catch(console.error);
   }, [refresh]);
-
-  // Algorithm moved to src/algorithms/nonlinearReg.js
-
-  // ---------------- Handlers ----------------
 
   const handleRun = () => {
     try {
@@ -51,6 +50,7 @@ export default function NonlinearReg() {
         y: JSON.stringify(yValues),
         model,
         expr: `Nonlinear Regression (${model})`,
+        method: "nonlinear_regression",
       };
       await saveProblem(payload);
       alert("บันทึกแล้ว!");
@@ -73,7 +73,6 @@ export default function NonlinearReg() {
     if (confirm("ลบโจทย์นี้ไหม?")) deleteProblem(p.id);
   };
 
-  // ---------------- UI ----------------
   return (
     <div className="max-w-6xl mx-auto p-6">
       <PageHeader
@@ -82,6 +81,7 @@ export default function NonlinearReg() {
       />
 
       <div className="grid md:grid-cols-2 gap-6">
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
           <label className="block text-sm text-gray-400 mb-1">เลือกโมเดล</label>
           <select
@@ -137,7 +137,7 @@ export default function NonlinearReg() {
             บันทึกโจทย์
           </button>
 
-          <div className="text-sm mb-2">{status}</div>
+          <div className="text-sm mb-2 text-gray-300">{status}</div>
 
           <SavedProblems
             problems={problems}
@@ -147,11 +147,17 @@ export default function NonlinearReg() {
           />
         </div>
 
+        {/* ===== Graph Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ผลลัพธ์</h3>
-          <div className="text-sm text-gray-400">
-            โมเดลนี้จะประมาณค่าพารามิเตอร์ a และ b
-            โดยใช้การแปลงลอการิทึมเพื่อลดรูปเป็นเชิงเส้น
+          <h3 className="text-gray-300 mb-2">กราฟและสมการที่ได้</h3>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphRegression
+              xValues={xValues}
+              yValues={yValues}
+              params={params}
+              model={model}
+              className="w-full h-72"
+            />
           </div>
 
           {params && (
@@ -170,6 +176,18 @@ export default function NonlinearReg() {
           )}
         </div>
       </div>
+
+      {/* ===== Table Section ===== */}
+      {params && (
+        <div className="mt-6">
+          <TableRegression
+            xValues={xValues}
+            yValues={yValues}
+            params={params}
+            model={model}
+          />
+        </div>
+      )}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
         © By KaiMaiRuh

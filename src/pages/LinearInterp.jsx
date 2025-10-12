@@ -1,3 +1,4 @@
+// src/pages/LinearInterp.jsx
 import { useState, useEffect } from "react";
 import * as LinearService from "../services/LinearService";
 import useProblems from "../hooks/useProblems";
@@ -5,6 +6,8 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import linearInterpolation from "../algorithms/linearInterp";
+import GraphInterpolation from "../components/graphs/GraphInterpolation";
+import TableInterpolation from "../components/tables/TableInterpolation";
 
 export default function LinearInterp() {
   const [x1, setX1] = useState("");
@@ -15,15 +18,13 @@ export default function LinearInterp() {
   const [result, setResult] = useState(null);
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
 
-  const { problems, removingIds, refresh, saveProblem, deleteProblem } = useProblems(LinearService);
+  const { problems, removingIds, refresh, saveProblem, deleteProblem } =
+    useProblems(LinearService);
 
   useEffect(() => {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // Algorithm moved to src/algorithms/linearInterp.js
-
-  // ----------- Handlers -----------
   const handleRun = () => {
     try {
       const _x1 = parseFloat(x1);
@@ -62,18 +63,10 @@ export default function LinearInterp() {
 
   const handleSaveProblem = async () => {
     try {
-      const payload = {
-        x1,
-        y1,
-        x2,
-        y2,
-        xTarget,
-        expr: `Linear(${x1},${x2})`,
-      };
+      const payload = { x1, y1, x2, y2, xTarget, method: "linear_interp" };
       await saveProblem(payload);
       alert("บันทึกแล้ว!");
     } catch (e) {
-      console.error("save problem failed:", e);
       alert("บันทึกไม่สำเร็จ: " + (e?.message || String(e)));
     }
   };
@@ -87,20 +80,21 @@ export default function LinearInterp() {
   };
 
   const handleDeleteProblem = (p) => {
-    if (!confirm("ลบโจทย์นี้ไหม?")) return;
-    deleteProblem(p.id);
+    if (confirm("ลบโจทย์นี้ไหม?")) deleteProblem(p.id);
   };
 
-  // ----------- UI -----------
+  const points = [
+    { x: parseFloat(x1), y: parseFloat(y1) },
+    { x: parseFloat(x2), y: parseFloat(y2) },
+  ].filter((p) => !isNaN(p.x) && !isNaN(p.y));
+
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <PageHeader title="Linear Interpolation" subtitle="คำนวณค่า f(x) โดยใช้การประมาณเชิงเส้น" />
+      <PageHeader title="Linear Interpolation" subtitle="การประมาณค่า f(x) ด้วยเส้นตรงระหว่างจุดสองจุด" />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* ฝั่งซ้าย: อินพุต */}
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
-          <h3 className="text-gray-300 mb-3">ใส่ข้อมูล</h3>
-
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
               <label className="text-sm text-gray-400">x₁</label>
@@ -141,7 +135,9 @@ export default function LinearInterp() {
           </div>
 
           <div className="mb-3">
-            <label className="block text-sm text-gray-400 mb-1">หาค่า f(x) เมื่อ x = </label>
+            <label className="block text-sm text-gray-400 mb-1">
+              ต้องการหาค่า f(x) ที่ x =
+            </label>
             <input
               type="number"
               value={xTarget}
@@ -151,37 +147,50 @@ export default function LinearInterp() {
           </div>
 
           <div className="flex gap-3 mb-3">
-            <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">คำนวณ</button>
-            <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">รีเซ็ต</button>
+            <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">
+              คำนวณ
+            </button>
+            <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">
+              รีเซ็ต
+            </button>
           </div>
 
-          <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">บันทึกโจทย์</button>
+          <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">
+            บันทึกโจทย์
+          </button>
 
           <div className="text-sm mb-2 text-gray-400">{status}</div>
 
           <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
         </div>
 
-        {/* ฝั่งขวา: ผลลัพธ์ */}
+        {/* ===== Graph Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ผลลัพธ์</h3>
+          <label className="block text-sm text-gray-400 mb-2">กราฟ Linear Interpolation</label>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphInterpolation points={points} xTarget={parseFloat(xTarget)} method="Linear" className="w-full h-72" />
+          </div>
+
           {result !== null ? (
-            <div className="text-sm text-gray-300">
-              <div>
-                f({xTarget}) ≈ <b>{formatNum(result)}</b>
-              </div>
-              <div className="mt-3 text-gray-400">
-                <div className="font-semibold text-gray-300">สูตรที่ใช้:</div>
-                <code>
-                  f(x) = f(x₁) + [(f(x₂) - f(x₁)) / (x₂ - x₁)] · (x - x₁)
-                </code>
-              </div>
+            <div className="mt-3 text-sm text-gray-300">
+              f({xTarget}) ≈ <b>{formatNum(result)}</b>
             </div>
           ) : (
-            <div className="text-sm text-gray-400">ยังไม่มีการคำนวณ</div>
+            <div className="mt-3 text-sm text-gray-400">ยังไม่มีการคำนวณ</div>
           )}
         </div>
       </div>
+
+      {result !== null && (
+        <div className="mt-6">
+          <TableInterpolation
+            points={points}
+            method="Linear"
+            result={result}
+            formula="f(x) = f(x₁) + [(f(x₂) - f(x₁)) / (x₂ - x₁)] · (x - x₁)"
+          />
+        </div>
+      )}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>

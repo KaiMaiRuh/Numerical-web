@@ -1,11 +1,13 @@
+// src/pages/FirstDivided.jsx
 import { useState, useEffect } from "react";
 import * as FirstDividedService from "../services/FirstDividedService";
 import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
-// import { evaluate } from "mathjs";
 import { formatNum } from "../utils/math";
 import firstDividedDiff from "../algorithms/firstDivided";
+import GraphDifferentiation from "../components/graphs/GraphDifferentiation";
+import TableDifferentiation from "../components/tables/TableDifferentiation";
 
 export default function FirstDivided() {
   const [x0, setX0] = useState(1);
@@ -17,15 +19,12 @@ export default function FirstDivided() {
   const [diff, setDiff] = useState("-");
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
 
-  const { problems, removingIds, refresh, saveProblem, deleteProblem } =
-    useProblems(FirstDividedService);
+  const { problems, removingIds, refresh, saveProblem, deleteProblem } = useProblems(FirstDividedService);
 
   useEffect(() => {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // algorithm moved to src/algorithms/firstDivided.js
-  // ---------------- Handlers ----------------
   const handleRun = () => {
     try {
       const { f01, Px } = firstDividedDiff(x0, x1, fx0, fx1, x);
@@ -71,7 +70,6 @@ export default function FirstDivided() {
     if (confirm("ลบโจทย์นี้ไหม?")) deleteProblem(p.id);
   };
 
-  // ---------------- UI ----------------
   return (
     <div className="max-w-6xl mx-auto p-6">
       <PageHeader
@@ -80,7 +78,7 @@ export default function FirstDivided() {
       />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Input Section */}
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
@@ -122,9 +120,7 @@ export default function FirstDivided() {
           </div>
 
           <div className="mb-3">
-            <label className="block text-sm text-gray-400 mb-1">
-              ค่าที่ต้องการประมาณ (x)
-            </label>
+            <label className="block text-sm text-gray-400 mb-1">ค่าที่ต้องการประมาณ (x)</label>
             <input
               type="number"
               value={x}
@@ -134,61 +130,53 @@ export default function FirstDivided() {
           </div>
 
           <div className="flex gap-3 mb-3">
-            <button
-              onClick={handleRun}
-              className="flex-1 btn-primary glow-btn py-2 rounded font-semibold"
-            >
+            <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">
               คำนวณ
             </button>
-            <button
-              onClick={handleReset}
-              className="flex-1 btn-danger border border-slate-600 py-2 rounded"
-            >
+            <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">
               รีเซ็ต
             </button>
           </div>
 
-          <button
-            onClick={handleSaveProblem}
-            className="w-full btn-primary glow-btn py-2 rounded mb-3"
-          >
+          <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">
             บันทึกโจทย์
           </button>
 
-          <div className="text-sm mb-2">{status}</div>
+          <div className="text-sm mb-2 text-gray-300">{status}</div>
 
-          <SavedProblems
-            problems={problems}
-            onLoad={handleLoadProblem}
-            onDelete={handleDeleteProblem}
-            removingIds={removingIds}
-          />
+          <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
         </div>
 
-        {/* Output Section */}
+        {/* ===== Graph Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ผลลัพธ์</h3>
-          <div className="text-sm text-gray-400 mb-3">
-            ใช้สูตร:  
-            f[x₀, x₁] = (f(x₁) - f(x₀)) / (x₁ - x₀)
-            <br />
-            P₁(x) = f(x₀) + f[x₀, x₁](x - x₀)
+          <label className="block text-sm text-gray-400 mb-2">กราฟการประมาณเชิงเส้น</label>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphDifferentiation
+              xValues={[x0, x1]}
+              yValues={[fx0, fx1]}
+              xTarget={x}
+              method="first"
+              className="w-full h-72"
+            />
           </div>
 
           {diff !== "-" && (
-            <div className="text-sm text-gray-300">
+            <div className="mt-3 text-sm text-gray-300">
               <p>f[x₀, x₁] = {formatNum(diff)}</p>
-              <p className="mt-1">
-                f({x}) ≈ <b>{formatNum(result)}</b>
-              </p>
+              <p>f({x}) ≈ <b>{formatNum(result)}</b></p>
             </div>
           )}
         </div>
       </div>
 
-      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
-        © By KaiMaiRuh
-      </div>
+      {/* ===== Results Table ===== */}
+      {diff !== "-" && (
+        <div className="mt-6">
+          <TableDifferentiation table={[[fx0, fx1]]} />
+        </div>
+      )}
+
+      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>
   );
 }

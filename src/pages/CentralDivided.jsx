@@ -1,3 +1,4 @@
+// src/pages/CentralDivided.jsx
 import { useState, useEffect } from "react";
 import * as CentralDividedService from "../services/CentralDividedService";
 import useProblems from "../hooks/useProblems";
@@ -5,6 +6,10 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import newtonCentral from "../algorithms/centralDivided";
+
+// ✅ ใช้ระบบกราฟ/ตารางใหม่
+import GraphDifferentiation from "../components/graphs/GraphDifferentiation";
+import TableDifferentiation from "../components/tables/TableDifferentiation";
 
 export default function CentralDivided() {
   const [xValues, setXValues] = useState([1, 2, 3, 4, 5]);
@@ -20,8 +25,6 @@ export default function CentralDivided() {
   useEffect(() => {
     refresh().catch(console.error);
   }, [refresh]);
-
-  // algorithm moved to src/algorithms/centralDivided.js
 
   // ---------------- Handlers ----------------
   const handleRun = () => {
@@ -85,7 +88,7 @@ export default function CentralDivided() {
       />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Input Section */}
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
           <label className="block text-sm text-gray-400 mb-1">
             ค่า x (คั่นด้วย ,)
@@ -145,7 +148,7 @@ export default function CentralDivided() {
             บันทึกโจทย์
           </button>
 
-          <div className="text-sm mb-2">{status}</div>
+          <div className="text-sm mb-2 text-gray-300">{status}</div>
 
           <SavedProblems
             problems={problems}
@@ -155,53 +158,35 @@ export default function CentralDivided() {
           />
         </div>
 
-        {/* Output Section */}
+        {/* ===== Output Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ผลลัพธ์</h3>
-          <div className="text-sm text-gray-400 mb-3">
-            สูตร Newton’s Central Difference:
-            <br />
-            P(x) = fₘ + uδfₘ + (u(u−1)/2!)δ²fₘ + (u(u−1)(u+1)/3!)δ³fₘ + …
-            <br />
-            โดย u = (x − xₘ)/h
+          <label className="block text-sm text-gray-400 mb-2">กราฟข้อมูล</label>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphDifferentiation
+              xValues={xValues}
+              yValues={yValues}
+              xTarget={x}
+              method="central"
+              className="w-full h-72"
+            />
           </div>
 
-          {table.length > 0 && (
-            <div className="overflow-x-auto mb-3 text-sm text-gray-300">
-              <table className="min-w-full border border-slate-700">
-                <thead>
-                  <tr className="bg-slate-700">
-                    <th className="px-2 py-1 border border-slate-600">ลำดับ</th>
-                    <th className="px-2 py-1 border border-slate-600">δⁿ fₘ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {table.map((row, i) => (
-                    <tr key={i}>
-                      <td className="px-2 py-1 border border-slate-700 text-center">
-                        δ{i === 0 ? "⁰" : i}
-                      </td>
-                      <td className="px-2 py-1 border border-slate-700">
-                        {formatNum(row[Math.floor(row.length / 2)])}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
           {result !== "-" && (
-            <div className="text-sm text-gray-300">
+            <div className="mt-3 text-gray-300 text-sm">
               f({x}) ≈ <b>{formatNum(result)}</b>
             </div>
           )}
         </div>
       </div>
 
-      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
-        © By KaiMaiRuh
-      </div>
+      {/* ===== Results Table ===== */}
+      {table.length > 0 && (
+        <div className="mt-6">
+          <TableDifferentiation table={table} />
+        </div>
+      )}
+
+      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>
   );
 }

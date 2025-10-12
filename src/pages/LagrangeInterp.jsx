@@ -1,3 +1,4 @@
+// src/pages/LagrangeInterp.jsx
 import { useState, useEffect } from "react";
 import * as LagrangeService from "../services/LagrangeService";
 import useProblems from "../hooks/useProblems";
@@ -5,6 +6,8 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import lagrange from "../algorithms/lagrangeInterp";
+import GraphInterpolation from "../components/graphs/GraphInterpolation";
+import TableInterpolation from "../components/tables/TableInterpolation";
 
 export default function LagrangeInterp() {
   const [xValues, setXValues] = useState(["", "", ""]);
@@ -20,9 +23,6 @@ export default function LagrangeInterp() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // Algorithm moved to src/algorithms/lagrangeInterp.js
-
-  // ----------- Handlers -----------
   const handleRun = () => {
     try {
       const xs = xValues.map((v) => parseFloat(v));
@@ -64,6 +64,7 @@ export default function LagrangeInterp() {
         yValues: JSON.stringify(yValues),
         xTarget,
         expr: `Lagrange(${xValues.join(",")})`,
+        method: "lagrange",
       };
       await saveProblem(payload);
       alert("บันทึกแล้ว!");
@@ -91,13 +92,12 @@ export default function LagrangeInterp() {
     deleteProblem(p.id);
   };
 
-  // ----------- UI -----------
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <PageHeader title="Lagrange Interpolation" subtitle="หาค่า f(x) โดยใช้ลากร็องจ์อินเตอร์โพเลชัน" />
+      <PageHeader title="Lagrange Interpolation" subtitle="หาค่า f(x) โดยใช้ Lagrange Polynomial" />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* ฝั่งซ้าย: อินพุต */}
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
           <label className="block text-sm text-gray-400 mb-1">จำนวนจุดข้อมูล</label>
           <input
@@ -153,9 +153,7 @@ export default function LagrangeInterp() {
             </table>
           </div>
 
-          <label className="block text-sm text-gray-400 mb-1">
-            ต้องการหาค่า f(x) ที่ x =
-          </label>
+          <label className="block text-sm text-gray-400 mb-1">ต้องการหาค่า f(x) ที่ x =</label>
           <input
             type="number"
             value={xTarget}
@@ -164,37 +162,50 @@ export default function LagrangeInterp() {
           />
 
           <div className="flex gap-3 mb-3">
-            <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">คำนวณ</button>
-            <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">รีเซ็ต</button>
+            <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">
+              คำนวณ
+            </button>
+            <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">
+              รีเซ็ต
+            </button>
           </div>
 
-          <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">บันทึกโจทย์</button>
+          <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">
+            บันทึกโจทย์
+          </button>
 
           <div className="text-sm mb-2 text-gray-400">{status}</div>
 
           <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
         </div>
 
-        {/* ฝั่งขวา: แสดงผล */}
+        {/* ===== Graph Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ผลลัพธ์</h3>
+          <label className="block text-sm text-gray-400 mb-2">กราฟ Lagrange Polynomial</label>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphInterpolation
+              points={xValues.map((x, i) => ({ x: parseFloat(x), y: parseFloat(yValues[i]) }))}
+              xTarget={parseFloat(xTarget)}
+              method="Lagrange"
+              className="w-full h-72"
+            />
+          </div>
+
           {result !== null ? (
-            <div className="text-sm text-gray-300">
-              <div>f({xTarget}) ≈ <b>{formatNum(result)}</b></div>
-              <div className="mt-3 text-gray-400">
-                <div className="mb-1 font-semibold text-gray-300">ขั้นตอนการคำนวณ:</div>
-                {steps.map((s) => (
-                  <div key={s.i} className="mb-1">
-                    L{s.i}(x): {s.Li.toFixed(6)} → y{s.i}·L{s.i}(x) = {s.term.toFixed(6)}
-                  </div>
-                ))}
-              </div>
+            <div className="mt-3 text-sm text-gray-300">
+              f({xTarget}) ≈ <b>{formatNum(result)}</b>
             </div>
           ) : (
-            <div className="text-sm text-gray-400">ยังไม่มีการคำนวณ</div>
+            <div className="mt-3 text-sm text-gray-400">ยังไม่มีการคำนวณ</div>
           )}
         </div>
       </div>
+
+      {result !== null && (
+        <div className="mt-6">
+          <TableInterpolation points={xValues.map((x, i) => ({ x, y: yValues[i] }))} method="Lagrange" />
+        </div>
+      )}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>

@@ -1,3 +1,4 @@
+// src/pages/ForwardDivided.jsx
 import { useState, useEffect } from "react";
 import * as ForwardDividedService from "../services/ForwardDividedService";
 import useProblems from "../hooks/useProblems";
@@ -5,6 +6,8 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import newtonForward from "../algorithms/forwardDivided";
+import GraphDifferentiation from "../components/graphs/GraphDifferentiation";
+import TableDifferentiation from "../components/tables/TableDifferentiation";
 
 export default function ForwardDivided() {
   const [xValues, setXValues] = useState([1, 2, 3, 4]);
@@ -14,16 +17,12 @@ export default function ForwardDivided() {
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
   const [table, setTable] = useState([]);
 
-  const { problems, removingIds, refresh, saveProblem, deleteProblem } =
-    useProblems(ForwardDividedService);
+  const { problems, removingIds, refresh, saveProblem, deleteProblem } = useProblems(ForwardDividedService);
 
   useEffect(() => {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // algorithm moved to src/algorithms/forwardDivided.js
-
-  // ---------------- Handlers ----------------
   const handleRun = () => {
     try {
       const { result, table } = newtonForward(xValues, yValues, x);
@@ -67,7 +66,7 @@ export default function ForwardDivided() {
       setXValues(JSON.parse(p.x));
       setYValues(JSON.parse(p.y));
       setX(p.xFind);
-    } catch (err) {
+    } catch {
       alert("ไม่สามารถโหลดโจทย์: ข้อมูลไม่ถูกต้อง");
     }
   };
@@ -76,46 +75,32 @@ export default function ForwardDivided() {
     if (confirm("ลบโจทย์นี้ไหม?")) deleteProblem(p.id);
   };
 
-  // ---------------- UI ----------------
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <PageHeader
-        title="Forward Divided-Difference"
-        subtitle="Newton’s Forward Difference Interpolation"
-      />
+      <PageHeader title="Forward Divided-Difference" subtitle="Newton’s Forward Difference Interpolation" />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Input Section */}
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
-          <label className="block text-sm text-gray-400 mb-1">
-            ค่า x (คั่นด้วย ,)
-          </label>
+          <label className="block text-sm text-gray-400 mb-1">ค่า x (คั่นด้วย ,)</label>
           <textarea
             value={xValues.join(", ")}
             onChange={(e) =>
-              setXValues(
-                e.target.value.split(",").map((v) => parseFloat(v.trim()) || 0)
-              )
+              setXValues(e.target.value.split(",").map((v) => parseFloat(v.trim()) || 0))
             }
             className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700 mb-3 text-sm"
           />
 
-          <label className="block text-sm text-gray-400 mb-1">
-            ค่า f(x) (คั่นด้วย ,)
-          </label>
+          <label className="block text-sm text-gray-400 mb-1">ค่า f(x) (คั่นด้วย ,)</label>
           <textarea
             value={yValues.join(", ")}
             onChange={(e) =>
-              setYValues(
-                e.target.value.split(",").map((v) => parseFloat(v.trim()) || 0)
-              )
+              setYValues(e.target.value.split(",").map((v) => parseFloat(v.trim()) || 0))
             }
             className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700 mb-3 text-sm"
           />
 
-          <label className="block text-sm text-gray-400 mb-1">
-            ค่าที่ต้องการประมาณ (x)
-          </label>
+          <label className="block text-sm text-gray-400 mb-1">ค่าที่ต้องการประมาณ (x)</label>
           <input
             type="number"
             value={x}
@@ -124,84 +109,46 @@ export default function ForwardDivided() {
           />
 
           <div className="flex gap-3 mb-3">
-            <button
-              onClick={handleRun}
-              className="flex-1 btn-primary glow-btn py-2 rounded font-semibold"
-            >
+            <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">
               คำนวณ
             </button>
-            <button
-              onClick={handleReset}
-              className="flex-1 btn-danger border border-slate-600 py-2 rounded"
-            >
+            <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">
               รีเซ็ต
             </button>
           </div>
 
-          <button
-            onClick={handleSaveProblem}
-            className="w-full btn-primary glow-btn py-2 rounded mb-3"
-          >
+          <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">
             บันทึกโจทย์
           </button>
 
-          <div className="text-sm mb-2">{status}</div>
+          <div className="text-sm mb-2 text-gray-300">{status}</div>
 
-          <SavedProblems
-            problems={problems}
-            onLoad={handleLoadProblem}
-            onDelete={handleDeleteProblem}
-            removingIds={removingIds}
-          />
+          <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
         </div>
 
-        {/* Output Section */}
+        {/* ===== Graph Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ผลลัพธ์</h3>
-          <div className="text-sm text-gray-400 mb-3">
-            ใช้สูตร Newton’s Forward Difference:
-            <br />
-            P(x) = f₀ + uΔf₀ + (u(u−1)/2!)Δ²f₀ + (u(u−1)(u−2)/3!)Δ³f₀ + ...
-            <br />
-            โดย u = (x - x₀)/h
+          <label className="block text-sm text-gray-400 mb-2">กราฟ Newton’s Forward Difference</label>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphDifferentiation xValues={xValues} yValues={yValues} xTarget={x} method="forward" className="w-full h-72" />
           </div>
 
-          {table.length > 0 && (
-            <div className="overflow-x-auto mb-3 text-sm text-gray-300">
-              <table className="min-w-full border border-slate-700">
-                <thead>
-                  <tr className="bg-slate-700">
-                    <th className="px-2 py-1 border border-slate-600">ลำดับ</th>
-                    <th className="px-2 py-1 border border-slate-600">Δⁿ f₀</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {table.map((row, i) => (
-                    <tr key={i}>
-                      <td className="px-2 py-1 border border-slate-700 text-center">
-                        Δ{i === 0 ? "⁰" : i}
-                      </td>
-                      <td className="px-2 py-1 border border-slate-700">
-                        {row[0] !== undefined ? formatNum(row[0]) : "-"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
           {result !== "-" && (
-            <div className="text-sm text-gray-300">
+            <div className="mt-3 text-sm text-gray-300">
               f({x}) ≈ <b>{formatNum(result)}</b>
             </div>
           )}
         </div>
       </div>
 
-      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
-        © By KaiMaiRuh
-      </div>
+      {/* ===== Results Table ===== */}
+      {table.length > 0 && (
+        <div className="mt-6">
+          <TableDifferentiation table={table} />
+        </div>
+      )}
+
+      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>
   );
 }

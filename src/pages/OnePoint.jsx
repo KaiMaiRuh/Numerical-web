@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import PageHeader from "../components/PageHeader";
 import { makeFunc, formatNum } from "../utils/math";
+import TableRoot from "../components/tables/TableRoot";
 
 export default function OnePoint() {
   const [fxExpr, setFxExpr] = useState("");
@@ -215,27 +216,8 @@ export default function OnePoint() {
 
         {/* ตารางผลลัพธ์ */}
         {iterations.length > 0 && (
-          <div className="overflow-auto max-h-64 mt-3">
-            <table className="w-full text-sm border-collapse">
-              <thead>
-                <tr className="bg-slate-700 text-gray-400">
-                  <th className="p-2 text-right">iter</th>
-                  <th className="p-2 text-right">x</th>
-                  <th className="p-2 text-right">error</th>
-                </tr>
-              </thead>
-              <tbody>
-                {iterations.map((r) => (
-                  <tr key={r.iter} className="border-b border-slate-700">
-                    <td className="p-2 text-right">{r.iter}</td>
-                    <td className="p-2 text-right">{formatNum(r.x)}</td>
-                    <td className="p-2 text-right">
-                      {r.error === null ? "-" : formatNum(r.error)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-3">
+            <TableRoot iterations={iterations} />
           </div>
         )}
 

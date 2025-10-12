@@ -1,3 +1,4 @@
+// src/pages/SecondDivided.jsx
 import { useState, useEffect } from "react";
 import * as SecondDividedService from "../services/SecondDividedService";
 import useProblems from "../hooks/useProblems";
@@ -5,6 +6,8 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import secondDividedDiff from "../algorithms/secondDivided";
+import GraphInterpolation from "../components/graphs/GraphInterpolation";
+import TableInterpolation from "../components/tables/TableInterpolation";
 
 export default function SecondDivided() {
   const [x0, setX0] = useState(1);
@@ -28,9 +31,6 @@ export default function SecondDivided() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // Algorithm moved to src/algorithms/secondDivided.js
-
-  // ---------------- Handlers ----------------
   const handleRun = () => {
     try {
       const { f01, f12, f012, Px } = secondDividedDiff(
@@ -70,7 +70,16 @@ export default function SecondDivided() {
 
   const handleSaveProblem = async () => {
     try {
-      const payload = { x0, x1, x2, fx0, fx1, fx2, x, method: "second_divided" };
+      const payload = {
+        x0,
+        x1,
+        x2,
+        fx0,
+        fx1,
+        fx2,
+        x,
+        method: "second_divided",
+      };
       await saveProblem(payload);
       alert("บันทึกแล้ว!");
     } catch (e) {
@@ -92,77 +101,66 @@ export default function SecondDivided() {
     if (confirm("ลบโจทย์นี้ไหม?")) deleteProblem(p.id);
   };
 
-  // ---------------- UI ----------------
+  const points = [
+    { x: x0, y: fx0 },
+    { x: x1, y: fx1 },
+    { x: x2, y: fx2 },
+  ];
+
   return (
     <div className="max-w-6xl mx-auto p-6">
       <PageHeader
         title="Second Divided-Difference"
-        subtitle="การประมาณเชิงกำลังสองด้วย Newton’s Second Divided-Difference"
+        subtitle="การประมาณค่า f(x) ด้วย Newton’s Second Divided-Difference"
       />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Input */}
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
           <div className="grid grid-cols-3 gap-3 mb-3">
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">x₀</label>
-              <input
-                type="number"
-                value={x0}
-                onChange={(e) => setX0(parseFloat(e.target.value))}
-                className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
-              />
-              <label className="block text-sm text-gray-400 mb-1 mt-1">f(x₀)</label>
-              <input
-                type="number"
-                value={fx0}
-                onChange={(e) => setFx0(parseFloat(e.target.value))}
-                className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">x₁</label>
-              <input
-                type="number"
-                value={x1}
-                onChange={(e) => setX1(parseFloat(e.target.value))}
-                className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
-              />
-              <label className="block text-sm text-gray-400 mb-1 mt-1">f(x₁)</label>
-              <input
-                type="number"
-                value={fx1}
-                onChange={(e) => setFx1(parseFloat(e.target.value))}
-                className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">x₂</label>
-              <input
-                type="number"
-                value={x2}
-                onChange={(e) => setX2(parseFloat(e.target.value))}
-                className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
-              />
-              <label className="block text-sm text-gray-400 mb-1 mt-1">f(x₂)</label>
-              <input
-                type="number"
-                value={fx2}
-                onChange={(e) => setFx2(parseFloat(e.target.value))}
-                className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
-              />
-            </div>
+            {[0, 1, 2].map((i) => (
+              <div key={i}>
+                <label className="block text-sm text-gray-400 mb-1">
+                  x{subscript(i)}
+                </label>
+                <input
+                  type="number"
+                  value={[x0, x1, x2][i]}
+                  onChange={(e) => {
+                    const v = parseFloat(e.target.value);
+                    if (i === 0) setX0(v);
+                    else if (i === 1) setX1(v);
+                    else setX2(v);
+                  }}
+                  className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
+                />
+                <label className="block text-sm text-gray-400 mb-1 mt-1">
+                  f(x{subscript(i)})
+                </label>
+                <input
+                  type="number"
+                  value={[fx0, fx1, fx2][i]}
+                  onChange={(e) => {
+                    const v = parseFloat(e.target.value);
+                    if (i === 0) setFx0(v);
+                    else if (i === 1) setFx1(v);
+                    else setFx2(v);
+                  }}
+                  className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
+                />
+              </div>
+            ))}
           </div>
 
           <div className="mb-3">
             <label className="block text-sm text-gray-400 mb-1">
-              ค่าที่ต้องการประมาณ (x)
+              ต้องการหาค่า f(x) ที่ x =
             </label>
             <input
               type="number"
               value={x}
               onChange={(e) => setX(parseFloat(e.target.value))}
-              className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
+              className="w-32 px-2 py-1 rounded bg-slate-900 border border-slate-700"
             />
           </div>
 
@@ -188,8 +186,7 @@ export default function SecondDivided() {
             บันทึกโจทย์
           </button>
 
-          <div className="text-sm mb-2">{status}</div>
-
+          <div className="text-sm mb-2 text-gray-400">{status}</div>
           <SavedProblems
             problems={problems}
             onLoad={handleLoadProblem}
@@ -198,23 +195,20 @@ export default function SecondDivided() {
           />
         </div>
 
-        {/* Output */}
+        {/* ===== Output Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ผลลัพธ์</h3>
-          <div className="text-sm text-gray-400 mb-3">
-            ใช้สูตร:
-            <br />
-            f[x₀, x₁] = (f₁ - f₀) / (x₁ - x₀)
-            <br />
-            f[x₁, x₂] = (f₂ - f₁) / (x₂ - x₁)
-            <br />
-            f[x₀, x₁, x₂] = (f[x₁, x₂] - f[x₀, x₁]) / (x₂ - x₀)
-            <br />
-            P₂(x) = f₀ + f[x₀,x₁](x-x₀) + f[x₀,x₁,x₂](x-x₀)(x-x₁)
+          <h3 className="text-gray-300 mb-2">กราฟ Second Divided-Difference</h3>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphInterpolation
+              points={points}
+              xTarget={parseFloat(x)}
+              method="Second Divided-Difference"
+              className="w-full h-72"
+            />
           </div>
 
           {f012 !== "-" && (
-            <div className="text-sm text-gray-300">
+            <div className="text-sm text-gray-300 mt-3">
               <p>f[x₀, x₁] = {formatNum(f01)}</p>
               <p>f[x₁, x₂] = {formatNum(f12)}</p>
               <p>f[x₀, x₁, x₂] = {formatNum(f012)}</p>
@@ -226,9 +220,19 @@ export default function SecondDivided() {
         </div>
       </div>
 
+      {result !== "-" && (
+        <div className="mt-6">
+          <TableInterpolation points={points} method="Second Divided-Difference" />
+        </div>
+      )}
+
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
         © By KaiMaiRuh
       </div>
     </div>
   );
+}
+
+function subscript(i) {
+  return ["₀", "₁", "₂"][i];
 }

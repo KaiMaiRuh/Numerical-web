@@ -1,3 +1,4 @@
+// src/pages/ConjugateGradient.jsx
 import { useState, useEffect } from "react";
 import * as ConjugateGradientService from "../services/ConjugateGradientService";
 import useProblems from "../hooks/useProblems";
@@ -6,22 +7,32 @@ import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import conjugateGradient from "../algorithms/conjugateGradient";
 
+// ✅ ระบบ unified ใหม่
+import GraphLinearSystem from "../components/graphs/GraphLinearSystem";
+import TableLinearSystem from "../components/tables/TableLinearSystem";
+
 export default function ConjugateGradient() {
   const [size, setSize] = useState(3);
-  const [A, setA] = useState([[0, 0, 0], [0, 0, 0], [0, 0, 0]]);
+  const [A, setA] = useState([
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+  ]);
   const [b, setB] = useState([0, 0, 0]);
   const [x0, setX0] = useState([0, 0, 0]);
   const [tol, setTol] = useState(1e-6);
   const [maxIter, setMaxIter] = useState(50);
   const [solution, setSolution] = useState([]);
+  const [iterationsState, setIterationsState] = useState([]);
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
-  const { problems, removingIds, refresh, saveProblem, deleteProblem } = useProblems(ConjugateGradientService);
+
+  const { problems, removingIds, refresh, saveProblem, deleteProblem } =
+    useProblems(ConjugateGradientService);
 
   useEffect(() => {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // algorithm moved to src/algorithms/conjugateGradient.js
   // ---------- Handlers ----------
   const handleRun = () => {
     try {
@@ -29,9 +40,11 @@ export default function ConjugateGradient() {
       if (res.error) {
         setStatus("สถานะ: " + res.error);
         setSolution([]);
+        setIterationsState([]);
         return;
       }
       setSolution(res.solution);
+      setIterationsState(res.iterations ?? []);
       setStatus("สถานะ: เสร็จสิ้น " + (res.converged ? "(Converged)" : "(ไม่ Converged)"));
     } catch (e) {
       console.error(e);
@@ -57,8 +70,8 @@ export default function ConjugateGradient() {
         maxIter,
         size,
         expr: `Matrix ${size}x${size}`,
+        method: "conjugate_gradient",
       };
-      console.log("ConjugateGradient: saving problem (serialized)", payload);
       await saveProblem(payload);
       alert("บันทึกแล้ว!");
     } catch (e) {
@@ -92,12 +105,15 @@ export default function ConjugateGradient() {
   // ---------- UI ----------
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <PageHeader title="Conjugate Gradient Method" subtitle="วิธีการหาคำตอบของระบบสมการเชิงเส้น (สำหรับเมทริกซ์สมมาตรบวกกำหนดแน่นอน)" />
+      <PageHeader
+        title="Conjugate Gradient Method"
+        subtitle="การหาคำตอบของระบบสมการเชิงเส้น (เฉพาะเมทริกซ์สมมาตรบวกกำหนดแน่นอน SPD)"
+      />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Left: Input */}
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
-          <label className="block text-sm text-gray-400 mb-1">ขนาดเมทริกซ์ (n x n)</label>
+          <label className="block text-sm text-gray-400 mb-1">ขนาดเมทริกซ์ (n × n)</label>
           <input
             type="number"
             value={size}
@@ -214,17 +230,24 @@ export default function ConjugateGradient() {
             บันทึกโจทย์
           </button>
 
-          <div className="text-sm mb-2"><div>{status}</div></div>
+          <div className="text-sm mb-2 text-gray-300">{status}</div>
 
           <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
         </div>
 
-        {/* Right: Info */}
+        {/* ===== Graph Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ข้อมูล</h3>
-          <div className="text-sm text-gray-400">
-            วิธี Conjugate Gradient ใช้สำหรับเมทริกซ์สมมาตรบวกกำหนดแน่นอน (SPD)
-            โดยหาคำตอบด้วยการเคลื่อนที่ในทิศทางที่สอดคล้อง (Conjugate) เพื่อลด residual อย่างรวดเร็ว
+          <label className="block text-sm text-gray-400 mb-2">
+            การกระจายและการลู่เข้าสู่คำตอบ
+          </label>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphLinearSystem
+              A={A}
+              b={b}
+              solution={solution}
+              method="Conjugate Gradient"
+              className="w-full h-72"
+            />
           </div>
 
           {solution.length > 0 && (
@@ -232,13 +255,22 @@ export default function ConjugateGradient() {
               <div className="mb-2">ผลลัพธ์ (x):</div>
               <ul>
                 {solution.map((x, i) => (
-                  <li key={i}>x{i + 1} = {formatNum(x)}</li>
+                  <li key={i}>
+                    x{i + 1} = {formatNum(x)}
+                  </li>
                 ))}
               </ul>
             </div>
           )}
         </div>
       </div>
+
+      {/* ===== Results Table ===== */}
+      {solution.length > 0 && (
+        <div className="mt-6">
+          <TableLinearSystem A={A} b={b} solution={solution} iterations={iterationsState} />
+        </div>
+      )}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>

@@ -1,3 +1,4 @@
+// src/pages/PolynomialInterp.jsx
 import { useState, useEffect } from "react";
 import * as PolynomialService from "../services/PolynomialService";
 import useProblems from "../hooks/useProblems";
@@ -5,6 +6,8 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import polynomialInterpolation from "../algorithms/polynomialInterp";
+import GraphInterpolation from "../components/graphs/GraphInterpolation";
+import TableInterpolation from "../components/tables/TableInterpolation";
 
 export default function PolynomialInterp() {
   const [xValues, setXValues] = useState(["", "", "", ""]);
@@ -12,17 +15,15 @@ export default function PolynomialInterp() {
   const [xTarget, setXTarget] = useState("");
   const [result, setResult] = useState(null);
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
-  const [table, setTable] = useState([]);
+  const [coeffs, setCoeffs] = useState([]);
 
-  const { problems, removingIds, refresh, saveProblem, deleteProblem } = useProblems(PolynomialService);
+  const { problems, removingIds, refresh, saveProblem, deleteProblem } =
+    useProblems(PolynomialService);
 
   useEffect(() => {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // Algorithm moved to src/algorithms/polynomialInterp.js
-
-  // ----------- Handlers -----------
   const handleRun = () => {
     try {
       const xs = xValues.map((v) => parseFloat(v));
@@ -34,10 +35,9 @@ export default function PolynomialInterp() {
         return;
       }
 
-      const table = dividedDifferences(xs, ys);
-      const fx = newtonPolynomial(xs, table, x);
+      const { fx, coeff } = polynomialInterpolation(xs, ys, x);
       setResult(fx);
-      setTable(table);
+      setCoeffs(coeff);
       setStatus("สถานะ: คำนวณเสร็จสิ้น");
     } catch (e) {
       console.error(e);
@@ -50,7 +50,7 @@ export default function PolynomialInterp() {
     setYValues(["", "", "", ""]);
     setXTarget("");
     setResult(null);
-    setTable([]);
+    setCoeffs([]);
     setStatus("สถานะ: รีเซ็ตแล้ว");
   };
 
@@ -61,44 +61,53 @@ export default function PolynomialInterp() {
         yValues: JSON.stringify(yValues),
         xTarget,
         expr: `Polynomial(${xValues.join(",")})`,
+        method: "polynomial_interp",
       };
       await saveProblem(payload);
       alert("บันทึกแล้ว!");
     } catch (e) {
-      console.error("save problem failed:", e);
       alert("บันทึกไม่สำเร็จ: " + (e?.message || String(e)));
     }
   };
 
   const handleLoadProblem = (p) => {
     try {
-      const parsedX = typeof p.xValues === "string" ? JSON.parse(p.xValues) : p.xValues || [];
-      const parsedY = typeof p.yValues === "string" ? JSON.parse(p.yValues) : p.yValues || [];
+      const parsedX =
+        typeof p.xValues === "string" ? JSON.parse(p.xValues) : p.xValues || [];
+      const parsedY =
+        typeof p.yValues === "string" ? JSON.parse(p.yValues) : p.yValues || [];
       setXValues(parsedX);
       setYValues(parsedY);
       setXTarget(p.xTarget || "");
     } catch (err) {
-      console.error("failed to parse saved problem", err, p);
-      alert("ไม่สามารถโหลดโจทย์: ข้อมูลที่บันทึกไม่ถูกต้อง");
+      alert("ไม่สามารถโหลดโจทย์ได้");
     }
   };
 
   const handleDeleteProblem = (p) => {
-    if (!confirm("ลบโจทย์นี้ไหม?")) return;
-    deleteProblem(p.id);
+    if (confirm("ลบโจทย์นี้ไหม?")) deleteProblem(p.id);
   };
 
-  // ----------- UI -----------
+  const points = xValues
+    .map((x, i) => ({
+      x: parseFloat(x),
+      y: parseFloat(yValues[i]),
+    }))
+    .filter((p) => !isNaN(p.x) && !isNaN(p.y));
+
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <PageHeader title="Polynomial Interpolation" subtitle="คำนวณค่า f(x) โดยใช้ Newton’s Divided Difference Polynomial" />
+      <PageHeader
+        title="Polynomial Interpolation"
+        subtitle="การประมาณค่า f(x) โดยใช้ Newton’s Divided Difference Polynomial"
+      />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* ฝั่งซ้าย: อินพุต */}
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
-          <h3 className="text-gray-300 mb-3">ใส่ข้อมูล</h3>
-
-          <label className="block text-sm text-gray-400 mb-1">จำนวนจุดข้อมูล</label>
+          <label className="block text-sm text-gray-400 mb-1">
+            จำนวนจุดข้อมูล
+          </label>
           <input
             type="number"
             value={xValues.length}
@@ -111,7 +120,9 @@ export default function PolynomialInterp() {
           />
 
           <div className="overflow-x-auto mb-3">
-            <label className="block text-sm text-gray-400 mb-1">ค่าของ x และ f(x)</label>
+            <label className="block text-sm text-gray-400 mb-1">
+              ค่าของ x และ f(x)
+            </label>
             <table className="text-sm border-collapse">
               <thead>
                 <tr className="text-gray-400">
@@ -152,7 +163,9 @@ export default function PolynomialInterp() {
             </table>
           </div>
 
-          <label className="block text-sm text-gray-400 mb-1">ต้องการหาค่า f(x) ที่ x =</label>
+          <label className="block text-sm text-gray-400 mb-1">
+            ต้องการหาค่า f(x) ที่ x =
+          </label>
           <input
             type="number"
             value={xTarget}
@@ -161,57 +174,83 @@ export default function PolynomialInterp() {
           />
 
           <div className="flex gap-3 mb-3">
-            <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">คำนวณ</button>
-            <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">รีเซ็ต</button>
+            <button
+              onClick={handleRun}
+              className="flex-1 btn-primary glow-btn py-2 rounded font-semibold"
+            >
+              คำนวณ
+            </button>
+            <button
+              onClick={handleReset}
+              className="flex-1 btn-danger border border-slate-600 py-2 rounded"
+            >
+              รีเซ็ต
+            </button>
           </div>
 
-          <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">บันทึกโจทย์</button>
+          <button
+            onClick={handleSaveProblem}
+            className="w-full btn-primary glow-btn py-2 rounded mb-3"
+          >
+            บันทึกโจทย์
+          </button>
 
           <div className="text-sm mb-2 text-gray-400">{status}</div>
 
-          <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
+          <SavedProblems
+            problems={problems}
+            onLoad={handleLoadProblem}
+            onDelete={handleDeleteProblem}
+            removingIds={removingIds}
+          />
         </div>
 
-        {/* ฝั่งขวา: ผลลัพธ์ */}
+        {/* ===== Output Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ผลลัพธ์</h3>
+          <h3 className="text-gray-300 mb-2">กราฟ Polynomial Interpolation</h3>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphInterpolation
+              points={points}
+              xTarget={parseFloat(xTarget)}
+              method="Polynomial"
+              className="w-full h-72"
+            />
+          </div>
+
           {result !== null ? (
-            <div className="text-sm text-gray-300">
-              <div>f({xTarget}) ≈ <b>{formatNum(result)}</b></div>
-
-              <div className="mt-3 text-gray-400">
-                <div className="font-semibold text-gray-300 mb-1">ตาราง Newton’s Divided Difference:</div>
-                <table className="text-xs border-collapse border border-slate-600">
-                  <tbody>
-                    {table.map((row, i) => (
-                      <tr key={i}>
-                        {row.map((v, j) =>
-                          j < table.length - i ? (
-                            <td key={j} className="border border-slate-700 p-1 text-center">
-                              {formatNum(v)}
-                            </td>
-                          ) : null
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="mt-3 text-gray-400">
-                <div className="font-semibold text-gray-300">สูตรทั่วไป:</div>
-                <code>
-                  f(x) = f(x₀) + f[x₀,x₁](x - x₀) + f[x₀,x₁,x₂](x - x₀)(x - x₁) + ...
-                </code>
-              </div>
+            <div className="mt-3 text-sm text-gray-300">
+              f({xTarget}) ≈ <b>{formatNum(result)}</b>
+              {coeffs.length > 0 && (
+                <div className="mt-2 text-gray-400">
+                  <div className="font-semibold text-gray-300">
+                    สมการ Polynomial:
+                  </div>
+                  <code>
+                    f(x) ={" "}
+                    {coeffs
+                      .map((c, i) => `${formatNum(c)}x^${i}`)
+                      .join(" + ")}
+                  </code>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="text-sm text-gray-400">ยังไม่มีการคำนวณ</div>
+            <div className="text-sm text-gray-400 mt-3">
+              ยังไม่มีการคำนวณ
+            </div>
           )}
         </div>
       </div>
 
-      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
+      {result !== null && (
+        <div className="mt-6">
+          <TableInterpolation points={points} method="Polynomial" />
+        </div>
+      )}
+
+      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
+        © By KaiMaiRuh
+      </div>
     </div>
   );
 }

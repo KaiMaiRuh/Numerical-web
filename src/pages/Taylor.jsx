@@ -1,3 +1,4 @@
+// src/pages/Taylor.jsx
 import { useState, useEffect } from "react";
 import * as TaylorService from "../services/TaylorService";
 import useProblems from "../hooks/useProblems";
@@ -5,6 +6,8 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import taylorApprox from "../algorithms/taylor";
 import { formatNum } from "../utils/math";
+import GraphRoot from "../components/graphs/GraphRoot";
+import TableRoot from "../components/tables/TableRoot";
 
 export default function Taylor() {
   const [expr, setExpr] = useState("e^x");
@@ -22,9 +25,6 @@ export default function Taylor() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // ----------- Calculation -----------
-
-  // ----------- Handlers -----------
   const handleRun = () => {
     try {
       const { result, terms } = taylorApprox(expr, x0, x, n);
@@ -70,7 +70,6 @@ export default function Taylor() {
     if (confirm("ลบโจทย์นี้ไหม?")) deleteProblem(p.id);
   };
 
-  // ----------- UI -----------
   return (
     <div className="max-w-6xl mx-auto p-6">
       <PageHeader
@@ -79,7 +78,7 @@ export default function Taylor() {
       />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Input Section */}
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
           <label className="block text-sm text-gray-400 mb-1">ฟังก์ชัน f(x)</label>
           <input
@@ -142,7 +141,7 @@ export default function Taylor() {
             บันทึกโจทย์
           </button>
 
-          <div className="text-sm mb-2">{status}</div>
+          <div className="text-sm mb-2 text-gray-300">{status}</div>
 
           <SavedProblems
             problems={problems}
@@ -152,35 +151,34 @@ export default function Taylor() {
           />
         </div>
 
-        {/* Output Section */}
+        {/* ===== Output Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ผลลัพธ์</h3>
-          <div className="text-sm text-gray-400 mb-3">
-            ใช้สูตร Taylor Series:
-            <br />
-            f(x) ≈ f(x₀) + f'(x₀)(x−x₀) + f''(x₀)(x−x₀)²/2! + …
+          <h3 className="text-gray-300 mb-2">ผลลัพธ์และกราฟ</h3>
+          <div className="w-full h-72 bg-slate-900 rounded mb-3">
+            <GraphRoot
+              func={(xv) => taylorApprox(expr, x0, xv, n).result}
+              xl={x0 - 2}
+              xr={x0 + 2}
+              iterations={terms.map((t, i) => ({
+                i,
+                xi: x0,
+                fx: t.fx0,
+              }))}
+              method="Taylor Series"
+              className="w-full h-72"
+            />
           </div>
 
           {terms.length > 0 && (
-            <div className="overflow-x-auto mb-3 text-sm text-gray-300">
-              <table className="min-w-full border border-slate-700">
-                <thead>
-                  <tr className="bg-slate-700">
-                    <th className="px-2 py-1 border border-slate-600">ลำดับ</th>
-                    <th className="px-2 py-1 border border-slate-600">f⁽ⁱ⁾(x₀)</th>
-                    <th className="px-2 py-1 border border-slate-600">เทอมที่ i</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {terms.map((t) => (
-                    <tr key={t.i}>
-                      <td className="px-2 py-1 border border-slate-700 text-center">{t.i}</td>
-                      <td className="px-2 py-1 border border-slate-700">{formatNum(t.fx0)}</td>
-                      <td className="px-2 py-1 border border-slate-700">{formatNum(t.term)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="mt-3">
+              <TableRoot
+                iterations={terms.map((t, i) => ({
+                  iter: t.i ?? i,
+                  x: x,
+                  fx: t.fx0,
+                  error: t.term,
+                }))}
+              />
             </div>
           )}
 
@@ -193,6 +191,20 @@ export default function Taylor() {
           )}
         </div>
       </div>
+
+      {/* ===== Table Section ===== */}
+      {terms.length > 0 && (
+        <div className="mt-6">
+          <TableRoot
+            iterations={terms.map((t, i) => ({
+              iter: t.i ?? i,
+              x: x,
+              fx: t.fx0,
+              error: t.term,
+            }))}
+          />
+        </div>
+      )}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>

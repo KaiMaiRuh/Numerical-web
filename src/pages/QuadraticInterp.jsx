@@ -1,3 +1,4 @@
+// src/pages/QuadraticInterp.jsx
 import { useState, useEffect } from "react";
 import * as QuadraticService from "../services/QuadraticService";
 import useProblems from "../hooks/useProblems";
@@ -5,6 +6,8 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import quadraticInterpolation from "../algorithms/quadraticInterp";
+import GraphInterpolation from "../components/graphs/GraphInterpolation";
+import TableInterpolation from "../components/tables/TableInterpolation";
 
 export default function QuadraticInterp() {
   const [xValues, setXValues] = useState(["", "", ""]);
@@ -13,15 +16,13 @@ export default function QuadraticInterp() {
   const [result, setResult] = useState(null);
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
 
-  const { problems, removingIds, refresh, saveProblem, deleteProblem } = useProblems(QuadraticService);
+  const { problems, removingIds, refresh, saveProblem, deleteProblem } =
+    useProblems(QuadraticService);
 
   useEffect(() => {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // Algorithm moved to src/algorithms/quadraticInterp.js
-
-  // ----------- Handlers -----------
   const handleRun = () => {
     try {
       const xs = xValues.map((v) => parseFloat(v));
@@ -57,6 +58,7 @@ export default function QuadraticInterp() {
         yValues: JSON.stringify(yValues),
         xTarget,
         expr: `Quadratic(${xValues.join(",")})`,
+        method: "quadratic_interp",
       };
       await saveProblem(payload);
       alert("บันทึกแล้ว!");
@@ -84,18 +86,29 @@ export default function QuadraticInterp() {
     deleteProblem(p.id);
   };
 
-  // ----------- UI -----------
+  const points = xValues
+    .map((x, i) => ({
+      x: parseFloat(x),
+      y: parseFloat(yValues[i]),
+    }))
+    .filter((p) => !isNaN(p.x) && !isNaN(p.y));
+
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <PageHeader title="Quadratic Interpolation" subtitle="คำนวณค่า f(x) โดยใช้การอินเตอร์โพเลชันกำลังสอง (ผ่าน 3 จุด)" />
+      <PageHeader
+        title="Quadratic Interpolation"
+        subtitle="การประมาณค่า f(x) ด้วยสมการกำลังสองจากสามจุดข้อมูล"
+      />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* ฝั่งซ้าย: อินพุต */}
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
           <h3 className="text-gray-300 mb-3">ใส่ข้อมูล</h3>
 
           <div className="overflow-x-auto mb-3">
-            <label className="block text-sm text-gray-400 mb-1">ค่าของ x และ f(x)</label>
+            <label className="block text-sm text-gray-400 mb-1">
+              ค่าของ x และ f(x)
+            </label>
             <table className="text-sm border-collapse">
               <thead>
                 <tr className="text-gray-400">
@@ -147,43 +160,60 @@ export default function QuadraticInterp() {
           />
 
           <div className="flex gap-3 mb-3">
-            <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">คำนวณ</button>
-            <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">รีเซ็ต</button>
+            <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">
+              คำนวณ
+            </button>
+            <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">
+              รีเซ็ต
+            </button>
           </div>
 
-          <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">บันทึกโจทย์</button>
+          <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">
+            บันทึกโจทย์
+          </button>
 
           <div className="text-sm mb-2 text-gray-400">{status}</div>
 
-          <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
+          <SavedProblems
+            problems={problems}
+            onLoad={handleLoadProblem}
+            onDelete={handleDeleteProblem}
+            removingIds={removingIds}
+          />
         </div>
 
-        {/* ฝั่งขวา: ผลลัพธ์ */}
+        {/* ===== Output Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ผลลัพธ์</h3>
+          <label className="block text-sm text-gray-400 mb-2">กราฟ Quadratic Interpolation</label>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphInterpolation
+              points={points}
+              xTarget={parseFloat(xTarget)}
+              method="Quadratic"
+              className="w-full h-72"
+            />
+          </div>
+
           {result ? (
-            <div className="text-sm text-gray-300">
-              <div>
-                f({xTarget}) ≈ <b>{formatNum(result.fx)}</b>
-              </div>
-              <div className="mt-3 text-gray-400">
-                <div className="font-semibold text-gray-300 mb-1">ค่า Lᵢ(x):</div>
-                <div>L₀(x) = {formatNum(result.L0)}</div>
-                <div>L₁(x) = {formatNum(result.L1)}</div>
-                <div>L₂(x) = {formatNum(result.L2)}</div>
-              </div>
-              <div className="mt-3 text-gray-400">
-                <div className="font-semibold text-gray-300">สูตรที่ใช้:</div>
-                <code>
-                  f(x) = y₀L₀(x) + y₁L₁(x) + y₂L₂(x)
-                </code>
+            <div className="mt-3 text-sm text-gray-300">
+              <p>f({xTarget}) ≈ <b>{formatNum(result.fx)}</b></p>
+              <div className="mt-2 text-gray-400">
+                <p>L₀(x) = {formatNum(result.L0)}</p>
+                <p>L₁(x) = {formatNum(result.L1)}</p>
+                <p>L₂(x) = {formatNum(result.L2)}</p>
               </div>
             </div>
           ) : (
-            <div className="text-sm text-gray-400">ยังไม่มีการคำนวณ</div>
+            <div className="text-sm text-gray-400 mt-3">ยังไม่มีการคำนวณ</div>
           )}
         </div>
       </div>
+
+      {result && (
+        <div className="mt-6">
+          <TableInterpolation points={points} method="Quadratic" />
+        </div>
+      )}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>

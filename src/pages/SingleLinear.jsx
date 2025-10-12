@@ -1,3 +1,4 @@
+// src/pages/SingleLinear.jsx
 import { useState, useEffect } from "react";
 import * as SingleLinearService from "../services/SingleLinearService";
 import useProblems from "../hooks/useProblems";
@@ -5,6 +6,8 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import solveSingleLinearRegression from "../algorithms/singleLinear";
+import GraphRegression from "../components/graphs/GraphRegression";
+import TableRegression from "../components/tables/TableRegression";
 
 export default function SingleLinear() {
   const [points, setPoints] = useState([
@@ -23,9 +26,6 @@ export default function SingleLinear() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // Algorithm moved to src/algorithms/singleLinear.js
-
-  // ---------- Handlers ----------
   const handleRun = () => {
     try {
       const xNum = parseFloat(xPredict);
@@ -73,6 +73,7 @@ export default function SingleLinear() {
         points: JSON.stringify(points),
         xPredict,
         expr: `Single Linear Regression (${points.length} points)`,
+        method: "single_linear_regression",
       };
       await saveProblem(payload);
       alert("บันทึกแล้ว!");
@@ -99,7 +100,6 @@ export default function SingleLinear() {
     deleteProblem(p.id);
   };
 
-  // ---------- UI ----------
   return (
     <div className="max-w-6xl mx-auto p-6">
       <PageHeader
@@ -108,9 +108,11 @@ export default function SingleLinear() {
       />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Input Section */}
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
-          <label className="block text-sm text-gray-400 mb-1">จุดข้อมูล (x, y)</label>
+          <label className="block text-sm text-gray-400 mb-1">
+            จุดข้อมูล (x, y)
+          </label>
           <table className="text-sm border-collapse mb-3">
             <tbody>
               {points.map((p, i) => (
@@ -193,7 +195,7 @@ export default function SingleLinear() {
             บันทึกโจทย์
           </button>
 
-          <div className="text-sm mb-2">{status}</div>
+          <div className="text-sm mb-2 text-gray-300">{status}</div>
           <SavedProblems
             problems={problems}
             onLoad={handleLoadProblem}
@@ -202,11 +204,21 @@ export default function SingleLinear() {
           />
         </div>
 
-        {/* Result Section */}
+        {/* ===== Output Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ผลลัพธ์</h3>
+          <h3 className="text-gray-300 mb-2">กราฟ Single Linear Regression</h3>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphRegression
+              xValues={points.map((p) => p.x)}
+              yValues={points.map((p) => p.y)}
+              params={result ? { a: result.a, b: result.b } : {}}
+              model="linear"
+              className="w-full h-72"
+            />
+          </div>
+
           {result ? (
-            <div className="text-sm text-gray-300 space-y-1">
+            <div className="text-sm text-gray-300 space-y-1 mt-3">
               <div>a = {formatNum(result.a)}</div>
               <div>b = {formatNum(result.b)}</div>
               <div>
@@ -218,16 +230,26 @@ export default function SingleLinear() {
               </div>
             </div>
           ) : (
-            <div className="text-sm text-gray-400">ยังไม่มีผลลัพธ์</div>
+            <div className="text-sm text-gray-400 mt-3">ยังไม่มีผลลัพธ์</div>
           )}
-          <div className="mt-4 text-sm text-gray-400">
-            การถดถอยเชิงเส้น (Single Linear Regression) ใช้หาความสัมพันธ์ระหว่าง x และ y
-            ด้วยเส้นตรง y = a + bx ที่ทำให้ผลรวมของความคลาดเคลื่อนยกกำลังสองน้อยที่สุด
-          </div>
         </div>
       </div>
 
-      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
+      {/* ===== Table Section ===== */}
+      {result && (
+        <div className="mt-6">
+          <TableRegression
+            xValues={points.map((p) => p.x)}
+            yValues={points.map((p) => p.y)}
+            params={{ a: result.a, b: result.b }}
+            model="linear"
+          />
+        </div>
+      )}
+
+      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
+        © By KaiMaiRuh
+      </div>
     </div>
   );
 }

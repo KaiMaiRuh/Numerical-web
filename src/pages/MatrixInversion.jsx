@@ -1,3 +1,4 @@
+// src/pages/MatrixInversion.jsx
 import { useState, useEffect } from "react";
 import * as MatrixInversionService from "../services/MatrixInversionService";
 import useProblems from "../hooks/useProblems";
@@ -5,31 +6,39 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import solveByMatrixInversion from "../algorithms/matrixInversion";
+import GraphLinearSystem from "../components/graphs/GraphLinearSystem";
+import TableLinearSystem from "../components/tables/TableLinearSystem";
 
 export default function MatrixInversion() {
   const [size, setSize] = useState(3);
-  const [A, setA] = useState([[0, 0, 0], [0, 0, 0], [0, 0, 0]]);
+  const [A, setA] = useState([
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+  ]);
   const [b, setB] = useState([0, 0, 0]);
   const [solution, setSolution] = useState([]);
+  const [iterationsState, setIterationsState] = useState([]);
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
-  const { problems, removingIds, refresh, saveProblem, deleteProblem } = useProblems(MatrixInversionService);
+
+  const { problems, removingIds, refresh, saveProblem, deleteProblem } =
+    useProblems(MatrixInversionService);
 
   useEffect(() => {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // Algorithm moved to src/algorithms/matrixInversion.js
-
-  // ---------- Handlers ----------
   const handleRun = () => {
     try {
       const res = solveByMatrixInversion(A, b);
       if (res.error) {
         setStatus("สถานะ: " + res.error);
         setSolution([]);
+        setIterationsState([]);
         return;
       }
       setSolution(res.solution);
+      setIterationsState(res.iterations ?? []);
       setStatus("สถานะ: เสร็จสิ้น (คำนวณ Inverse สำเร็จ)");
     } catch (e) {
       console.error(e);
@@ -51,8 +60,8 @@ export default function MatrixInversion() {
         b: JSON.stringify(b),
         size,
         expr: `Matrix ${size}x${size}`,
+        method: "matrix_inversion",
       };
-      console.log("MatrixInversion: saving problem (serialized)", payload);
       await saveProblem(payload);
       alert("บันทึกแล้ว!");
     } catch (e) {
@@ -79,15 +88,19 @@ export default function MatrixInversion() {
     deleteProblem(p.id);
   };
 
-  // ---------- UI ----------
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <PageHeader title="Matrix Inversion Method" subtitle="แก้ระบบสมการเชิงเส้นโดยใช้เมทริกซ์ผกผัน (A⁻¹b)" />
+      <PageHeader
+        title="Matrix Inversion Method"
+        subtitle="การแก้ระบบสมการเชิงเส้นโดยใช้เมทริกซ์ผกผัน (A⁻¹b)"
+      />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Left side: Input */}
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
-          <label className="block text-sm text-gray-400 mb-1">ขนาดเมทริกซ์ (n x n)</label>
+          <label className="block text-sm text-gray-400 mb-1">
+            ขนาดเมทริกซ์ (n × n)
+          </label>
           <input
             type="number"
             value={size}
@@ -149,21 +162,28 @@ export default function MatrixInversion() {
 
           {/* Buttons */}
           <div className="flex gap-3 mb-3">
-            <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">
+            <button
+              onClick={handleRun}
+              className="flex-1 btn-primary glow-btn py-2 rounded font-semibold"
+            >
               คำนวณ
             </button>
-            <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">
+            <button
+              onClick={handleReset}
+              className="flex-1 btn-danger border border-slate-600 py-2 rounded"
+            >
               รีเซ็ต
             </button>
           </div>
 
-          <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">
+          <button
+            onClick={handleSaveProblem}
+            className="w-full btn-primary glow-btn py-2 rounded mb-3"
+          >
             บันทึกโจทย์
           </button>
 
-          <div className="text-sm mb-2">
-            <div>{status}</div>
-          </div>
+          <div className="text-sm mb-2 text-gray-300">{status}</div>
 
           <SavedProblems
             problems={problems}
@@ -173,12 +193,19 @@ export default function MatrixInversion() {
           />
         </div>
 
-        {/* Right Info */}
+        {/* ===== Graph Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ข้อมูล</h3>
-          <div className="text-sm text-gray-400">
-            โปรแกรมจะคำนวณเมทริกซ์ผกผัน A⁻¹ โดยใช้ Gauss–Jordan บน [A | I] จากนั้นนำไปคูณกับเวกเตอร์ b 
-            เพื่อหาคำตอบของระบบสมการเชิงเส้น
+          <label className="block text-sm text-gray-400 mb-2">
+            Visualization (Matrix Inversion)
+          </label>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphLinearSystem
+              A={A}
+              b={b}
+              solution={solution}
+              method="Matrix Inversion"
+              className="w-full h-72"
+            />
           </div>
 
           {solution.length > 0 && (
@@ -186,7 +213,9 @@ export default function MatrixInversion() {
               <div className="mb-2">ผลลัพธ์ (x):</div>
               <ul>
                 {solution.map((x, i) => (
-                  <li key={i}>x{i + 1} = {formatNum(x)}</li>
+                  <li key={i}>
+                    x{i + 1} = {formatNum(x)}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -194,7 +223,15 @@ export default function MatrixInversion() {
         </div>
       </div>
 
-      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
+      {solution.length > 0 && (
+        <div className="mt-6">
+          <TableLinearSystem A={A} b={b} solution={solution} iterations={iterationsState} />
+        </div>
+      )}
+
+      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
+        © By KaiMaiRuh
+      </div>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+// src/pages/Jacobi.jsx
 import { useState, useEffect } from "react";
 import * as JacobiService from "../services/JacobiService";
 import useProblems from "../hooks/useProblems";
@@ -5,34 +6,46 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import jacobiIteration from "../algorithms/jacobi";
+import GraphLinearSystem from "../components/graphs/GraphLinearSystem";
+import TableLinearSystem from "../components/tables/TableLinearSystem";
 
 export default function Jacobi() {
   const [size, setSize] = useState(3);
-  const [A, setA] = useState([[0, 0, 0], [0, 0, 0], [0, 0, 0]]);
+  const [A, setA] = useState([
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+  ]);
   const [b, setB] = useState([0, 0, 0]);
   const [x0, setX0] = useState([0, 0, 0]);
   const [tol, setTol] = useState(1e-6);
   const [maxIter, setMaxIter] = useState(50);
   const [solution, setSolution] = useState([]);
+  const [iterationsState, setIterationsState] = useState([]);
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
-  const { problems, removingIds, refresh, saveProblem, deleteProblem } = useProblems(JacobiService);
+
+  const { problems, removingIds, refresh, saveProblem, deleteProblem } =
+    useProblems(JacobiService);
 
   useEffect(() => {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // algorithm moved to src/algorithms/jacobi.js
-  // ---------- Handlers ----------
   const handleRun = () => {
     try {
       const res = jacobiIteration(A, b, x0, parseFloat(tol), parseInt(maxIter));
       if (res.error) {
         setStatus("สถานะ: " + res.error);
         setSolution([]);
+        setIterationsState([]);
         return;
       }
       setSolution(res.solution);
-      setStatus("สถานะ: เสร็จสิ้น " + (res.converged ? "(Converged)" : "(ไม่ Converged)"));
+      setIterationsState(res.iterations ?? []);
+      setStatus(
+        "สถานะ: เสร็จสิ้น " +
+          (res.converged ? "(Converged)" : "(ไม่ Converged)")
+      );
     } catch (e) {
       console.error(e);
       setStatus("สถานะ: เกิดข้อผิดพลาดในการคำนวณ");
@@ -54,11 +67,10 @@ export default function Jacobi() {
         b: JSON.stringify(b),
         x0: JSON.stringify(x0),
         tol,
-        maxIter,
         size,
         expr: `Matrix ${size}x${size}`,
+        method: "jacobi",
       };
-      console.log("Jacobi: saving problem (serialized)", payload);
       await saveProblem(payload);
       alert("บันทึกแล้ว!");
     } catch (e) {
@@ -89,15 +101,19 @@ export default function Jacobi() {
     deleteProblem(p.id);
   };
 
-  // ---------- UI ----------
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <PageHeader title="Jacobi Iteration Method" subtitle="วิธีการหาคำตอบแบบทำซ้ำ (Iterative Method)" />
+      <PageHeader
+        title="Jacobi Iteration Method"
+        subtitle="วิธีการหาคำตอบของระบบสมการเชิงเส้นแบบทำซ้ำ (Iterative Method)"
+      />
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Left */}
+        {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
-          <label className="block text-sm text-gray-400 mb-1">ขนาดเมทริกซ์ (n x n)</label>
+          <label className="block text-sm text-gray-400 mb-1">
+            ขนาดเมทริกซ์ (n × n)
+          </label>
           <input
             type="number"
             value={size}
@@ -181,7 +197,9 @@ export default function Jacobi() {
           {/* Tolerance & Iteration */}
           <div className="flex gap-3 mb-3">
             <div className="flex-1">
-              <label className="block text-sm text-gray-400 mb-1">Error (เช่น 1e-6)</label>
+              <label className="block text-sm text-gray-400 mb-1">
+                Error (เช่น 1e-6)
+              </label>
               <input
                 type="text"
                 value={tol}
@@ -190,7 +208,9 @@ export default function Jacobi() {
               />
             </div>
             <div className="flex-1">
-              <label className="block text-sm text-gray-400 mb-1">Max Iteration</label>
+              <label className="block text-sm text-gray-400 mb-1">
+                Max Iteration
+              </label>
               <input
                 type="number"
                 value={maxIter}
@@ -202,29 +222,50 @@ export default function Jacobi() {
 
           {/* Buttons */}
           <div className="flex gap-3 mb-3">
-            <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">
+            <button
+              onClick={handleRun}
+              className="flex-1 btn-primary glow-btn py-2 rounded font-semibold"
+            >
               คำนวณ
             </button>
-            <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">
+            <button
+              onClick={handleReset}
+              className="flex-1 btn-danger border border-slate-600 py-2 rounded"
+            >
               รีเซ็ต
             </button>
           </div>
 
-          <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">
+          <button
+            onClick={handleSaveProblem}
+            className="w-full btn-primary glow-btn py-2 rounded mb-3"
+          >
             บันทึกโจทย์
           </button>
 
-          <div className="text-sm mb-2"><div>{status}</div></div>
+          <div className="text-sm mb-2 text-gray-300">{status}</div>
 
-          <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
+          <SavedProblems
+            problems={problems}
+            onLoad={handleLoadProblem}
+            onDelete={handleDeleteProblem}
+            removingIds={removingIds}
+          />
         </div>
 
-        {/* Right */}
+        {/* ===== Graph Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ข้อมูล</h3>
-          <div className="text-sm text-gray-400">
-            วิธี Jacobi ใช้การทำซ้ำเพื่อหาคำตอบของระบบสมการเชิงเส้น โดยเริ่มจากค่าประมาณเริ่มต้น x₀
-            แล้วคำนวณซ้ำจนค่าความคลาดเคลื่อนน้อยกว่าที่กำหนด
+          <label className="block text-sm text-gray-400 mb-2">
+            การลู่เข้าสู่ผลลัพธ์ (Visualization)
+          </label>
+          <div className="w-full h-72 bg-slate-900 rounded">
+            <GraphLinearSystem
+              A={A}
+              b={b}
+              solution={solution}
+              method="Jacobi"
+              className="w-full h-72"
+            />
           </div>
 
           {solution.length > 0 && (
@@ -239,6 +280,13 @@ export default function Jacobi() {
           )}
         </div>
       </div>
+
+      {/* ===== Results Table ===== */}
+      {solution.length > 0 && (
+        <div className="mt-6">
+          <TableLinearSystem A={A} b={b} solution={solution} iterations={iterationsState} />
+        </div>
+      )}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>
