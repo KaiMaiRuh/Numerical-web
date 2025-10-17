@@ -242,9 +242,6 @@ export default function Bisection() {
               className="w-full h-72 rounded"
             />
           </div>
-          <div className="text-xs text-gray-400 mt-2">
-            เขียว = XL, แดง = XR, ส้ม = x<sub>m</sub> ของแต่ละรอบ (วงใหญ่ = x<sub>m</sub> สุดท้าย)
-          </div>
         </div>
       </div>
 

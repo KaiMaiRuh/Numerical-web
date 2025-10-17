@@ -210,9 +210,6 @@ export default function FalsePosition() {
               className="w-full h-72 rounded"
             />
           </div>
-          <div className="text-xs text-gray-400 mt-2">
-            เขียว = XL, แดง = XR, ส้ม = X<sub>1</sub> แต่ละรอบ (วงใหญ่ = X<sub>1</sub> สุดท้าย)
-          </div>
         </div>
       </div>
 
