@@ -5,10 +5,57 @@
     <link rel="icon" type="image/svg+xml" href="/Numerical-web/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Numerical Methods</title>
-    <script type="module" crossorigin src="/Numerical-web/assets/index-DI9gPMnE.js"></script>
-    <link rel="stylesheet" crossorigin href="/Numerical-web/assets/index-BZVlqs6x.css">
+    <script type="module" crossorigin src="/Numerical-web/assets/index-B1MXSDlI.js"></script>
+    <link rel="stylesheet" crossorigin href="/Numerical-web/assets/index-Cqmwwg83.css">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"></div>
+    <!-- Simple client-side error overlay to surface runtime errors on blank page -->
+    <script>
+      (function(){
+        function createOverlay(){
+          const o = document.createElement('div');
+          o.id = '__client_error_overlay__';
+          Object.assign(o.style,{
+            position:'fixed',left:0,right:0,top:0,bottom:0,
+            background:'rgba(0,0,0,0.85)',color:'#fff',zIndex:2147483647,
+            padding:'20px',overflow:'auto',fontFamily:'system-ui,Segoe UI,Roboto,Arial',fontSize:'14px'
+          });
+          const title = document.createElement('div');
+          title.style.fontSize='18px'; title.style.fontWeight='700'; title.style.marginBottom='8px';
+          title.textContent = 'Client runtime error (shown to help debugging)';
+          o.appendChild(title);
+          const content = document.createElement('pre'); content.id='__client_error_overlay_content__';
+          content.style.whiteSpace='pre-wrap'; content.style.color='#fff';
+          o.appendChild(content);
+          const btn = document.createElement('button'); btn.textContent='Close';
+          btn.style.marginTop='12px'; btn.onclick=()=>o.remove();
+          o.appendChild(btn);
+          document.body.appendChild(o);
+          return content;
+        }
+        function showError(msg){
+          try{
+            let content = document.getElementById('__client_error_overlay_content__');
+            if(!content) content = createOverlay();
+            content.textContent = msg;
+          }catch(e){
+            console.error('Overlay failed',e);
+          }
+        }
+        window.addEventListener('error', function(ev){
+          const msg = ev && ev.error && ev.error.stack ? ev.error.stack : (ev.message || String(ev));
+          showError(msg);
+        });
+        window.addEventListener('unhandledrejection', function(ev){
+          const msg = ev && ev.reason && ev.reason.stack ? ev.reason.stack : String(ev.reason);
+          showError(msg);
+        });
+        // also capture synchronous exceptions during module execution
+        try{
+          // noop - placeholder
+        }catch(e){ showError(e && e.stack ? e.stack : String(e)); }
+      })();
+    </script>
   </body>
 </html>
