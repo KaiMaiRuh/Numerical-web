@@ -1,5 +1,5 @@
 // Simple localStorage-based DB adapter for saved problems
-// Provides async functions similar to Firestore usage in services.
+// Provides async functions used by services. Stores collections under localStorage keys prefixed with 'numerical_db::'
 const PREFIX = 'numerical_db::';
 
 function collectionKey(col) {

@@ -84,7 +84,7 @@ export default function Secant() {
       alert("บันทึกแล้ว!");
     } catch (e) {
       console.error("บันทึกโจทย์ผิดพลาด:", e);
-      alert("บันทึกไม่สำเร็จ ลองเช็ค Firestore rules/console");
+      alert("บันทึกไม่สำเร็จ ลองเช็ค console หรือการตั้งค่าการจัดเก็บข้อมูล");
     }
   };
 
