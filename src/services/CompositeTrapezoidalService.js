@@ -1,25 +1,13 @@
-import { db } from "../firebase";
-import {
-  collection,
-  getDocs,
-  addDoc,
-  deleteDoc,
-  doc,
-  query,
-  orderBy,
-  serverTimestamp,
-} from "firebase/firestore";
+import { list, add, remove as dbRemove, serverTimestamp } from "./LocalDb";
 
 const COL = "problems_composite_trapezoidal";
 
 export async function getCompositeTrapezoidalProblems() {
-  const q = query(collection(db, COL), orderBy("createdAt", "desc"));
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return list(COL);
 }
 
 export async function saveCompositeTrapezoidalProblem(problem) {
-  return addDoc(collection(db, COL), {
+  return add(COL, {
     ...problem,
     method: "composite_trapezoidal",
     createdAt: serverTimestamp(),
@@ -27,7 +15,7 @@ export async function saveCompositeTrapezoidalProblem(problem) {
 }
 
 export async function deleteCompositeTrapezoidalProblem(id) {
-  return deleteDoc(doc(db, COL, id));
+  return dbRemove(COL, id);
 }
 
 // Generic aliases

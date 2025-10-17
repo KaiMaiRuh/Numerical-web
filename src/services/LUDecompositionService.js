@@ -1,26 +1,14 @@
 // src/services/LUDecompositionService.js
-import { db } from "../firebase";
-import {
-  collection,
-  getDocs,
-  addDoc,
-  deleteDoc,
-  doc,
-  query,
-  orderBy,
-  serverTimestamp,
-} from "firebase/firestore";
+import { list, add, remove as dbRemove, serverTimestamp } from "./LocalDb";
 
 const COL = "problems_lu";
 
 export async function getLUProblems() {
-  const q = query(collection(db, COL), orderBy("createdAt", "desc"));
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return list(COL);
 }
 
 export async function saveLUProblem(problem) {
-  return addDoc(collection(db, COL), {
+  return add(COL, {
     ...problem,
     method: "lu",
     createdAt: serverTimestamp(),
@@ -28,9 +16,9 @@ export async function saveLUProblem(problem) {
 }
 
 export async function deleteLUProblem(id) {
-  return deleteDoc(doc(db, COL, id));
-}
+  return dbRemove(COL, id);
 
+}
 // ✅ generic aliases
 export const getProblems = getLUProblems;
 export const save = saveLUProblem;

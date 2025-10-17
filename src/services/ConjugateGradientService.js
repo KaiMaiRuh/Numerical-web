@@ -1,34 +1,22 @@
 // src/services/ConjugateGradientService.js
-import { db } from "../firebase";
-import {
-  collection,
-  getDocs,
-  addDoc,
-  deleteDoc,
-  doc,
-  query,
-  orderBy,
-  serverTimestamp,
-} from "firebase/firestore";
+import { list, add, remove as dbRemove, serverTimestamp } from "./LocalDb";
 
 const COL = "problems_conjugategradient";
 
 export async function getConjugateGradientProblems() {
-  const q = query(collection(db, COL), orderBy("createdAt", "desc"));
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return list(COL);
 }
 
 export async function saveConjugateGradientProblem(problem) {
-  return addDoc(collection(db, COL), {
+  return add(COL, {
     ...problem,
-    method: "conjugategradient",
+    method: "conjugate_gradient",
     createdAt: serverTimestamp(),
   });
 }
 
 export async function deleteConjugateGradientProblem(id) {
-  return deleteDoc(doc(db, COL, id));
+  return dbRemove(COL, id);
 }
 
 // ✅ generic aliases
