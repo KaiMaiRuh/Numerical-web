@@ -6,8 +6,6 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import linearInterpolation from "../algorithms/linearInterp";
-import GraphInterpolation from "../components/graphs/GraphInterpolation";
-import TableInterpolation from "../components/tables/TableInterpolation";
 
 export default function LinearInterp() {
   const [x1, setX1] = useState("");
@@ -164,33 +162,10 @@ export default function LinearInterp() {
           <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
         </div>
 
-        {/* ===== Graph Section ===== */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <label className="block text-sm text-gray-400 mb-2">กราฟ Linear Interpolation</label>
-          <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphInterpolation points={points} xTarget={parseFloat(xTarget)} method="Linear" className="w-full h-72" />
-          </div>
-
-          {result !== null ? (
-            <div className="mt-3 text-sm text-gray-300">
-              f({xTarget}) ≈ <b>{formatNum(result)}</b>
-            </div>
-          ) : (
-            <div className="mt-3 text-sm text-gray-400">ยังไม่มีการคำนวณ</div>
-          )}
-        </div>
+        {/* Graph removed per configuration */}
       </div>
 
-      {result !== null && (
-        <div className="mt-6">
-          <TableInterpolation
-            points={points}
-            method="Linear"
-            result={result}
-            formula="f(x) = f(x₁) + [(f(x₂) - f(x₁)) / (x₂ - x₁)] · (x - x₁)"
-          />
-        </div>
-      )}
+      {/* Table removed per configuration */}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>

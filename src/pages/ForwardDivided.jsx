@@ -6,8 +6,6 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import newtonForward from "../algorithms/forwardDivided";
-import GraphDifferentiation from "../components/graphs/GraphDifferentiation";
-import TableDifferentiation from "../components/tables/TableDifferentiation";
 
 export default function ForwardDivided() {
   const [xValues, setXValues] = useState([1, 2, 3, 4]);
@@ -130,21 +128,16 @@ export default function ForwardDivided() {
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <label className="block text-sm text-gray-400 mb-2">กราฟ Newton’s Forward Difference</label>
           <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphDifferentiation xValues={xValues} yValues={yValues} xTarget={x} method="forward" className="w-full h-72" />
+            {/* Graph removed per configuration */}
           </div>
-
-          {result !== "-" && (
-            <div className="mt-3 text-sm text-gray-300">
-              f({x}) ≈ <b>{formatNum(result)}</b>
-            </div>
-          )}
+          {/* Graph removed per configuration */}
         </div>
       </div>
 
       {/* ===== Results Table ===== */}
       {table.length > 0 && (
         <div className="mt-6">
-          <TableDifferentiation table={table} />
+          {/* Table removed per configuration */}
         </div>
       )}
 

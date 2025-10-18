@@ -8,8 +8,7 @@ import { formatNum } from "../utils/math";
 import newtonCentral from "../algorithms/centralDivided";
 
 // ✅ ใช้ระบบกราฟ/ตารางใหม่
-import GraphDifferentiation from "../components/graphs/GraphDifferentiation";
-import TableDifferentiation from "../components/tables/TableDifferentiation";
+// Graph/Table for differentiation removed per configuration
 
 export default function CentralDivided() {
   const [xValues, setXValues] = useState([1, 2, 3, 4, 5]);
@@ -161,30 +160,12 @@ export default function CentralDivided() {
         {/* ===== Output Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <label className="block text-sm text-gray-400 mb-2">กราฟข้อมูล</label>
-          <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphDifferentiation
-              xValues={xValues}
-              yValues={yValues}
-              xTarget={x}
-              method="central"
-              className="w-full h-72"
-            />
-          </div>
-
-          {result !== "-" && (
-            <div className="mt-3 text-gray-300 text-sm">
-              f({x}) ≈ <b>{formatNum(result)}</b>
-            </div>
-          )}
+          {/* Graph removed per configuration */}
         </div>
       </div>
 
       {/* ===== Results Table ===== */}
-      {table.length > 0 && (
-        <div className="mt-6">
-          <TableDifferentiation table={table} />
-        </div>
-      )}
+      {/* Table removed per configuration */}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>

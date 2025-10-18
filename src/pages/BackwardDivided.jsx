@@ -3,8 +3,7 @@ import * as BackwardDividedService from "../services/BackwardDividedService";
 import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
-import GraphDifferentiation from "../components/graphs/GraphDifferentiation";
-import TableDifferentiation from "../components/tables/TableDifferentiation";
+// Graph/Table for differentiation removed per configuration
 import { formatNum } from "../utils/math";
 import newtonBackward, { backwardDiffTable } from "../algorithms/backwardDivided";
 
@@ -182,16 +181,7 @@ export default function BackwardDivided() {
             โดย u = (x - xₙ)/h
           </div>
 
-          {table.length > 0 && (
-            <TableDifferentiation
-              steps={table.map((row, i) => ({
-                x: i,
-                fx: row[row.length - 1],
-                d1: i === 1 ? row[row.length - 1] : undefined,
-                d2: i === 2 ? row[row.length - 1] : undefined,
-              }))}
-            />
-          )}
+          {/* Table removed per configuration */}
 
           {result !== "-" && (
             <div className="text-sm text-gray-300 mt-4">
@@ -200,16 +190,7 @@ export default function BackwardDivided() {
           )}
 
           {/* Graph */}
-          <div className="mt-6">
-            <h3 className="text-gray-300 mb-2">กราฟการประมาณค่า</h3>
-            <GraphDifferentiation
-              func={(x) => approxFunc(x)}
-              xPoints={xValues}
-              width={760}
-              height={300}
-              className="rounded"
-            />
-          </div>
+          {/* Graph removed per configuration */}
         </div>
       </div>
 

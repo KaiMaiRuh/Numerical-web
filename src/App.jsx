@@ -20,6 +20,8 @@ import ConjugateGradient from "./pages/ConjugateGradient";
 import LagrangeInterp from "./pages/LagrangeInterp";
 import PolynomialInterp from "./pages/PolynomialInterp";
 import CubicSpline from "./pages/CubicSpline";
+import LinearSpline from "./pages/LinearSpline";
+import QuadraticSpline from "./pages/QuadraticSpline";
 // Extrapolation / Regression
 import SingleLinear from "./pages/SingleLinear";
 import MultipleLinear from "./pages/MultipleLinear";
@@ -55,6 +57,8 @@ function App() {
   <Route path="/polynomialinterp" element={<PolynomialInterp />} />
   <Route path="/lagrangeinterp" element={<LagrangeInterp />} />
   <Route path="/cubicspline" element={<CubicSpline />} />
+  <Route path="/linearspline" element={<LinearSpline />} />
+  <Route path="/quadraticspline" element={<QuadraticSpline />} />
   {/* Extrapolation / Regression */}
   <Route path="/singlelinear" element={<SingleLinear />} />
   <Route path="/multiplelinear" element={<MultipleLinear />} />

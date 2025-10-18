@@ -6,8 +6,7 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { makeFunc, formatNum } from "../utils/math";
 import simpsonsRule from "../algorithms/simpsonsRule";
-import GraphIntegration from "../components/graphs/GraphIntegration";
-import TableIntegration from "../components/tables/TableIntegration";
+// Integration graph/table removed per configuration
 
 export default function SimpsonsRule() {
   const [expr, setExpr] = useState("x^2 + 1");
@@ -165,14 +164,15 @@ export default function SimpsonsRule() {
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <h3 className="text-gray-300 mb-2">กราฟและผลลัพธ์</h3>
           <div className="w-full h-72 bg-slate-900 rounded mb-3">
-            <GraphIntegration
+            {/* Graph removed per configuration */}
+            {/* <GraphIntegration
               func={f}
               a={a}
               b={b}
               n={n}
               method="Simpson’s Rule"
               className="w-full h-72"
-            />
+            /> */}
           </div>
 
           {result !== "-" && (
@@ -191,7 +191,8 @@ export default function SimpsonsRule() {
       {/* ===== Table Section ===== */}
       {table.length > 0 && (
         <div className="mt-6">
-          <TableIntegration rows={table} method="Simpson’s Rule" />
+            {/* Table removed per configuration */}
+            {/* <TableIntegration rows={table} method="Simpson’s Rule" /> */}
         </div>
       )}
 

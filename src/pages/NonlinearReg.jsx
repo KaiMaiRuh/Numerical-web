@@ -6,8 +6,7 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import solveNonlinearRegression from "../algorithms/nonlinearReg";
-import GraphRegression from "../components/graphs/GraphRegression";
-import TableRegression from "../components/tables/TableRegression";
+// Regression graph/table removed per configuration
 
 export default function NonlinearReg() {
   const [xValues, setXValues] = useState([1, 2, 3, 4, 5]);
@@ -150,7 +149,8 @@ export default function NonlinearReg() {
         {/* ===== Graph Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <h3 className="text-gray-300 mb-2">กราฟและสมการที่ได้</h3>
-          <div className="w-full h-72 bg-slate-900 rounded">
+          {/* Graph removed per configuration */}
+          {/* <div className="w-full h-72 bg-slate-900 rounded">
             <GraphRegression
               xValues={xValues}
               yValues={yValues}
@@ -158,7 +158,7 @@ export default function NonlinearReg() {
               model={model}
               className="w-full h-72"
             />
-          </div>
+          </div> */}
 
           {params && (
             <div className="mt-4 text-sm text-gray-300">
@@ -178,7 +178,8 @@ export default function NonlinearReg() {
       </div>
 
       {/* ===== Table Section ===== */}
-      {params && (
+      {/* Table removed per configuration */}
+      {/* {params && (
         <div className="mt-6">
           <TableRegression
             xValues={xValues}
@@ -187,7 +188,7 @@ export default function NonlinearReg() {
             model={model}
           />
         </div>
-      )}
+      )} */}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
         © By KaiMaiRuh

@@ -6,8 +6,7 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import solveByMatrixInversion from "../algorithms/matrixInversion";
-import GraphLinearSystem from "../components/graphs/GraphLinearSystem";
-import TableLinearSystem from "../components/tables/TableLinearSystem";
+// Linear system graph/table removed per configuration
 
 export default function MatrixInversion() {
   const [size, setSize] = useState(3);
@@ -98,9 +97,7 @@ export default function MatrixInversion() {
       <div className="grid md:grid-cols-2 gap-6">
         {/* ===== Input Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
-          <label className="block text-sm text-gray-400 mb-1">
-            ขนาดเมทริกซ์ (n × n)
-          </label>
+          <label className="block text-sm text-gray-400 mb-1">ขนาดเมทริกซ์ (n × n)</label>
           <input
             type="number"
             value={size}
@@ -198,15 +195,7 @@ export default function MatrixInversion() {
           <label className="block text-sm text-gray-400 mb-2">
             Visualization (Matrix Inversion)
           </label>
-          <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphLinearSystem
-              A={A}
-              b={b}
-              solution={solution}
-              method="Matrix Inversion"
-              className="w-full h-72"
-            />
-          </div>
+          {/* Graph removed per configuration */}
 
           {solution.length > 0 && (
             <div className="mt-4 text-sm text-gray-300">
@@ -223,11 +212,7 @@ export default function MatrixInversion() {
         </div>
       </div>
 
-      {solution.length > 0 && (
-        <div className="mt-6">
-          <TableLinearSystem A={A} b={b} solution={solution} iterations={iterationsState} />
-        </div>
-      )}
+      {/* Table removed per configuration */}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
         © By KaiMaiRuh

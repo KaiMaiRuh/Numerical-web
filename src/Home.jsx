@@ -26,14 +26,16 @@ export default function Home() {
         { id: "conjugategradient", name: "Conjugate Gradient Methods", path: "/conjugategradient" },
       ],
     },
-    {
-      title: "3. Interpolation",
-      topics: [
-        { id: "newtondiv", name: "Newton divided-differences", path: "/polynomialinterp" },
-        { id: "lagrangeinterp", name: "Lagrange interpolation", path: "/lagrangeinterp" },
-        { id: "spline", name: "Spline interpolation", path: "/cubicspline" },
-      ],
-    },
+        {
+          title: "3. Interpolation",
+          topics: [
+            { id: "newtondiv", name: "Newton divided-differences", path: "/polynomialinterp" },
+            { id: "lagrangeinterp", name: "Lagrange interpolation", path: "/lagrangeinterp" },
+            { id: "cubicspline", name: "Cubic Spline", path: "/cubicspline" },
+            { id: "linearspline", name: "Linear Spline", path: "/linearspline" },
+            { id: "quadraticspline", name: "Quadratic Spline", path: "/quadraticspline" },
+          ],
+        },
     {
       title: "4. Extrapolation",
       topics: [

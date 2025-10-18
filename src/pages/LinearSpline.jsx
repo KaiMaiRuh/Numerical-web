@@ -6,8 +6,6 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import linearSpline from "../algorithms/linearSpline";
-import GraphInterpolation from "../components/graphs/GraphInterpolation";
-import TableInterpolation from "../components/tables/TableInterpolation";
 
 export default function LinearSpline() {
   const [xValues, setXValues] = useState(["", "", ""]);
@@ -205,45 +203,10 @@ export default function LinearSpline() {
         </div>
 
         {/* ===== Graph & Result Section ===== */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <label className="block text-sm text-gray-400 mb-2">
-            กราฟ Linear Spline
-          </label>
-          <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphInterpolation
-              points={xValues.map((x, i) => ({
-                x: parseFloat(x),
-                y: parseFloat(yValues[i]),
-              }))}
-              xTarget={parseFloat(xTarget)}
-              method="Linear Spline"
-              className="w-full h-72"
-            />
-          </div>
-
-          {result ? (
-            <div className="mt-3 text-sm text-gray-300">
-              f({xTarget}) ≈ <b>{formatNum(result.fx)}</b>
-            </div>
-          ) : (
-            <div className="mt-3 text-sm text-gray-400">
-              ยังไม่มีการคำนวณ
-            </div>
-          )}
-        </div>
+        {/* Graph removed per configuration */}
       </div>
 
-      {segments.length > 0 && (
-        <div className="mt-6">
-          <TableInterpolation
-            points={xValues.map((x, i) => ({
-              x: parseFloat(x),
-              y: parseFloat(yValues[i]),
-            }))}
-            method="Linear Spline"
-          />
-        </div>
-      )}
+      {/* Table removed per configuration */}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
         © By KaiMaiRuh

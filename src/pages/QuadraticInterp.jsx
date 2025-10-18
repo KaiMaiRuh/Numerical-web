@@ -6,8 +6,6 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import quadraticInterpolation from "../algorithms/quadraticInterp";
-import GraphInterpolation from "../components/graphs/GraphInterpolation";
-import TableInterpolation from "../components/tables/TableInterpolation";
 
 export default function QuadraticInterp() {
   const [xValues, setXValues] = useState(["", "", ""]);
@@ -183,37 +181,10 @@ export default function QuadraticInterp() {
         </div>
 
         {/* ===== Output Section ===== */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <label className="block text-sm text-gray-400 mb-2">กราฟ Quadratic Interpolation</label>
-          <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphInterpolation
-              points={points}
-              xTarget={parseFloat(xTarget)}
-              method="Quadratic"
-              className="w-full h-72"
-            />
-          </div>
-
-          {result ? (
-            <div className="mt-3 text-sm text-gray-300">
-              <p>f({xTarget}) ≈ <b>{formatNum(result.fx)}</b></p>
-              <div className="mt-2 text-gray-400">
-                <p>L₀(x) = {formatNum(result.L0)}</p>
-                <p>L₁(x) = {formatNum(result.L1)}</p>
-                <p>L₂(x) = {formatNum(result.L2)}</p>
-              </div>
-            </div>
-          ) : (
-            <div className="text-sm text-gray-400 mt-3">ยังไม่มีการคำนวณ</div>
-          )}
-        </div>
+        {/* Graph removed per configuration */}
       </div>
 
-      {result && (
-        <div className="mt-6">
-          <TableInterpolation points={points} method="Quadratic" />
-        </div>
-      )}
+      {/* Table removed per configuration */}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>

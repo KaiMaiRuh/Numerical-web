@@ -6,8 +6,7 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import solvePolynomialRegression from "../algorithms/polynomialReg";
-import GraphRegression from "../components/graphs/GraphRegression";
-import TableRegression from "../components/tables/TableRegression";
+// Regression graph/table removed per configuration
 
 export default function PolynomialReg() {
   const [xValues, setXValues] = useState([1, 2, 3, 4]);
@@ -153,14 +152,7 @@ export default function PolynomialReg() {
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <h3 className="text-gray-300 mb-2">กราฟ Polynomial Regression</h3>
           <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphRegression
-              xValues={xValues}
-              yValues={yValues}
-              params={{ coeffs }}
-              model="polynomial"
-              degree={degree}
-              className="w-full h-72"
-            />
+            {/* Graph removed per configuration */}
           </div>
 
           {coeffs.length > 0 && (
@@ -180,12 +172,7 @@ export default function PolynomialReg() {
       {/* ===== Table Section ===== */}
       {coeffs.length > 0 && (
         <div className="mt-6">
-          <TableRegression
-            xValues={xValues}
-            yValues={yValues}
-            params={{ coeffs }}
-            model="polynomial"
-          />
+          {/* Table removed per configuration */}
         </div>
       )}
 

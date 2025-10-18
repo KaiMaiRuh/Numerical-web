@@ -6,8 +6,7 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import solveSingleLinearRegression from "../algorithms/singleLinear";
-import GraphRegression from "../components/graphs/GraphRegression";
-import TableRegression from "../components/tables/TableRegression";
+import GraphSimpleRegression from "../components/graphs/GraphSimpleRegression";
 
 export default function SingleLinear() {
   const [points, setPoints] = useState([
@@ -207,15 +206,9 @@ export default function SingleLinear() {
         {/* ===== Output Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <h3 className="text-gray-300 mb-2">กราฟ Single Linear Regression</h3>
-          <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphRegression
-              xValues={points.map((p) => p.x)}
-              yValues={points.map((p) => p.y)}
-              params={result ? { a: result.a, b: result.b } : {}}
-              model="linear"
-              className="w-full h-72"
-            />
-          </div>
+            <div className="w-full h-72 bg-slate-900 rounded">
+              <GraphSimpleRegression xs={points.map((p) => p.x)} ys={points.map((p) => p.y)} className="w-full h-72" />
+            </div>
 
           {result ? (
             <div className="text-sm text-gray-300 space-y-1 mt-3">
@@ -236,16 +229,7 @@ export default function SingleLinear() {
       </div>
 
       {/* ===== Table Section ===== */}
-      {result && (
-        <div className="mt-6">
-          <TableRegression
-            xValues={points.map((p) => p.x)}
-            yValues={points.map((p) => p.y)}
-            params={{ a: result.a, b: result.b }}
-            model="linear"
-          />
-        </div>
-      )}
+      {/* Regression table removed per configuration (graph only) */}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
         © By KaiMaiRuh

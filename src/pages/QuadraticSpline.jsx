@@ -6,8 +6,6 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import solveQuadraticSpline from "../algorithms/quadraticSpline";
-import GraphInterpolation from "../components/graphs/GraphInterpolation";
-import TableInterpolation from "../components/tables/TableInterpolation";
 
 export default function QuadraticSpline() {
   const [points, setPoints] = useState([
@@ -205,34 +203,11 @@ export default function QuadraticSpline() {
           />
         </div>
 
-        {/* ===== Graph Section ===== */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">กราฟ Quadratic Spline</h3>
-          <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphInterpolation
-              points={points}
-              xTarget={parseFloat(xValue)}
-              method="Quadratic Spline"
-              className="w-full h-72"
-            />
-          </div>
-
-          {yResult !== null ? (
-            <div className="mt-3 text-sm text-gray-300">
-              y({xValue}) ≈ <b>{formatNum(yResult)}</b>
-            </div>
-          ) : (
-            <div className="text-sm text-gray-400 mt-3">ยังไม่มีการคำนวณ</div>
-          )}
-        </div>
+        {/* Graph removed per configuration */}
       </div>
 
       {/* ===== Table Section ===== */}
-      {segments.length > 0 && (
-        <div className="mt-6">
-          <TableInterpolation points={points} method="Quadratic Spline" />
-        </div>
-      )}
+      {/* Table removed per configuration */}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>

@@ -6,8 +6,7 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import secondDividedDiff from "../algorithms/secondDivided";
-import GraphInterpolation from "../components/graphs/GraphInterpolation";
-import TableInterpolation from "../components/tables/TableInterpolation";
+// Interpolation graph/table removed per configuration
 
 export default function SecondDivided() {
   const [x0, setX0] = useState(1);
@@ -199,12 +198,7 @@ export default function SecondDivided() {
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <h3 className="text-gray-300 mb-2">กราฟ Second Divided-Difference</h3>
           <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphInterpolation
-              points={points}
-              xTarget={parseFloat(x)}
-              method="Second Divided-Difference"
-              className="w-full h-72"
-            />
+            {/* Graph removed per configuration */}
           </div>
 
           {f012 !== "-" && (
@@ -220,11 +214,7 @@ export default function SecondDivided() {
         </div>
       </div>
 
-      {result !== "-" && (
-        <div className="mt-6">
-          <TableInterpolation points={points} method="Second Divided-Difference" />
-        </div>
-      )}
+      {/* Table removed per configuration */}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
         © By KaiMaiRuh

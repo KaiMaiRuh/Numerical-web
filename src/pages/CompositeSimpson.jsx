@@ -9,8 +9,7 @@ import { formatNum, makeFunc } from "../utils/math";
 import compositeSimpson from "../algorithms/compositeSimpson";
 
 // ✅ ระบบ unified ใหม่
-import GraphIntegration from "../components/graphs/GraphIntegration";
-import TableIntegration from "../components/tables/TableIntegration";
+// Integration graph/table removed per configuration
 
 export default function CompositeSimpson() {
   const [expr, setExpr] = useState("x^2 + 1");
@@ -177,14 +176,7 @@ export default function CompositeSimpson() {
             พื้นที่ใต้กราฟ (Simpson’s Rule)
           </label>
           <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphIntegration
-              func={safeFunc}
-              a={a}
-              b={b}
-              table={table}
-              method="Simpson"
-              className="w-full h-72"
-            />
+            {/* Graph removed per configuration */}
           </div>
 
           {result !== "-" && (
@@ -198,7 +190,7 @@ export default function CompositeSimpson() {
       {/* ===== Results Table ===== */}
       {table.length > 0 && (
         <div className="mt-6">
-          <TableIntegration table={table} method="Simpson" />
+          {/* Table removed per configuration */}
         </div>
       )}
 

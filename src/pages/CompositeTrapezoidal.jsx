@@ -9,8 +9,9 @@ import { formatNum, makeFunc } from "../utils/math";
 import compositeTrapezoidal from "../algorithms/compositeTrapezoidal";
 
 // ✅ ระบบ unified ใหม่
-import GraphIntegration from "../components/graphs/GraphIntegration";
-import TableIntegration from "../components/tables/TableIntegration";
+// Integration graph/table removed per configuration
+// import GraphIntegration from "../components/graphs/GraphIntegration";
+// import TableIntegration from "../components/tables/TableIntegration";
 
 export default function CompositeTrapezoidal() {
   const [expr, setExpr] = useState("x^2 + 1");
@@ -177,14 +178,15 @@ export default function CompositeTrapezoidal() {
             พื้นที่ใต้กราฟ (Trapezoidal Rule)
           </label>
           <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphIntegration
+            {/* Graph removed per configuration */}
+            {/* <GraphIntegration
               func={safeFunc}
               a={a}
               b={b}
               table={table}
               method="Trapezoidal"
               className="w-full h-72"
-            />
+            /> */}
           </div>
 
           {result !== "-" && (
@@ -198,7 +200,8 @@ export default function CompositeTrapezoidal() {
       {/* ===== Results Table ===== */}
       {table.length > 0 && (
         <div className="mt-6">
-          <TableIntegration table={table} method="Trapezoidal" />
+          {/* Table removed per configuration */}
+          {/* <TableIntegration table={table} method="Trapezoidal" /> */}
         </div>
       )}
 

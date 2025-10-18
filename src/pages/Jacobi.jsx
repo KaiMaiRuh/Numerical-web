@@ -6,8 +6,7 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import jacobiIteration from "../algorithms/jacobi";
-import GraphLinearSystem from "../components/graphs/GraphLinearSystem";
-import TableLinearSystem from "../components/tables/TableLinearSystem";
+import TableJacobi from "../components/tables/TableJacobi";
 
 export default function Jacobi() {
   const [size, setSize] = useState(3);
@@ -253,38 +252,13 @@ export default function Jacobi() {
           />
         </div>
 
-        {/* ===== Graph Section ===== */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <label className="block text-sm text-gray-400 mb-2">
-            การลู่เข้าสู่ผลลัพธ์ (Visualization)
-          </label>
-          <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphLinearSystem
-              A={A}
-              b={b}
-              solution={solution}
-              method="Jacobi"
-              className="w-full h-72"
-            />
-          </div>
-
-          {solution.length > 0 && (
-            <div className="mt-4 text-sm text-gray-300">
-              <div className="mb-2">ผลลัพธ์ (x):</div>
-              <ul>
-                {solution.map((x, i) => (
-                  <li key={i}>x{i + 1} = {formatNum(x)}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+        {/* Graph removed per configuration; Jacobi shows table only */}
       </div>
 
       {/* ===== Results Table ===== */}
       {solution.length > 0 && (
         <div className="mt-6">
-          <TableLinearSystem A={A} b={b} solution={solution} iterations={iterationsState} />
+          <TableJacobi iterations={iterationsState} />
         </div>
       )}
 

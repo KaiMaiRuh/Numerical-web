@@ -6,8 +6,7 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import gaussianElimination from "../algorithms/gaussian";
-import GraphLinearSystem from "../components/graphs/GraphLinearSystem";
-import TableLinearSystem from "../components/tables/TableLinearSystem";
+// Linear system graph/table removed per configuration
 
 export default function Gaussian() {
   const [size, setSize] = useState(3);
@@ -198,15 +197,7 @@ export default function Gaussian() {
           <label className="block text-sm text-gray-400 mb-2">
             กราฟการลู่เข้าสู่คำตอบ
           </label>
-          <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphLinearSystem
-              A={A}
-              b={b}
-              solution={solution}
-              method="Gaussian Elimination"
-              className="w-full h-72"
-            />
-          </div>
+          {/* Graph/Table removed per configuration */}
 
           {solution.length > 0 && (
             <div className="mt-4 text-sm text-gray-300">
@@ -226,7 +217,7 @@ export default function Gaussian() {
       {/* ===== Table Section ===== */}
       {solution.length > 0 && (
         <div className="mt-6">
-          <TableLinearSystem A={A} b={b} solution={solution} iterations={iterationsState} />
+          {/* Table removed per configuration */}
         </div>
       )}
 

@@ -8,8 +8,7 @@ import { formatNum } from "../utils/math";
 import choleskyDecomposition from "../algorithms/cholesky";
 
 // ✅ ใช้ระบบใหม่
-import GraphLinearSystem from "../components/graphs/GraphLinearSystem";
-import TableLinearSystem from "../components/tables/TableLinearSystem";
+// Linear system graph/table removed per configuration
 
 export default function Cholesky() {
   const [size, setSize] = useState(3);
@@ -201,13 +200,7 @@ export default function Cholesky() {
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <label className="block text-sm text-gray-400 mb-2">กราฟโครงสร้างเมทริกซ์</label>
           <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphLinearSystem
-              A={A}
-              b={b}
-              solution={solution}
-              method="Cholesky"
-              className="w-full h-72"
-            />
+              {/* Graph/Table removed per configuration */}
           </div>
 
           {solution.length > 0 && (
@@ -226,11 +219,7 @@ export default function Cholesky() {
       </div>
 
       {/* ===== Table Section ===== */}
-      {solution.length > 0 && (
-        <div className="mt-6">
-          <TableLinearSystem A={A} b={b} solution={solution} iterations={iterationsState} />
-        </div>
-      )}
+      {/* Table removed per configuration */}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
         © By KaiMaiRuh

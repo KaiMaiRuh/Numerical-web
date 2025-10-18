@@ -6,8 +6,6 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import firstDividedDiff from "../algorithms/firstDivided";
-import GraphDifferentiation from "../components/graphs/GraphDifferentiation";
-import TableDifferentiation from "../components/tables/TableDifferentiation";
 
 export default function FirstDivided() {
   const [x0, setX0] = useState(1);
@@ -147,34 +145,11 @@ export default function FirstDivided() {
           <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
         </div>
 
-        {/* ===== Graph Section ===== */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <label className="block text-sm text-gray-400 mb-2">กราฟการประมาณเชิงเส้น</label>
-          <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphDifferentiation
-              xValues={[x0, x1]}
-              yValues={[fx0, fx1]}
-              xTarget={x}
-              method="first"
-              className="w-full h-72"
-            />
-          </div>
-
-          {diff !== "-" && (
-            <div className="mt-3 text-sm text-gray-300">
-              <p>f[x₀, x₁] = {formatNum(diff)}</p>
-              <p>f({x}) ≈ <b>{formatNum(result)}</b></p>
-            </div>
-          )}
-        </div>
+        {/* Graph removed per configuration */}
       </div>
 
       {/* ===== Results Table ===== */}
-      {diff !== "-" && (
-        <div className="mt-6">
-          <TableDifferentiation table={[[fx0, fx1]]} />
-        </div>
-      )}
+      {/* Table removed per configuration */}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>

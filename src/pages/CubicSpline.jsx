@@ -6,8 +6,6 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import solveCubicSpline from "../algorithms/cubicSpline";
-import GraphInterpolation from "../components/graphs/GraphInterpolation";
-import TableInterpolation from "../components/tables/TableInterpolation";
 
 export default function CubicSpline() {
   const [points, setPoints] = useState([
@@ -178,28 +176,10 @@ export default function CubicSpline() {
           <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
         </div>
 
-        {/* ===== Graph Section ===== */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <label className="block text-sm text-gray-400 mb-2">กราฟ Cubic Spline</label>
-          <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphInterpolation points={points} xTarget={parseFloat(xValue)} method="Cubic Spline" className="w-full h-72" />
-          </div>
-
-          {yResult !== null ? (
-            <div className="mt-3 text-sm text-gray-300">
-              y({xValue}) ≈ <b>{formatNum(yResult)}</b>
-            </div>
-          ) : (
-            <div className="mt-3 text-sm text-gray-400">ยังไม่มีผลลัพธ์</div>
-          )}
-        </div>
+        {/* Graph removed per configuration */}
       </div>
 
-      {points.length > 0 && (
-        <div className="mt-6">
-          <TableInterpolation points={points} method="Cubic Spline" />
-        </div>
-      )}
+      {/* Table removed per configuration */}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>

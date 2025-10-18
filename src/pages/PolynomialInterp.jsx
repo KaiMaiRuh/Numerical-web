@@ -6,8 +6,6 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import polynomialInterpolation from "../algorithms/polynomialInterp";
-import GraphInterpolation from "../components/graphs/GraphInterpolation";
-import TableInterpolation from "../components/tables/TableInterpolation";
 
 export default function PolynomialInterp() {
   const [xValues, setXValues] = useState(["", "", "", ""]);
@@ -205,48 +203,10 @@ export default function PolynomialInterp() {
           />
         </div>
 
-        {/* ===== Output Section ===== */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">กราฟ Polynomial Interpolation</h3>
-          <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphInterpolation
-              points={points}
-              xTarget={parseFloat(xTarget)}
-              method="Polynomial"
-              className="w-full h-72"
-            />
-          </div>
-
-          {result !== null ? (
-            <div className="mt-3 text-sm text-gray-300">
-              f({xTarget}) ≈ <b>{formatNum(result)}</b>
-              {coeffs.length > 0 && (
-                <div className="mt-2 text-gray-400">
-                  <div className="font-semibold text-gray-300">
-                    สมการ Polynomial:
-                  </div>
-                  <code>
-                    f(x) ={" "}
-                    {coeffs
-                      .map((c, i) => `${formatNum(c)}x^${i}`)
-                      .join(" + ")}
-                  </code>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-sm text-gray-400 mt-3">
-              ยังไม่มีการคำนวณ
-            </div>
-          )}
-        </div>
+        {/* Graph removed per configuration */}
       </div>
 
-      {result !== null && (
-        <div className="mt-6">
-          <TableInterpolation points={points} method="Polynomial" />
-        </div>
-      )}
+      {/* Table removed per configuration */}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
         © By KaiMaiRuh

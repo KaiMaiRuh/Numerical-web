@@ -6,8 +6,7 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import cramer from "../algorithms/cramer";
-import GraphLinearSystem from "../components/graphs/GraphLinearSystem";
-import TableLinearSystem from "../components/tables/TableLinearSystem";
+// Linear system graph/table removed per configuration
 
 export default function Cramer() {
   const [size, setSize] = useState(3);
@@ -160,7 +159,7 @@ export default function Cramer() {
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <label className="block text-sm text-gray-400 mb-2">ภาพรวมการแก้ระบบสมการ</label>
           <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphLinearSystem A={A} b={b} solution={solution} method="Cramer's Rule" className="w-full h-72" />
+            {/* Graph/Table removed per configuration */}
           </div>
 
           {solution.length > 0 && (
@@ -178,7 +177,7 @@ export default function Cramer() {
 
       {solution.length > 0 && (
         <div className="mt-6">
-          <TableLinearSystem A={A} b={b} solution={solution} iterations={iterationsState} />
+          {/* Table removed per configuration */}
         </div>
       )}
 

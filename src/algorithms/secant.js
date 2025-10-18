@@ -10,7 +10,8 @@ export function secant(func, x0, x1, tol = 1e-6, maxIter = 50) {
       const x2 = b - fb * (b - a) / (fb - fa);
       const fx2 = func(x2);
       const err = Math.abs((x2 - b) / (Math.abs(x2) > 1e-12 ? Math.abs(x2) : 1));
-      iterations.push({ iter: i, x0: a, x1: b, x2, fx2, error: err });
+      // Provide generic keys x, fx so graph/table components can read f(x)
+      iterations.push({ iter: i, x0: a, x1: b, x2, fx2, x: x2, fx: fx2, error: err });
       if (!isFinite(fx2)) return { error: "f(x) คำนวณไม่ได้", iterations, converged: false };
       if (err <= tol) return { root: x2, iterations, converged: true };
       a = b; fa = fb; b = x2; fb = fx2;

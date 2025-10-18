@@ -6,8 +6,7 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { makeFunc, formatNum } from "../utils/math";
 import singleTrapezoidal from "../algorithms/singleTrapezoidal";
-import GraphIntegration from "../components/graphs/GraphIntegration";
-import TableIntegration from "../components/tables/TableIntegration";
+import GraphTrapezoidal from "../components/graphs/GraphTrapezoidal";
 
 export default function SingleTrapezoidal() {
   const [expr, setExpr] = useState("x^2 + 1");
@@ -153,14 +152,7 @@ export default function SingleTrapezoidal() {
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <h3 className="text-gray-300 mb-2">กราฟและผลลัพธ์</h3>
           <div className="w-full h-72 bg-slate-900 rounded mb-3">
-            <GraphIntegration
-              func={f}
-              a={a}
-              b={b}
-              n={1}
-              method="Single Trapezoidal"
-              className="w-full h-72"
-            />
+            <GraphTrapezoidal points={[{x:a, y:f(a)},{x:b,y:f(b)}]} method="Single Trapezoidal" className="w-full h-72" />
           </div>
 
           {result !== "-" && (
@@ -181,17 +173,7 @@ export default function SingleTrapezoidal() {
       </div>
 
       {/* ===== Table Section ===== */}
-      {result !== "-" && (
-        <div className="mt-6">
-          <TableIntegration
-            rows={[
-              { x: a, fx: f(a) },
-              { x: b, fx: f(b) },
-            ]}
-            method="Single Trapezoidal"
-          />
-        </div>
-      )}
+      {/* Table removed per configuration (graph only) */}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
         © By KaiMaiRuh

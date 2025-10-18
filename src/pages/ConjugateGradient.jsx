@@ -8,8 +8,8 @@ import { formatNum } from "../utils/math";
 import conjugateGradient from "../algorithms/conjugateGradient";
 
 // ✅ ระบบ unified ใหม่
-import GraphLinearSystem from "../components/graphs/GraphLinearSystem";
-import TableLinearSystem from "../components/tables/TableLinearSystem";
+import GraphConjugateGradient from "../components/graphs/GraphConjugateGradient";
+import TableConjugateGradient from "../components/tables/TableConjugateGradient";
 
 export default function ConjugateGradient() {
   const [size, setSize] = useState(3);
@@ -240,15 +240,9 @@ export default function ConjugateGradient() {
           <label className="block text-sm text-gray-400 mb-2">
             การกระจายและการลู่เข้าสู่คำตอบ
           </label>
-          <div className="w-full h-72 bg-slate-900 rounded">
-            <GraphLinearSystem
-              A={A}
-              b={b}
-              solution={solution}
-              method="Conjugate Gradient"
-              className="w-full h-72"
-            />
-          </div>
+            <div className="w-full h-72 bg-slate-900 rounded">
+              <GraphConjugateGradient iterations={iterationsState} className="w-full h-72" />
+            </div>
 
           {solution.length > 0 && (
             <div className="mt-4 text-sm text-gray-300">
@@ -268,7 +262,7 @@ export default function ConjugateGradient() {
       {/* ===== Results Table ===== */}
       {solution.length > 0 && (
         <div className="mt-6">
-          <TableLinearSystem A={A} b={b} solution={solution} iterations={iterationsState} />
+          <TableConjugateGradient iterations={iterationsState} />
         </div>
       )}
 
