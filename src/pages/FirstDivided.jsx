@@ -69,89 +69,89 @@ export default function FirstDivided() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6">
       <PageHeader
         title="First Divided-Difference"
         subtitle="การประมาณเชิงเส้นด้วย Newton’s First Divided-Difference"
       />
 
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* ===== Input Section ===== */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">x₀</label>
-              <input
-                type="number"
-                value={x0}
-                onChange={(e) => setX0(parseFloat(e.target.value))}
-                className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">f(x₀)</label>
-              <input
-                type="number"
-                value={fx0}
-                onChange={(e) => setFx0(parseFloat(e.target.value))}
-                className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">x₁</label>
-              <input
-                type="number"
-                value={x1}
-                onChange={(e) => setX1(parseFloat(e.target.value))}
-                className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">f(x₁)</label>
-              <input
-                type="number"
-                value={fx1}
-                onChange={(e) => setFx1(parseFloat(e.target.value))}
-                className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
-              />
-            </div>
-          </div>
-
-          <div className="mb-3">
-            <label className="block text-sm text-gray-400 mb-1">ค่าที่ต้องการประมาณ (x)</label>
+      <div className="bg-slate-800 rounded-lg p-4 shadow">
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">x₀</label>
             <input
               type="number"
-              value={x}
-              onChange={(e) => setX(parseFloat(e.target.value))}
+              value={x0}
+              onChange={(e) => setX0(parseFloat(e.target.value))}
               className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
             />
           </div>
-
-          <div className="flex gap-3 mb-3">
-            <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">
-              คำนวณ
-            </button>
-            <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">
-              รีเซ็ต
-            </button>
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">f(x₀)</label>
+            <input
+              type="number"
+              value={fx0}
+              onChange={(e) => setFx0(parseFloat(e.target.value))}
+              className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
+            />
           </div>
-
-          <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">
-            บันทึกโจทย์
-          </button>
-
-          <div className="text-sm mb-2 text-gray-300">{status}</div>
-
-          <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">x₁</label>
+            <input
+              type="number"
+              value={x1}
+              onChange={(e) => setX1(parseFloat(e.target.value))}
+              className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">f(x₁)</label>
+            <input
+              type="number"
+              value={fx1}
+              onChange={(e) => setFx1(parseFloat(e.target.value))}
+              className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
+            />
+          </div>
         </div>
 
-        {/* Graph removed per configuration */}
+        <div className="mb-3">
+          <label className="block text-sm text-gray-400 mb-1">ค่าที่ต้องการประมาณ (x)</label>
+          <input
+            type="number"
+            value={x}
+            onChange={(e) => setX(parseFloat(e.target.value))}
+            className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
+          />
+        </div>
+
+        <div className="flex gap-3 mb-3">
+          <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">
+            คำนวณ
+          </button>
+          <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">
+            รีเซ็ต
+          </button>
+        </div>
+
+        <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">
+          บันทึกโจทย์
+        </button>
+
+        <div className="text-sm mb-2 text-gray-300">{status}</div>
+
+        <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
+
+        {/* Inline results */}
+        {result !== "-" && (
+          <div className="mt-4 text-sm text-gray-200">
+            <div>ผลลัพธ์ P(x) = {formatNum(result)}</div>
+            <div>First divided diff = {formatNum(diff)}</div>
+          </div>
+        )}
+
+        <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
       </div>
-
-      {/* ===== Results Table ===== */}
-      {/* Table removed per configuration */}
-
-      <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>
   );
 }

@@ -91,96 +91,100 @@ export default function LagrangeInterp() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6">
       <PageHeader title="Lagrange Interpolation" subtitle="หาค่า f(x) โดยใช้ Lagrange Polynomial" />
 
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* ===== Input Section ===== */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
-          <label className="block text-sm text-gray-400 mb-1">จำนวนจุดข้อมูล</label>
-          <input
-            type="number"
-            value={xValues.length}
-            onChange={(e) => {
-              const n = Math.max(2, parseInt(e.target.value) || 2);
-              setXValues(Array(n).fill(""));
-              setYValues(Array(n).fill(""));
-            }}
-            className="w-24 px-3 py-2 rounded bg-slate-900 border border-slate-700 mb-3"
-          />
+      <div className="bg-slate-800 rounded-lg p-4 shadow">
+        <label className="block text-sm text-gray-400 mb-1">จำนวนจุดข้อมูล</label>
+        <input
+          type="number"
+          value={xValues.length}
+          onChange={(e) => {
+            const n = Math.max(2, parseInt(e.target.value) || 2);
+            setXValues(Array(n).fill(""));
+            setYValues(Array(n).fill(""));
+          }}
+          className="w-24 px-3 py-2 rounded bg-slate-900 border border-slate-700 mb-3"
+        />
 
-          <div className="overflow-x-auto mb-3">
-            <label className="block text-sm text-gray-400 mb-1">ค่าของ x และ f(x)</label>
-            <table className="text-sm border-collapse">
-              <thead>
-                <tr className="text-gray-400">
-                  <th className="p-1">xᵢ</th>
-                  <th className="p-1">f(xᵢ)</th>
+        <div className="overflow-x-auto mb-3">
+          <label className="block text-sm text-gray-400 mb-1">ค่าของ x และ f(x)</label>
+          <table className="text-sm border-collapse">
+            <thead>
+              <tr className="text-gray-400">
+                <th className="p-1">xᵢ</th>
+                <th className="p-1">f(xᵢ)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {xValues.map((_, i) => (
+                <tr key={i}>
+                  <td className="p-1">
+                    <input
+                      type="number"
+                      value={xValues[i]}
+                      onChange={(e) => {
+                        const newX = [...xValues];
+                        newX[i] = e.target.value;
+                        setXValues(newX);
+                      }}
+                      className="w-20 px-2 py-1 rounded bg-slate-900 border border-slate-700"
+                    />
+                  </td>
+                  <td className="p-1">
+                    <input
+                      type="number"
+                      value={yValues[i]}
+                      onChange={(e) => {
+                        const newY = [...yValues];
+                        newY[i] = e.target.value;
+                        setYValues(newY);
+                      }}
+                      className="w-20 px-2 py-1 rounded bg-slate-900 border border-slate-700"
+                    />
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {xValues.map((_, i) => (
-                  <tr key={i}>
-                    <td className="p-1">
-                      <input
-                        type="number"
-                        value={xValues[i]}
-                        onChange={(e) => {
-                          const newX = [...xValues];
-                          newX[i] = e.target.value;
-                          setXValues(newX);
-                        }}
-                        className="w-20 px-2 py-1 rounded bg-slate-900 border border-slate-700"
-                      />
-                    </td>
-                    <td className="p-1">
-                      <input
-                        type="number"
-                        value={yValues[i]}
-                        onChange={(e) => {
-                          const newY = [...yValues];
-                          newY[i] = e.target.value;
-                          setYValues(newY);
-                        }}
-                        className="w-20 px-2 py-1 rounded bg-slate-900 border border-slate-700"
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <label className="block text-sm text-gray-400 mb-1">ต้องการหาค่า f(x) ที่ x =</label>
-          <input
-            type="number"
-            value={xTarget}
-            onChange={(e) => setXTarget(e.target.value)}
-            className="w-32 px-2 py-1 rounded bg-slate-900 border border-slate-700 mb-3"
-          />
-
-          <div className="flex gap-3 mb-3">
-            <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">
-              คำนวณ
-            </button>
-            <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">
-              รีเซ็ต
-            </button>
-          </div>
-
-          <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">
-            บันทึกโจทย์
-          </button>
-
-          <div className="text-sm mb-2 text-gray-400">{status}</div>
-
-          <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
+              ))}
+            </tbody>
+          </table>
         </div>
 
-        {/* Graph removed per configuration */}
-      </div>
+        <label className="block text-sm text-gray-400 mb-1">ต้องการหาค่า f(x) ที่ x =</label>
+        <input
+          type="number"
+          value={xTarget}
+          onChange={(e) => setXTarget(e.target.value)}
+          className="w-32 px-2 py-1 rounded bg-slate-900 border border-slate-700 mb-3"
+        />
 
-      {/* Table removed per configuration */}
+        <div className="flex gap-3 mb-3">
+          <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">
+            คำนวณ
+          </button>
+          <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">
+            รีเซ็ต
+          </button>
+        </div>
+
+        <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">
+          บันทึกโจทย์
+        </button>
+
+        <div className="text-sm mb-2 text-gray-400">{status}</div>
+
+        {result !== null && (
+          <div className="mt-4 text-sm text-gray-300">
+            <div className="mb-2">ผลลัพธ์: {formatNum(result)}</div>
+            {steps.length > 0 && (
+              <div className="text-xs text-gray-400">รายละเอียดการคำนวณมีอยู่</div>
+            )}
+          </div>
+        )}
+
+        <div className="mt-4">
+          <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
+        </div>
+      </div>
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>

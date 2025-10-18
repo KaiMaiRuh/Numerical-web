@@ -96,90 +96,89 @@ export default function CubicSpline() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6">
       <PageHeader title="Cubic Spline" subtitle="ประมาณค่า y ด้วย Cubic Spline Interpolation" />
 
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* ===== Input Section ===== */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
-          <label className="block text-sm text-gray-400 mb-1">จุดข้อมูล (x, y)</label>
-          <table className="text-sm border-collapse mb-3">
-            <tbody>
-              {points.map((p, i) => (
-                <tr key={i}>
-                  <td className="p-1">
-                    <input
-                      type="number"
-                      value={p.x}
-                      onChange={(e) => {
-                        const newPts = [...points];
-                        newPts[i].x = parseFloat(e.target.value) || 0;
-                        setPoints(newPts);
-                      }}
-                      className="w-20 px-2 py-1 rounded bg-slate-900 border border-slate-700"
-                    />
-                  </td>
-                  <td className="p-1">
-                    <input
-                      type="number"
-                      value={p.y}
-                      onChange={(e) => {
-                        const newPts = [...points];
-                        newPts[i].y = parseFloat(e.target.value) || 0;
-                        setPoints(newPts);
-                      }}
-                      className="w-20 px-2 py-1 rounded bg-slate-900 border border-slate-700"
-                    />
-                  </td>
-                  <td className="p-1">
-                    <button
-                      onClick={() => handleRemovePoint(i)}
-                      className="text-red-400 hover:text-red-300 text-xs"
-                    >
-                      ลบ
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="bg-slate-800 rounded-lg p-4 shadow">
+        <label className="block text-sm text-gray-400 mb-1">จุดข้อมูล (x, y)</label>
+        <table className="text-sm border-collapse mb-3">
+          <tbody>
+            {points.map((p, i) => (
+              <tr key={i}>
+                <td className="p-1">
+                  <input
+                    type="number"
+                    value={p.x}
+                    onChange={(e) => {
+                      const newPts = [...points];
+                      newPts[i].x = parseFloat(e.target.value) || 0;
+                      setPoints(newPts);
+                    }}
+                    className="w-20 px-2 py-1 rounded bg-slate-900 border border-slate-700"
+                  />
+                </td>
+                <td className="p-1">
+                  <input
+                    type="number"
+                    value={p.y}
+                    onChange={(e) => {
+                      const newPts = [...points];
+                      newPts[i].y = parseFloat(e.target.value) || 0;
+                      setPoints(newPts);
+                    }}
+                    className="w-20 px-2 py-1 rounded bg-slate-900 border border-slate-700"
+                  />
+                </td>
+                <td className="p-1">
+                  <button
+                    onClick={() => handleRemovePoint(i)}
+                    className="text-red-400 hover:text-red-300 text-xs"
+                  >
+                    ลบ
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-          <button onClick={handleAddPoint} className="w-full btn-primary glow-btn py-2 rounded mb-3">
-            เพิ่มจุด
-          </button>
+        <button onClick={handleAddPoint} className="w-full btn-primary glow-btn py-2 rounded mb-3">
+          เพิ่มจุด
+        </button>
 
-          <div className="mb-3">
-            <label className="block text-sm text-gray-400 mb-1">ค่า x ที่ต้องการหาค่า y</label>
-            <input
-              type="number"
-              value={xValue}
-              onChange={(e) => setXValue(e.target.value)}
-              className="w-32 px-3 py-2 rounded bg-slate-900 border border-slate-700"
-            />
-          </div>
-
-          <div className="flex gap-3 mb-3">
-            <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">
-              คำนวณ
-            </button>
-            <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">
-              รีเซ็ต
-            </button>
-          </div>
-
-          <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">
-            บันทึกโจทย์
-          </button>
-
-          <div className="text-sm mb-2 text-gray-300">{status}</div>
-
-          <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
+        <div className="mb-3">
+          <label className="block text-sm text-gray-400 mb-1">ค่า x ที่ต้องการหาค่า y</label>
+          <input
+            type="number"
+            value={xValue}
+            onChange={(e) => setXValue(e.target.value)}
+            className="w-32 px-3 py-2 rounded bg-slate-900 border border-slate-700"
+          />
         </div>
 
-        {/* Graph removed per configuration */}
-      </div>
+        <div className="flex gap-3 mb-3">
+          <button onClick={handleRun} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">
+            คำนวณ
+          </button>
+          <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">
+            รีเซ็ต
+          </button>
+        </div>
 
-      {/* Table removed per configuration */}
+        <button onClick={handleSaveProblem} className="w-full btn-primary glow-btn py-2 rounded mb-3">
+          บันทึกโจทย์
+        </button>
+
+        <div className="text-sm mb-2 text-gray-300">{status}</div>
+
+        {yResult !== null && (
+          <div className="mt-4 text-sm text-gray-300">ผลลัพธ์: y = {formatNum(yResult)}</div>
+        )}
+
+        <div className="mt-4">
+          <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
+        </div>
+      </div>
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>

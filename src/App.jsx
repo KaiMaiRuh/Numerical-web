@@ -5,7 +5,6 @@ import Home from "./Home";
 import Bisection from "./pages/Bisection";
 import FalsePosition from "./pages/FalsePosition";
 import OnePoint from "./pages/OnePoint";
-import Taylor from "./pages/Taylor";
 import NewtonRaphson from "./pages/NewtonRaphson";
 import Secant from "./pages/Secant";
 // Linear Algebra
@@ -40,9 +39,8 @@ function App() {
         <Route path="/" element={<Home />} />
         {/* Root of Equation */}
         <Route path="/bisection" element={<Bisection />} />
-        <Route path="/falseposition" element={<FalsePosition />} />
-  <Route path="/onepoint" element={<OnePoint />} />
-  <Route path="/taylor" element={<Taylor />} />
+          <Route path="/falseposition" element={<FalsePosition />} />
+        <Route path="/onepoint" element={<OnePoint />} />
         <Route path="/newtonraphson" element={<NewtonRaphson />} />
         <Route path="/secant" element={<Secant />} />
   {/* Linear Algebra */}

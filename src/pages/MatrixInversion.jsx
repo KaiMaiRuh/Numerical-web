@@ -88,100 +88,107 @@ export default function MatrixInversion() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6">
       <PageHeader
         title="Matrix Inversion Method"
         subtitle="การแก้ระบบสมการเชิงเส้นโดยใช้เมทริกซ์ผกผัน (A⁻¹b)"
       />
 
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* ===== Input Section ===== */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
-          <label className="block text-sm text-gray-400 mb-1">ขนาดเมทริกซ์ (n × n)</label>
-          <input
-            type="number"
-            value={size}
-            onChange={(e) => {
-              const n = Math.max(1, parseInt(e.target.value) || 1);
-              setSize(n);
-              setA(Array(n).fill().map(() => Array(n).fill(0)));
-              setB(Array(n).fill(0));
-            }}
-            className="w-24 px-3 py-2 rounded bg-slate-900 border border-slate-700 mb-3"
-          />
+      <div className="bg-slate-800 rounded-lg p-4 shadow">
+        <label className="block text-sm text-gray-400 mb-1">ขนาดเมทริกซ์ (n × n)</label>
+        <input
+          type="number"
+          value={size}
+          onChange={(e) => {
+            const n = Math.max(1, parseInt(e.target.value) || 1);
+            setSize(n);
+            setA(Array(n).fill().map(() => Array(n).fill(0)));
+            setB(Array(n).fill(0));
+          }}
+          className="w-24 px-3 py-2 rounded bg-slate-900 border border-slate-700 mb-3"
+        />
 
-          {/* Matrix A */}
-          <div className="overflow-x-auto mb-3">
-            <label className="block text-sm text-gray-400 mb-1">Matrix A</label>
-            <table className="text-sm border-collapse">
-              <tbody>
-                {A.map((row, i) => (
-                  <tr key={i}>
-                    {row.map((val, j) => (
-                      <td key={j} className="p-1">
-                        <input
-                          type="number"
-                          value={val}
-                          onChange={(e) => {
-                            const newA = A.map((r) => [...r]);
-                            newA[i][j] = parseFloat(e.target.value) || 0;
-                            setA(newA);
-                          }}
-                          className="w-16 px-2 py-1 rounded bg-slate-900 border border-slate-700"
-                        />
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Vector b */}
-          <div className="mb-3">
-            <label className="block text-sm text-gray-400 mb-1">Vector b</label>
-            <div className="flex gap-2">
-              {b.map((val, i) => (
-                <input
-                  key={i}
-                  type="number"
-                  value={val}
-                  onChange={(e) => {
-                    const newB = [...b];
-                    newB[i] = parseFloat(e.target.value) || 0;
-                    setB(newB);
-                  }}
-                  className="w-16 px-2 py-1 rounded bg-slate-900 border border-slate-700"
-                />
+        <div className="overflow-x-auto mb-3">
+          <label className="block text-sm text-gray-400 mb-1">Matrix A</label>
+          <table className="text-sm border-collapse">
+            <tbody>
+              {A.map((row, i) => (
+                <tr key={i}>
+                  {row.map((val, j) => (
+                    <td key={j} className="p-1">
+                      <input
+                        type="number"
+                        value={val}
+                        onChange={(e) => {
+                          const newA = A.map((r) => [...r]);
+                          newA[i][j] = parseFloat(e.target.value) || 0;
+                          setA(newA);
+                        }}
+                        className="w-16 px-2 py-1 rounded bg-slate-900 border border-slate-700"
+                      />
+                    </td>
+                  ))}
+                </tr>
               ))}
-            </div>
-          </div>
+            </tbody>
+          </table>
+        </div>
 
-          {/* Buttons */}
-          <div className="flex gap-3 mb-3">
-            <button
-              onClick={handleRun}
-              className="flex-1 btn-primary glow-btn py-2 rounded font-semibold"
-            >
-              คำนวณ
-            </button>
-            <button
-              onClick={handleReset}
-              className="flex-1 btn-danger border border-slate-600 py-2 rounded"
-            >
-              รีเซ็ต
-            </button>
+        <div className="mb-3">
+          <label className="block text-sm text-gray-400 mb-1">Vector b</label>
+          <div className="flex gap-2">
+            {b.map((val, i) => (
+              <input
+                key={i}
+                type="number"
+                value={val}
+                onChange={(e) => {
+                  const newB = [...b];
+                  newB[i] = parseFloat(e.target.value) || 0;
+                  setB(newB);
+                }}
+                className="w-16 px-2 py-1 rounded bg-slate-900 border border-slate-700"
+              />
+            ))}
           </div>
+        </div>
 
+        <div className="flex gap-3 mb-3">
           <button
-            onClick={handleSaveProblem}
-            className="w-full btn-primary glow-btn py-2 rounded mb-3"
+            onClick={handleRun}
+            className="flex-1 btn-primary glow-btn py-2 rounded font-semibold"
           >
-            บันทึกโจทย์
+            คำนวณ
           </button>
+          <button
+            onClick={handleReset}
+            className="flex-1 btn-danger border border-slate-600 py-2 rounded"
+          >
+            รีเซ็ต
+          </button>
+        </div>
 
-          <div className="text-sm mb-2 text-gray-300">{status}</div>
+        <button
+          onClick={handleSaveProblem}
+          className="w-full btn-primary glow-btn py-2 rounded mb-3"
+        >
+          บันทึกโจทย์
+        </button>
 
+        <div className="text-sm mb-2 text-gray-300">{status}</div>
+
+        {solution.length > 0 && (
+          <div className="mt-4 text-sm text-gray-300">
+            <div className="mb-2">ผลลัพธ์ (x):</div>
+            <ul>
+              {solution.map((x, i) => (
+                <li key={i}>x{i + 1} = {formatNum(x)}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="mt-4">
           <SavedProblems
             problems={problems}
             onLoad={handleLoadProblem}
@@ -189,30 +196,7 @@ export default function MatrixInversion() {
             removingIds={removingIds}
           />
         </div>
-
-        {/* ===== Graph Section ===== */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <label className="block text-sm text-gray-400 mb-2">
-            Visualization (Matrix Inversion)
-          </label>
-          {/* Graph removed per configuration */}
-
-          {solution.length > 0 && (
-            <div className="mt-4 text-sm text-gray-300">
-              <div className="mb-2">ผลลัพธ์ (x):</div>
-              <ul>
-                {solution.map((x, i) => (
-                  <li key={i}>
-                    x{i + 1} = {formatNum(x)}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
       </div>
-
-      {/* Table removed per configuration */}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">
         © By KaiMaiRuh
