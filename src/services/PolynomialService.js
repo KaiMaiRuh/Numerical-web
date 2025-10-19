@@ -2,25 +2,14 @@
 import { list, add, remove as dbRemove, serverTimestamp } from "./LocalDb";
 
 const COL = "problems_polynomial";
+const METHOD = "polynomial";
 
-export async function getPolynomialProblems() {
-  return list(COL);
-}
+export const get = () => list(COL);
+export const save = (p) => add(COL, { ...p, method: METHOD, createdAt: serverTimestamp() });
+export const remove = (id) => dbRemove(COL, id);
 
-export async function savePolynomialProblem(problem) {
-  return add(COL, {
-    ...problem,
-    method: "polynomial",
-    createdAt: serverTimestamp(),
-  });
-}
+export const getProblems = get;
+export const del = remove;
+export { remove as delete };
 
-export async function deletePolynomialProblem(id) {
-  return dbRemove(COL, id);
-}
-
-// Generic aliases for useProblems hook compatibility
-export const getProblems = getPolynomialProblems;
-export const save = savePolynomialProblem;
-export const remove = deletePolynomialProblem;
-export const del = deletePolynomialProblem;
+export default { get, getProblems, save, remove, del, delete: remove };

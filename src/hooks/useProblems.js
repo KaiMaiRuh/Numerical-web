@@ -40,17 +40,22 @@ export default function useProblems(service) {
   // helper to trigger fade-out: returns a function that marks id then deletes after timeout
   const deleteWithAnimation = useCallback((id, timeout = 480) => {
     setRemovingIds((s) => new Set(s).add(id));
-    setTimeout(async () => {
-      try {
-        await deleteProblem(id);
-      } finally {
-        setRemovingIds((s) => {
-          const n = new Set(s);
-          n.delete(id);
-          return n;
-        });
-      }
-    }, timeout);
+    return new Promise((resolve, reject) => {
+      setTimeout(async () => {
+        try {
+          await deleteProblem(id);
+          resolve(true);
+        } catch (e) {
+          reject(e);
+        } finally {
+          setRemovingIds((s) => {
+            const n = new Set(s);
+            n.delete(id);
+            return n;
+          });
+        }
+      }, timeout);
+    });
   }, [deleteProblem]);
 
   return {

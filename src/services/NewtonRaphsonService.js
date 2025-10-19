@@ -1,42 +1,14 @@
 import { list, add, remove as dbRemove, serverTimestamp } from "./LocalDb";
 
 const COL = "problems_newtonraphson";
+const METHOD = "newton";
 
-export async function getNewtonProblems() {
-  return list(COL);
-}
+export const get = () => list(COL);
+export const save = (p) => add(COL, { ...p, method: METHOD, createdAt: serverTimestamp() });
+export const remove = (id) => dbRemove(COL, id);
 
-export async function saveNewtonProblem(problem) {
-  return add(COL, {
-    ...problem,
-    method: "newton",
-    createdAt: serverTimestamp(),
-  });
-}
+export const getProblems = get;
+export const del = remove;
+export { remove as delete };
 
-export async function deleteNewtonProblem(id) {
-  return dbRemove(COL, id);
-}
-
-// compatibility aliases for useProblems hook (generic names)
-export async function getProblems() {
-  return getNewtonProblems();
-}
-
-export async function save(problem) {
-  return saveNewtonProblem(problem);
-}
-
-export async function remove(id) {
-  return deleteNewtonProblem(id);
-}
-
-// single default export including both specific and generic names
-export default {
-  getNewtonProblems,
-  saveNewtonProblem,
-  deleteNewtonProblem,
-  getProblems,
-  save,
-  remove,
-};
+export default { get, getProblems, save, remove, del, delete: remove };

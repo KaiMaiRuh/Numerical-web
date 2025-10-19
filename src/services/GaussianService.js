@@ -2,25 +2,14 @@
 import { list, add, remove as dbRemove, serverTimestamp } from "./LocalDb";
 
 const COL = "problems_gaussian";
+const METHOD = "gaussian";
 
-export async function getGaussianProblems() {
-  return list(COL);
-}
+export const get = () => list(COL);
+export const save = (p) => add(COL, { ...p, method: METHOD, createdAt: serverTimestamp() });
+export const remove = (id) => dbRemove(COL, id);
 
-export async function saveGaussianProblem(problem) {
-  return add(COL, {
-    ...problem,
-    method: "gaussian",
-    createdAt: serverTimestamp(),
-  });
-}
+export const getProblems = get;
+export const del = remove;
+export { remove as delete };
 
-export async function deleteGaussianProblem(id) {
-  return dbRemove(COL, id);
-}
-
-// ✅ Generic aliases for useProblems hook compatibility
-export const getProblems = getGaussianProblems;
-export const save = saveGaussianProblem;
-export const remove = deleteGaussianProblem;
-export const del = deleteGaussianProblem;
+export default { get, getProblems, save, remove, del, delete: remove };

@@ -2,25 +2,14 @@
 import { list, add, remove as dbRemove, serverTimestamp } from "./LocalDb";
 
 const COL = "problems_jacobi";
+const METHOD = "jacobi";
 
-export async function getJacobiProblems() {
-  return list(COL);
-}
+export const get = () => list(COL);
+export const save = (p) => add(COL, { ...p, method: METHOD, createdAt: serverTimestamp() });
+export const remove = (id) => dbRemove(COL, id);
 
-export async function saveJacobiProblem(problem) {
-  return add(COL, {
-    ...problem,
-    method: "jacobi",
-    createdAt: serverTimestamp(),
-  });
-}
+export const getProblems = get;
+export const del = remove;
+export { remove as delete };
 
-export async function deleteJacobiProblem(id) {
-  return dbRemove(COL, id);
-}
-
-// ✅ generic aliases
-export const getProblems = getJacobiProblems;
-export const save = saveJacobiProblem;
-export const remove = deleteJacobiProblem;
-export const del = deleteJacobiProblem;
+export default { get, getProblems, save, remove, del, delete: remove };

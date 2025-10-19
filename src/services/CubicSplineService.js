@@ -1,25 +1,14 @@
 import { list, add, remove as dbRemove, serverTimestamp } from "./LocalDb";
 
 const COL = "problems_cubicspline";
+const METHOD = "cubic_spline";
 
-export async function getCubicSplineProblems() {
-  return list(COL);
-}
+export const get = () => list(COL);
+export const save = (p) => add(COL, { ...p, method: METHOD, createdAt: serverTimestamp() });
+export const remove = (id) => dbRemove(COL, id);
 
-export async function saveCubicSplineProblem(problem) {
-  return add(COL, {
-    ...problem,
-    method: "cubic_spline",
-    createdAt: serverTimestamp(),
-  });
-}
+export const getProblems = get;
+export const del = remove;
+export { remove as delete };
 
-export async function deleteCubicSplineProblem(id) {
-  return dbRemove(COL, id);
-}
-
-// สำหรับใช้กับ useProblems hook
-export const getProblems = getCubicSplineProblems;
-export const save = saveCubicSplineProblem;
-export const remove = deleteCubicSplineProblem;
-export const del = deleteCubicSplineProblem;
+export default { get, getProblems, save, remove, del, delete: remove };

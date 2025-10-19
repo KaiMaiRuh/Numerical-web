@@ -2,25 +2,14 @@
 import { list, add, remove as dbRemove, serverTimestamp } from "./LocalDb";
 
 const COL = "problems_onepoint";
+const METHOD = "onepoint";
 
-export async function getOnePointProblems() {
-  return list(COL);
-}
+export const get = () => list(COL);
+export const save = (p) => add(COL, { ...p, method: METHOD, createdAt: serverTimestamp() });
+export const remove = (id) => dbRemove(COL, id);
 
-export async function saveOnePointProblem(problem) {
-  return add(COL, {
-    ...problem,
-    method: "onepoint",
-    createdAt: serverTimestamp(),
-  });
-}
+export const getProblems = get;
+export const del = remove;
+export { remove as delete };
 
-export async function deleteOnePointProblem(id) {
-  return dbRemove(COL, id);
-}
-
-// Generic aliases for useProblems fallback names
-export const get = getOnePointProblems;
-export const save = saveOnePointProblem;
-export const remove = deleteOnePointProblem;
-export const deleteProblem = deleteOnePointProblem;
+export default { get, getProblems, save, remove, del, delete: remove };

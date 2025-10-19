@@ -2,25 +2,14 @@
 import { list, add, remove as dbRemove, serverTimestamp } from "./LocalDb";
 
 const COL = "problems_conjugategradient";
+const METHOD = "conjugate_gradient";
 
-export async function getConjugateGradientProblems() {
-  return list(COL);
-}
+export const get = () => list(COL);
+export const save = (p) => add(COL, { ...p, method: METHOD, createdAt: serverTimestamp() });
+export const remove = (id) => dbRemove(COL, id);
 
-export async function saveConjugateGradientProblem(problem) {
-  return add(COL, {
-    ...problem,
-    method: "conjugate_gradient",
-    createdAt: serverTimestamp(),
-  });
-}
+export const getProblems = get;
+export const del = remove;
+export { remove as delete };
 
-export async function deleteConjugateGradientProblem(id) {
-  return dbRemove(COL, id);
-}
-
-// ✅ generic aliases
-export const getProblems = getConjugateGradientProblems;
-export const save = saveConjugateGradientProblem;
-export const remove = deleteConjugateGradientProblem;
-export const del = deleteConjugateGradientProblem;
+export default { get, getProblems, save, remove, del, delete: remove };

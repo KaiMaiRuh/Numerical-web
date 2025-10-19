@@ -2,28 +2,14 @@
 import { list, add, remove as dbRemove, serverTimestamp } from "./LocalDb";
 
 const COL = "problems_falseposition";
+const METHOD = "falseposition";
 
-// ดึงโจทย์ทั้งหมด (ใหม่สุดก่อน)
-export async function getFalsePositionProblems() {
-  return list(COL);
-}
+export const get = () => list(COL);
+export const save = (p) => add(COL, { ...p, method: METHOD, createdAt: serverTimestamp() });
+export const remove = (id) => dbRemove(COL, id);
 
-// บันทึกโจทย์ใหม่
-export async function saveFalsePositionProblem(problem) {
-  return add(COL, {
-    ...problem,
-    method: "falseposition",
-    createdAt: serverTimestamp(),
-  });
-}
+export const getProblems = get;
+export const del = remove;
+export { remove as delete };
 
-// ลบโจทย์ตาม id
-export async function deleteFalsePositionProblem(id) {
-  return dbRemove(COL, id);
-}
-
-export default {
-  getFalsePositionProblems,
-  saveFalsePositionProblem,
-  deleteFalsePositionProblem,
-};
+export default { get, getProblems, save, remove, del, delete: remove };

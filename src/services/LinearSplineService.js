@@ -2,25 +2,14 @@
 import { list, add, remove as dbRemove, serverTimestamp } from "./LocalDb";
 
 const COL = "problems_linearspline";
+const METHOD = "linear_spline";
 
-export async function getLinearSplineProblems() {
-  return list(COL);
-}
+export const get = () => list(COL);
+export const save = (p) => add(COL, { ...p, method: METHOD, createdAt: serverTimestamp() });
+export const remove = (id) => dbRemove(COL, id);
 
-export async function saveLinearSplineProblem(problem) {
-  return add(COL, {
-    ...problem,
-    method: "linear_spline",
-    createdAt: serverTimestamp(),
-  });
-}
+export const getProblems = get;
+export const del = remove;
+export { remove as delete };
 
-export async function deleteLinearSplineProblem(id) {
-  return dbRemove(COL, id);
-}
-
-// Generic aliases for useProblems hook compatibility
-export const getProblems = getLinearSplineProblems;
-export const save = saveLinearSplineProblem;
-export const remove = deleteLinearSplineProblem;
-export const del = deleteLinearSplineProblem;
+export default { get, getProblems, save, remove, del, delete: remove };
