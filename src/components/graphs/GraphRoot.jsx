@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { niceStep } from "./core";
 
 function extractXY(it) {
   if (!it) return null;
@@ -41,14 +42,7 @@ export default function GraphRoot({ func, iterations = [], xl, xr, width = 800, 
     return { xmin, xmax, ymin, ymax };
   }
 
-  function niceStep(range) {
-    const rough = Math.pow(10, Math.floor(Math.log10(range)));
-    const r = range / rough;
-    if (r < 1.5) return rough * 0.1;
-    if (r < 3) return rough * 0.2;
-    if (r < 7) return rough * 0.5;
-    return rough;
-  }
+  // tick step now shared via ./core
 
   function worldToPixel([x, y], vp, w, h) {
     // optional margins support via vp._margins

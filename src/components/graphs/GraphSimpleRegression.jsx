@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
+import { niceStep } from "./core";
 
 // Responsive scatter + regression line. Pass either (a,b) for y = a + b x or a fitFunc(x).
 // New: support multiple series overlay. Each item: { xs, ys, a, b, fitFunc, pointColor, lineColor, label }
@@ -56,15 +57,7 @@ export default function GraphSimpleRegression({
     setVp(dataBounds);
   }, [dataBounds.xMin, dataBounds.xMax, dataBounds.yMin, dataBounds.yMax]);
 
-  // Utility for nice tick steps (similar spirit to GraphRoot)
-  const niceStep = (range) => {
-    const rough = Math.pow(10, Math.floor(Math.log10(Math.max(range, 1e-9))));
-    const r = range / rough;
-    if (r < 1.5) return rough * 0.1;
-    if (r < 3) return rough * 0.2;
-    if (r < 7) return rough * 0.5;
-    return rough;
-  };
+  // tick step now shared from ./core
 
   // Scales based on SVG viewBox with margins for labels
   const margins = { left: 60, right: 20, top: 20, bottom: 28 };
