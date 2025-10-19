@@ -10,7 +10,7 @@ export function falsePosition(f, a, b, tol = 1e-6, maxIter = 50) {
     const iterations = [];
     let prev = null, x1 = null;
     for (let i = 0; i <= maxIter; i++) {
-      if (fb - fa === 0) return { error: "หารศูนย์ในสูตร Secant", iterations, converged: false };
+      if (fb - fa === 0) return { error: "fb - fa = 0 (ช่วงนี้ไม่เหมาะกับ False Position)", iterations, converged: false };
       x1 = (a * fb - b * fa) / (fb - fa);
       const fx1 = f(x1);
       if (!finite(fx1)) return { error: "f(x1) คำนวณไม่ได้", iterations, converged: false };

@@ -29,15 +29,13 @@ export default function CompositeTrapezoidal() {
   }, [refresh]);
 
   // ---------------- Calculation ----------------
-  const f = (x) => {
-    try { return evalx(expr, x); }
-    catch { throw new Error("ไม่สามารถประเมินสมการได้"); }
-  };
+  // Use a unified safe function creator: prefer makeFunc(expr), fallback to evalx
+  const safeFunc = makeFunc(expr) || ((x) => evalx(expr, x));
 
   // ---------------- Handlers ----------------
   const handleRun = () => {
     try {
-      const { I, h, rows } = compositeTrapezoidal(a, b, n, f);
+  const { I, h, rows } = compositeTrapezoidal(a, b, n, safeFunc);
       setResult(I);
       setTable(rows);
       setStatus(`สถานะ: คำนวณสำเร็จ (h = ${formatNum(h)})`);
@@ -80,7 +78,7 @@ export default function CompositeTrapezoidal() {
     if (confirm("ลบโจทย์นี้ไหม?")) deleteProblem(p.id);
   };
 
-  const safeFunc = makeFunc(expr) || f;
+  // safeFunc already defined above
 
   // ---------------- UI ----------------
   return (
@@ -167,7 +165,7 @@ export default function CompositeTrapezoidal() {
           <div className="mt-3 text-gray-300 text-sm">
             <div className="mb-2">ผลลัพธ์:</div>
             <p>h = {formatNum((b - a) / n)}</p>
-            <p>f(a) = {formatNum(f(a))}, f(b) = {formatNum(f(b))}</p>
+            <p>f(a) = {formatNum(safeFunc(a))}, f(b) = {formatNum(safeFunc(b))}</p>
             <p className="mt-2">ค่าประมาณของ I ≈ <b>{formatNum(result)}</b></p>
             <p className="text-gray-400 mt-1">สูตร: I = (h/2)[f(a) + 2Σ f(xᵢ) + f(b)] (Σ สำหรับ i = 1..n-1)</p>
             <p className="text-gray-400 mt-1">แบ่งเป็น {n} ช่วง (interior points = {Math.max(0, n - 1)})</p>
