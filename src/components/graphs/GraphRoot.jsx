@@ -9,7 +9,7 @@ function extractXY(it) {
   return [x, y];
 }
 
-export default function GraphRoot({ func, iterations = [], xl, xr, width = 800, height = 320, className = "", caption }) {
+export default function GraphRoot({ func, iterations = [], xl, xr, width = 800, height = 320, className = "", caption, staircase = false }) {
   const canvasRef = useRef(null);
   const viewportRef = useRef(null); // { xmin, xmax, ymin, ymax }
   const draggingRef = useRef(false);
@@ -165,19 +165,43 @@ export default function GraphRoot({ func, iterations = [], xl, xr, width = 800, 
         ctx.stroke();
       }
 
-      // Green line connecting iteration points
+      // Connect iteration points
       if (points.length >= 2) {
-        ctx.strokeStyle = "#22c55e"; // green-500
-        ctx.lineWidth = 1.6;
-        for (let i = 1; i < points.length; i++) {
-          const [x0, y0] = points[i - 1];
-          const [x1, y1] = points[i];
-          const [px0, py0] = worldToPixel([x0, y0], vp, cssWidth, cssHeight);
-          const [px1, py1] = worldToPixel([x1, y1], vp, cssWidth, cssHeight);
-          ctx.beginPath();
-          ctx.moveTo(px0, py0);
-          ctx.lineTo(px1, py1);
-          ctx.stroke();
+        if (staircase) {
+          // Draw red staircase: vertical first, then horizontal
+          ctx.strokeStyle = "#ef4444"; // red-500
+          ctx.lineWidth = 1.6;
+          for (let i = 1; i < points.length; i++) {
+            const [x0, y0] = points[i - 1];
+            const [x1, y1] = points[i];
+            // vertical: (x0,y0) -> (x0,y1)
+            const [pxV0, pyV0] = worldToPixel([x0, y0], vp, cssWidth, cssHeight);
+            const [pxV1, pyV1] = worldToPixel([x0, y1], vp, cssWidth, cssHeight);
+            ctx.beginPath();
+            ctx.moveTo(pxV0, pyV0);
+            ctx.lineTo(pxV1, pyV1);
+            ctx.stroke();
+            // horizontal: (x0,y1) -> (x1,y1)
+            const [pxH1, pyH1] = worldToPixel([x1, y1], vp, cssWidth, cssHeight);
+            ctx.beginPath();
+            ctx.moveTo(pxV1, pyV1);
+            ctx.lineTo(pxH1, pyH1);
+            ctx.stroke();
+          }
+        } else {
+          // Default: green straight connectors
+          ctx.strokeStyle = "#22c55e"; // green-500
+          ctx.lineWidth = 1.6;
+          for (let i = 1; i < points.length; i++) {
+            const [x0, y0] = points[i - 1];
+            const [x1, y1] = points[i];
+            const [px0, py0] = worldToPixel([x0, y0], vp, cssWidth, cssHeight);
+            const [px1, py1] = worldToPixel([x1, y1], vp, cssWidth, cssHeight);
+            ctx.beginPath();
+            ctx.moveTo(px0, py0);
+            ctx.lineTo(px1, py1);
+            ctx.stroke();
+          }
         }
       }
 
@@ -271,7 +295,7 @@ export default function GraphRoot({ func, iterations = [], xl, xr, width = 800, 
       window.removeEventListener("mouseup", onMouseUp);
       canvas.removeEventListener("dblclick", onDblClick);
     };
-  }, [func, iterations, xl, xr, width, height]);
+  }, [func, iterations, xl, xr, width, height, staircase]);
 
   const defaultCaption = "เขียว = XL, แดง = XR, ส้ม = xm ของแต่ละรอบ (วงใหญ่ = xm สุดท้าย)";
   return (
