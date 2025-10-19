@@ -1,4 +1,3 @@
-// src/services/GraphicalMethodService.js
 import { list, add, remove as dbRemove, serverTimestamp } from "./LocalDb";
 
 const COL = "problems_graphical";

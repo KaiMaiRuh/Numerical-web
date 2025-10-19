@@ -1,4 +1,3 @@
-// src/services/PolynomialService.js
 import { list, add, remove as dbRemove, serverTimestamp } from "./LocalDb";
 
 const COL = "problems_polynomial";
