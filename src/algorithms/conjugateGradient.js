@@ -28,16 +28,17 @@ export function conjugateGradient(A, b, x0, tol = 1e-6, maxIter = 50) {
     for (let i = 0; i < n; i++) x[i] += alpha * p[i];
     for (let i = 0; i < n; i++) r[i] -= alpha * Ap[i];
 
-    const rsNew = r.reduce((sum, val) => sum + val * val, 0);
-    const error = Math.sqrt(rsNew);
+  const rsNew = r.reduce((sum, val) => sum + val * val, 0);
+  const error = Math.sqrt(rsNew);
+  const beta = rsNew / rsOld;
 
-    results.push({ iter, x: [...x], error });
+  // Record residual vector and scalars for this iteration
+  results.push({ iter, x: [...x], residual: [...r], alpha, beta, error });
 
-    if (Math.sqrt(rsNew) < tol) return { solution: x, iterations: results, converged: true };
+  if (Math.sqrt(rsNew) < tol) return { solution: x, iterations: results, converged: true };
 
-    const beta = rsNew / rsOld;
-    for (let i = 0; i < n; i++) p[i] = r[i] + beta * p[i];
-    rsOld = rsNew;
+  for (let i = 0; i < n; i++) p[i] = r[i] + beta * p[i];
+  rsOld = rsNew;
   }
 
   return { solution: x, iterations: results, converged: false };

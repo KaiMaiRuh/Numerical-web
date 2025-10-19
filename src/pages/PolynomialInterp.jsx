@@ -5,7 +5,8 @@ import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
-import polynomialInterpolation from "../algorithms/polynomialInterp";
+import polynomialInterpolation, { newtonPolynomial } from "../algorithms/polynomialInterp";
+import TableNewtonDD from "../components/tables/TableNewtonDD";
 
 export default function PolynomialInterp() {
   const [xValues, setXValues] = useState(["", "", "", ""]);
@@ -14,6 +15,7 @@ export default function PolynomialInterp() {
   const [result, setResult] = useState(null);
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
   const [coeffs, setCoeffs] = useState([]);
+  const [ddTable, setDdTable] = useState([]);
 
   const { problems, removingIds, refresh, saveProblem, deleteProblem } =
     useProblems(PolynomialService);
@@ -33,9 +35,10 @@ export default function PolynomialInterp() {
         return;
       }
 
-      const { fx, coeff } = polynomialInterpolation(xs, ys, x);
-      setResult(fx);
-      setCoeffs(coeff);
+  const { fx, coeff, table } = polynomialInterpolation(xs, ys, x);
+  setResult(fx);
+  setCoeffs(coeff);
+  setDdTable(table || []);
       setStatus("สถานะ: คำนวณเสร็จสิ้น");
     } catch (e) {
       console.error(e);
@@ -96,8 +99,8 @@ export default function PolynomialInterp() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <PageHeader
-        title="Polynomial Interpolation"
-        subtitle="การประมาณค่า f(x) โดยใช้ Newton’s Divided Difference Polynomial"
+        title="Newton Divided Differences"
+        subtitle={"Pn(x*) = f[x0] + f[x0,x1](x*−x0) + f[x0,x1,x2](x*−x0)(x*−x1) + …"}
       />
 
       <div className="bg-slate-800 rounded-lg p-4 shadow">
@@ -194,6 +197,10 @@ export default function PolynomialInterp() {
               <div className="text-xs text-gray-400">พจน์ของพหุนาม: {coeffs.map((c) => formatNum(c)).join(", ")}</div>
             )}
           </div>
+        )}
+
+        {ddTable && ddTable.length > 0 && (
+          <TableNewtonDD xValues={xValues} yValues={yValues} ddTable={ddTable} />
         )}
 
         <div className="mt-4">

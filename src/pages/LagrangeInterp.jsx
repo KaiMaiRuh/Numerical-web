@@ -6,6 +6,7 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import lagrange from "../algorithms/lagrangeInterp";
+import TableLagrange from "../components/tables/TableLagrange";
 
 export default function LagrangeInterp() {
   const [xValues, setXValues] = useState(["", "", ""]);
@@ -178,6 +179,12 @@ export default function LagrangeInterp() {
             {steps.length > 0 && (
               <div className="text-xs text-gray-400">รายละเอียดการคำนวณมีอยู่</div>
             )}
+          </div>
+        )}
+
+        {result !== null && (
+          <div className="mt-4">
+            <TableLagrange xValues={xValues} yValues={yValues} result={result} steps={steps} xTarget={xTarget} />
           </div>
         )}
 

@@ -170,11 +170,11 @@ export default function NewtonRaphson() {
         {/* ===== Graph Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <label className="block text-sm text-gray-400 mb-2">กราฟการลู่เข้าสู่รากของสมการ</label>
-          <div className="w-full h-72 bg-slate-900 rounded">
+          <div className="w-full h-72 bg-slate-900 rounded overflow-hidden">
             <GraphRoot
               func={safeFunc}
-              xl={parseFloat(x0) - 5 || -5}
-              xr={parseFloat(x0) + 5 || 5}
+              xl={Number.isFinite(parseFloat(x0)) ? parseFloat(x0) - 5 : -5}
+              xr={Number.isFinite(parseFloat(x0)) ? parseFloat(x0) + 5 : 5}
               iterations={iterations}
               method="Newton-Raphson"
               className="w-full h-72 rounded"
@@ -188,7 +188,9 @@ export default function NewtonRaphson() {
 
       {/* ===== Table Section ===== */}
       <div className="mt-6">
-        <TableRoot iterations={iterations} />
+        {/* TableRoot prefers x1 first; for Newton-Raphson we want to show the current x (x0, x1, ...)
+            so pass a mapped array with x1 removed to force the picker to use 'x'. */}
+        <TableRoot iterations={(iterations || []).map((it) => ({ ...it, x1: undefined }))} />
       </div>
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>

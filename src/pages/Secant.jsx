@@ -188,11 +188,11 @@ export default function Secant() {
         {/* ===== Graph Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <label className="block text-sm text-gray-400 mb-2">กราฟฟังก์ชัน</label>
-          <div className="w-full h-72 bg-slate-900 rounded">
+          <div className="w-full h-72 bg-slate-900 rounded overflow-hidden">
             <GraphRoot
               func={safeFunc}
-              xl={parseFloat(x0) - 2 || -5}
-              xr={parseFloat(x1) + 2 || 5}
+              xl={Number.isFinite(parseFloat(x0)) ? parseFloat(x0) - 2 : -5}
+              xr={Number.isFinite(parseFloat(x1)) ? parseFloat(x1) + 2 : 5}
               iterations={iterations}
               method="Secant"
               className="w-full h-72"
@@ -206,7 +206,24 @@ export default function Secant() {
 
       {/* ===== Table Section ===== */}
       <div className="mt-6">
-        <TableRoot iterations={iterations} />
+        {/* Build table rows so Iter 0 = user x0, Iter 1 = user x1, then Iter 2+ = computed x2, x3... */}
+        {(() => {
+          if (!iterations || iterations.length === 0) return <TableRoot iterations={[]} />;
+          const func = makeFunc(expr);
+          const safe = func || ((x) => NaN);
+          const x0num = parseFloat(x0);
+          const x1num = parseFloat(x1);
+          const rows = [];
+          if (Number.isFinite(x0num)) rows.push({ iter: 0, x: x0num, fx: Number.isFinite(x0num) ? safe(x0num) : NaN, error: null });
+          if (Number.isFinite(x1num)) rows.push({ iter: 1, x: x1num, fx: Number.isFinite(x1num) ? safe(x1num) : NaN, error: null });
+          iterations.forEach((it) => {
+            // algorithm provides x2 as the new root candidate
+            const val = it.x2 ?? it.x ?? null;
+            const fx = Number.isFinite(val) ? safe(val) : NaN;
+            rows.push({ iter: (it.iter ?? 0) + 2, x: val, fx, error: it.error });
+          });
+          return <TableRoot iterations={rows} />;
+        })()}
       </div>
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>

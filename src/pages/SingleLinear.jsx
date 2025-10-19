@@ -9,10 +9,11 @@ import solveSingleLinearRegression from "../algorithms/singleLinear";
 import GraphSimpleRegression from "../components/graphs/GraphSimpleRegression";
 
 export default function SingleLinear() {
+  // start with empty input rows
   const [points, setPoints] = useState([
-    { x: 1, y: 1 },
-    { x: 2, y: 2 },
-    { x: 3, y: 2.5 },
+    { x: "", y: "" },
+    { x: "", y: "" },
+    { x: "", y: "" },
   ]);
   const [xPredict, setXPredict] = useState("");
   const [result, setResult] = useState(null);
@@ -27,12 +28,18 @@ export default function SingleLinear() {
 
   const handleRun = () => {
     try {
+      // validate inputs
+      const numericPoints = points.map((p) => ({ x: parseFloat(p.x), y: parseFloat(p.y) }));
+      if (numericPoints.some((p) => Number.isNaN(p.x) || Number.isNaN(p.y))) {
+        setStatus("กรุณากรอกจุดข้อมูลให้ครบและเป็นตัวเลข");
+        return;
+      }
       const xNum = parseFloat(xPredict);
-      if (isNaN(xNum)) {
+      if (Number.isNaN(xNum)) {
         setStatus("กรุณากรอกค่า x ที่ต้องการทำนาย");
         return;
       }
-      const res = solveSingleLinearRegression(points, xNum);
+      const res = solveSingleLinearRegression(numericPoints, xNum);
       if (res.error) {
         setStatus("สถานะ: " + res.error);
         setResult(null);
@@ -48,9 +55,9 @@ export default function SingleLinear() {
 
   const handleReset = () => {
     setPoints([
-      { x: 1, y: 1 },
-      { x: 2, y: 2 },
-      { x: 3, y: 2.5 },
+      { x: "", y: "" },
+      { x: "", y: "" },
+      { x: "", y: "" },
     ]);
     setXPredict("");
     setResult(null);
@@ -122,7 +129,7 @@ export default function SingleLinear() {
                       value={p.x}
                       onChange={(e) => {
                         const newPts = [...points];
-                        newPts[i].x = parseFloat(e.target.value) || 0;
+                        newPts[i].x = e.target.value === "" ? "" : parseFloat(e.target.value);
                         setPoints(newPts);
                       }}
                       className="w-20 px-2 py-1 rounded bg-slate-900 border border-slate-700"
@@ -134,7 +141,7 @@ export default function SingleLinear() {
                       value={p.y}
                       onChange={(e) => {
                         const newPts = [...points];
-                        newPts[i].y = parseFloat(e.target.value) || 0;
+                        newPts[i].y = e.target.value === "" ? "" : parseFloat(e.target.value);
                         setPoints(newPts);
                       }}
                       className="w-20 px-2 py-1 rounded bg-slate-900 border border-slate-700"
@@ -206,20 +213,25 @@ export default function SingleLinear() {
         {/* ===== Output Section ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
           <h3 className="text-gray-300 mb-2">กราฟ Single Linear Regression</h3>
-            <div className="w-full h-72 bg-slate-900 rounded">
-              <GraphSimpleRegression xs={points.map((p) => p.x)} ys={points.map((p) => p.y)} className="w-full h-72" />
-            </div>
+          <div className="w-full h-72 rounded overflow-hidden">
+            <GraphSimpleRegression
+              xs={points.map((p) => p.x)}
+              ys={points.map((p) => p.y)}
+              a={result?.a}
+              b={result?.b}
+              className="w-full h-full"
+            />
+          </div>
 
           {result ? (
             <div className="text-sm text-gray-300 space-y-1 mt-3">
-              <div>a = {formatNum(result.a)}</div>
-              <div>b = {formatNum(result.b)}</div>
+              <div>a = {formatNum(result.a)} <span className="text-gray-400">(จุดตัดแกน y หรือค่าคงที่)</span></div>
+              <div>b = {formatNum(result.b)} <span className="text-gray-400">(ความชันของเส้นตรง)</span></div>
               <div>
                 สมการ: y = {formatNum(result.a)} + {formatNum(result.b)}x
               </div>
               <div>
-                y({xPredict}) ={" "}
-                <span className="font-semibold">{formatNum(result.yPred)}</span>
+                y({xPredict}) = <span className="font-semibold">{formatNum(result.yPred)}</span>
               </div>
             </div>
           ) : (

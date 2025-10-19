@@ -5,18 +5,20 @@ import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
 import { formatNum } from "../utils/math";
 import fitMultipleLinear, { predict } from "../algorithms/multipleLinear";
+import GraphSimpleRegression from "../components/graphs/GraphSimpleRegression";
 
 /** ---------------- Helpers moved to src/algorithms/multipleLinear.js ---------------- **/
 
 /** ---------------- Component ---------------- **/
 export default function MultipleLinear() {
-  const [features, setFeatures] = useState(2); // จำนวนตัวแปรอิสระ m
-  const [rows, setRows] = useState([
-    { x: [1, 2], y: 5 },
-    { x: [2, 0], y: 4 },
-    { x: [3, 1], y: 7 },
-  ]);
-  const [xPredict, setXPredict] = useState(Array(2).fill(0));
+  const [features, setFeatures] = useState(2); // จำนวนตัวแปรอิสระ m (allowed default)
+  // Start with empty editable inputs (no preset numeric values)
+  const [rows, setRows] = useState(
+    Array(3)
+      .fill()
+      .map(() => ({ x: Array(2).fill(""), y: "" }))
+  );
+  const [xPredict, setXPredict] = useState(Array(2).fill(""));
   const [model, setModel] = useState(null); // {coef, r2}
   const [yPred, setYPred] = useState(null);
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
@@ -52,7 +54,7 @@ export default function MultipleLinear() {
   };
 
   const addRow = () => {
-    setRows([...rows, { x: Array(features).fill(0), y: 0 }]);
+    setRows([...rows, { x: Array(features).fill(""), y: "" }]);
   };
 
   const removeRow = (idx) => {
@@ -62,7 +64,14 @@ export default function MultipleLinear() {
 
   const handleFit = () => {
     try {
-      const res = fitMultipleLinear(rows);
+      // validate rows: ensure all x and y values are numeric
+      for (const r of rows) {
+        if (!Array.isArray(r.x) || r.x.length < features) throw new Error("กรุณากรอกข้อมูลให้ครบ");
+        for (const v of r.x) if (v === "" || Number.isNaN(parseFloat(v))) throw new Error("กรุณากรอกข้อมูลให้ครบ");
+        if (r.y === "" || Number.isNaN(parseFloat(r.y))) throw new Error("กรุณากรอกค่า y ทุกแถว");
+      }
+      const numericRows = rows.map((r) => ({ x: r.x.map((v) => parseFloat(v)), y: parseFloat(r.y) }));
+      const res = fitMultipleLinear(numericRows);
       if (res.error) {
         setModel(null);
         setYPred(null);
@@ -80,20 +89,12 @@ export default function MultipleLinear() {
     }
   };
 
-  const handlePredict = () => {
-    if (!model?.coef) return alert("โปรดคำนวณโมเดลก่อน");
-    const xp = xPredict.map((v) => parseFloat(v) || 0);
-    setYPred(predict(model.coef, xp));
-  };
+  // Predict now happens right after fitting and on xPredict change if model exists
 
   const handleReset = () => {
     setFeatures(2);
-    setRows([
-      { x: [1, 2], y: 5 },
-      { x: [2, 0], y: 4 },
-      { x: [3, 1], y: 7 },
-    ]);
-    setXPredict([0, 0]);
+    setRows(Array(3).fill().map(() => ({ x: Array(2).fill(""), y: "" })));
+    setXPredict(Array(2).fill(""));
     setModel(null);
     setYPred(null);
     setStatus("สถานะ: รีเซ็ตแล้ว");
@@ -185,8 +186,9 @@ export default function MultipleLinear() {
                           type="number"
                           value={val}
                           onChange={(e) => {
+                            const v = e.target.value === "" ? "" : parseFloat(e.target.value);
                             const nr = rows.map((row) => ({ ...row, x: [...row.x] }));
-                            nr[i].x[j] = parseFloat(e.target.value) || 0;
+                            nr[i].x[j] = v;
                             setRows(nr);
                           }}
                           className="w-20 px-2 py-1 rounded bg-slate-900 border border-slate-700"
@@ -198,8 +200,9 @@ export default function MultipleLinear() {
                         type="number"
                         value={r.y}
                         onChange={(e) => {
+                          const v = e.target.value === "" ? "" : parseFloat(e.target.value);
                           const nr = rows.map((row) => ({ ...row, x: [...row.x] }));
-                          nr[i].y = parseFloat(e.target.value) || 0;
+                          nr[i].y = v;
                           setRows(nr);
                         }}
                         className="w-20 px-2 py-1 rounded bg-slate-900 border border-slate-700"
@@ -235,7 +238,7 @@ export default function MultipleLinear() {
                   value={v}
                   onChange={(e) => {
                     const nx = xPredict.slice();
-                    nx[j] = parseFloat(e.target.value) || 0;
+                    nx[j] = e.target.value === "" ? "" : parseFloat(e.target.value);
                     setXPredict(nx);
                   }}
                   className="w-24 px-2 py-1 rounded bg-slate-900 border border-slate-700"
@@ -247,9 +250,6 @@ export default function MultipleLinear() {
           <div className="flex gap-3 mb-3">
             <button onClick={handleFit} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">
               คำนวณโมเดล
-            </button>
-            <button onClick={handlePredict} className="flex-1 btn-primary glow-btn py-2 rounded font-semibold">
-              ทำนายค่า yₚ
             </button>
             <button onClick={handleReset} className="flex-1 btn-danger border border-slate-600 py-2 rounded">
               รีเซ็ต
@@ -271,20 +271,36 @@ export default function MultipleLinear() {
 
         {/* Right: Results */}
         <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <h3 className="text-gray-300 mb-2">ผลลัพธ์</h3>
+          <h3 className="text-gray-300 mb-2">กราฟและผลลัพธ์</h3>
+          {/* Single combined graph with multiple series (one per feature) */}
+          <div className="w-full h-72 rounded overflow-hidden bg-slate-900 mb-3">
+            <GraphSimpleRegression
+              className="w-full h-full"
+              series={Array.from({ length: features }, (_, j) => ({
+                xs: rows.map((r) => r.x[j]),
+                ys: rows.map((r) => r.y),
+                a: model?.coef?.[0] ?? 0,
+                b: model?.coef?.[j + 1] ?? 0,
+                pointColor: ["#38bdf8","#f472b6","#34d399","#fbbf24","#a78bfa","#ef4444","#22c55e","#60a5fa"][j % 8],
+                lineColor: ["#f59e0b","#ec4899","#10b981","#f59e0b","#8b5cf6","#ef4444","#22c55e","#3b82f6"][j % 8],
+                // label intentionally omitted per request
+              }))}
+              showLegend={false}
+            />
+          </div>
+
+          <h4 className="text-gray-300 mb-2">คำอธิบายผลลัพธ์</h4>
           {model?.coef ? (
             <div className="text-sm text-gray-300 space-y-1">
-              <div>Intercept (a) = {formatNum(model.coef[0])}</div>
+              <div>
+                a = {formatNum(model.coef[0])} <span className="text-gray-400">(จุดตัดแกน y หรือค่าคงที่)</span>
+              </div>
               {model.coef.slice(1).map((b, i) => (
-                <div key={i}>
-                  b{i + 1} = {formatNum(b)}
-                </div>
+                <div key={i}>b{i + 1} = {formatNum(b)} <span className="text-gray-400">(ความชันของตัวแปร x{i + 1} เมื่อคงตัวแปรอื่นคงที่)</span></div>
               ))}
-              <div>R² = <span className="font-semibold">{formatNum(model.r2)}</span></div>
+              <div>R² = <span className="font-semibold">{formatNum(model.r2)}</span> <span className="text-gray-400">(บอกสัดส่วนที่โมเดลอธิบายความแปรปรวนของ y ได้ ยิ่งใกล้ 1 ยิ่งดี)</span></div>
               {yPred !== null && (
-                <div className="mt-2">
-                  yₚ = <span className="font-semibold">{formatNum(yPred)}</span>
-                </div>
+                <div className="mt-2">yₚ = <span className="font-semibold">{formatNum(yPred)}</span> <span className="text-gray-400">(ค่าพยากรณ์เมื่อแทน xₚ ลงในสมการ)</span></div>
               )}
             </div>
           ) : (

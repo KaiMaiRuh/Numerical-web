@@ -10,12 +10,9 @@ import solveByMatrixInversion from "../algorithms/matrixInversion";
 
 export default function MatrixInversion() {
   const [size, setSize] = useState(3);
-  const [A, setA] = useState([
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-  ]);
-  const [b, setB] = useState([0, 0, 0]);
+  // matrix entries should start empty (no preset numbers)
+  const [A, setA] = useState(Array(3).fill().map(() => Array(3).fill("")));
+  const [b, setB] = useState(Array(3).fill(""));
   const [solution, setSolution] = useState([]);
   const [iterationsState, setIterationsState] = useState([]);
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");

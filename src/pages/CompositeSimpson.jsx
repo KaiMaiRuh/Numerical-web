@@ -12,10 +12,10 @@ import compositeSimpson from "../algorithms/compositeSimpson";
 // Integration graph/table removed per configuration
 
 export default function CompositeSimpson() {
-  const [expr, setExpr] = useState("x^2 + 1");
-  const [a, setA] = useState(0);
-  const [b, setB] = useState(2);
-  const [n, setN] = useState(4); // ต้องเป็นเลขคู่
+  const [expr, setExpr] = useState("");
+  const [a, setA] = useState("");
+  const [b, setB] = useState("");
+  const [n, setN] = useState(); // panels default left as 4 (allowed)
   const [result, setResult] = useState("-");
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
   const [table, setTable] = useState([]);
@@ -28,18 +28,15 @@ export default function CompositeSimpson() {
   }, [refresh]);
 
   // ---------------- Calculation ----------------
-  const f = (x) => {
-    try {
-      return evaluate(expr, { x });
-    } catch {
-      throw new Error("ไม่สามารถประเมินสมการได้");
-    }
-  };
+  const safeFunc = makeFunc(expr) || ((x) => evaluate(expr, { x }));
 
   // ---------------- Handlers ----------------
   const handleRun = () => {
     try {
-      const { I, h, rows } = compositeSimpson(a, b, n, f);
+      // The UI `n` is the number of Simpson panels (parabolas). Composite Simpson requires an even
+      // number of subintervals = 2 * panels. Convert here so the formula matches the documentation.
+  const subintervals = Math.max(2, Math.floor(n) * 2);
+  const { I, h, rows } = compositeSimpson(parseFloat(a), parseFloat(b), subintervals, safeFunc);
       setResult(I);
       setTable(rows);
       setStatus(`สถานะ: คำนวณสำเร็จ (h = ${formatNum(h)})`);
@@ -52,9 +49,9 @@ export default function CompositeSimpson() {
   };
 
   const handleReset = () => {
-    setExpr("x^2 + 1");
-    setA(0);
-    setB(2);
+    setExpr("");
+    setA("");
+    setB("");
     setN(4);
     setResult("-");
     setStatus("สถานะ: รีเซ็ตแล้ว");
@@ -82,7 +79,6 @@ export default function CompositeSimpson() {
     if (confirm("ลบโจทย์นี้ไหม?")) deleteProblem(p.id);
   };
 
-  const safeFunc = makeFunc(expr) || ((x) => x);
 
   // ---------------- UI ----------------
   return (

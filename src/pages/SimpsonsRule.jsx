@@ -9,10 +9,11 @@ import simpsonsRule from "../algorithms/simpsonsRule";
 // Integration graph/table removed per configuration
 
 export default function SimpsonsRule() {
-  const [expr, setExpr] = useState("x^2 + 1");
-  const [a, setA] = useState(0);
-  const [b, setB] = useState(2);
-  const [n, setN] = useState(4);
+  const [expr, setExpr] = useState("");
+  const [a, setA] = useState("");
+  const [b, setB] = useState("");
+  // n is not exposed to the UI; default to 2 to match common textbook examples (one composite with 2 intervals)
+  const DEFAULT_N = 2;
   const [result, setResult] = useState("-");
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
   const [table, setTable] = useState([]);
@@ -32,7 +33,7 @@ export default function SimpsonsRule() {
     }
 
     try {
-      const { I, h, rows } = simpsonsRule(a, b, n, f);
+      const { I, h, rows } = simpsonsRule(parseFloat(a), parseFloat(b), DEFAULT_N, f);
       setResult(I);
       setTable(rows);
       setStatus(`สถานะ: คำนวณสำเร็จ (h = ${formatNum(h)})`);
@@ -45,10 +46,9 @@ export default function SimpsonsRule() {
   };
 
   const handleReset = () => {
-    setExpr("x^2 + 1");
-    setA(0);
-    setB(2);
-    setN(4);
+    setExpr("");
+    setA("");
+    setB("");
     setResult("-");
     setStatus("สถานะ: รีเซ็ตแล้ว");
     setTable([]);
@@ -56,7 +56,7 @@ export default function SimpsonsRule() {
 
   const handleSaveProblem = async () => {
     try {
-      const payload = { expr, a, b, n, method: "simpson" };
+      const payload = { expr, a, b, method: "simpson" };
       await saveProblem(payload);
       alert("บันทึกแล้ว!");
     } catch (e) {
@@ -68,7 +68,6 @@ export default function SimpsonsRule() {
     setExpr(p.expr);
     setA(p.a);
     setB(p.b);
-    setN(p.n);
   };
 
   const handleDeleteProblem = (p) => {
@@ -114,15 +113,7 @@ export default function SimpsonsRule() {
               className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
             />
           </div>
-          <div>
-            <label className="block text-sm text-gray-400 mb-1">n (คู่)</label>
-            <input
-              type="number"
-              value={n}
-              onChange={(e) => setN(Math.max(2, parseInt(e.target.value) || 2))}
-              className="w-full px-2 py-1 rounded bg-slate-900 border border-slate-700"
-            />
-          </div>
+          {/* n is managed internally (default = 4) */}
         </div>
 
         <div className="flex gap-3 mb-3">

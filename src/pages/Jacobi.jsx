@@ -10,13 +10,9 @@ import TableJacobi from "../components/tables/TableJacobi";
 
 export default function Jacobi() {
   const [size, setSize] = useState(3);
-  const [A, setA] = useState([
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-  ]);
+  const [A, setA] = useState(Array(3).fill().map(() => Array(3).fill("")));
   const [b, setB] = useState([0, 0, 0]);
-  const [x0, setX0] = useState([0, 0, 0]);
+  const [x0, setX0] = useState(Array(3).fill(""));
   const [tol, setTol] = useState(1e-6);
   const [maxIter, setMaxIter] = useState(50);
   const [solution, setSolution] = useState([]);
@@ -53,8 +49,8 @@ export default function Jacobi() {
 
   const handleReset = () => {
     setA(Array(size).fill().map(() => Array(size).fill(0)));
-    setB(Array(size).fill(0));
-    setX0(Array(size).fill(0));
+  setB(Array(size).fill(""));
+  setX0(Array(size).fill(""));
     setSolution([]);
     setStatus("สถานะ: รีเซ็ตแล้ว");
   };

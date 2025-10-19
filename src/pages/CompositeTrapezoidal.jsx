@@ -14,10 +14,10 @@ import compositeTrapezoidal from "../algorithms/compositeTrapezoidal";
 // import TableIntegration from "../components/tables/TableIntegration";
 
 export default function CompositeTrapezoidal() {
-  const [expr, setExpr] = useState("x^2 + 1");
-  const [a, setA] = useState(0);
-  const [b, setB] = useState(2);
-  const [n, setN] = useState(4);
+  const [expr, setExpr] = useState("");
+  const [a, setA] = useState("");
+  const [b, setB] = useState("");
+  const [n, setN] = useState("");
   const [result, setResult] = useState("-");
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
   const [table, setTable] = useState([]);
@@ -166,10 +166,15 @@ export default function CompositeTrapezoidal() {
           removingIds={removingIds}
         />
 
-        {/* Inline result */}
+        {/* Inline result (explanatory, no table) */}
         {result !== "-" && (
           <div className="mt-3 text-gray-300 text-sm">
-            ค่าประมาณของ I ≈ <b>{formatNum(result)}</b>
+            <div className="mb-2">ผลลัพธ์:</div>
+            <p>h = {formatNum((b - a) / n)}</p>
+            <p>f(a) = {formatNum(f(a))}, f(b) = {formatNum(f(b))}</p>
+            <p className="mt-2">ค่าประมาณของ I ≈ <b>{formatNum(result)}</b></p>
+            <p className="text-gray-400 mt-1">สูตร: I = (h/2)[f(a) + 2Σ f(xᵢ) + f(b)] (Σ สำหรับ i = 1..n-1)</p>
+            <p className="text-gray-400 mt-1">แบ่งเป็น {n} ช่วง (interior points = {Math.max(0, n - 1)})</p>
           </div>
         )}
 

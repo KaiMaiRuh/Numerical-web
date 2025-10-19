@@ -9,13 +9,13 @@ import solveCubicSpline from "../algorithms/cubicSpline";
 
 export default function CubicSpline() {
   const [points, setPoints] = useState([
-    { x: 0, y: 0 },
-    { x: 1, y: 1 },
-    { x: 2, y: 4 },
-    { x: 3, y: 9 },
+    { x: "", y: "" },
+    { x: "", y: "" },
+    { x: "", y: "" },
   ]);
   const [xValue, setXValue] = useState("");
   const [yResult, setYResult] = useState(null);
+  const [segments, setSegments] = useState([]);
   const [status, setStatus] = useState("สถานะ: ยังไม่ได้คำนวณ");
 
   const { problems, removingIds, refresh, saveProblem, deleteProblem } = useProblems(CubicSplineService);
@@ -31,13 +31,45 @@ export default function CubicSpline() {
         setStatus("กรุณากรอกค่า x ให้ถูกต้อง");
         return;
       }
-      const res = solveCubicSpline(points, xNum);
+      const numericPoints = points
+        .map((p) => ({ x: parseFloat(p.x), y: parseFloat(p.y) }))
+        .filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y))
+        .sort((p1, p2) => p1.x - p2.x);
+
+      if (numericPoints.length < 3) {
+        setStatus("ต้องมีอย่างน้อย 3 จุด และต้องเป็นตัวเลข");
+        setYResult(null);
+        setSegments([]);
+        return;
+      }
+
+      const res = solveCubicSpline(numericPoints, xNum);
       if (res.error) {
         setStatus("สถานะ: " + res.error);
         setYResult(null);
         return;
       }
       setYResult(res.y);
+
+      // Convert local form S_i(x) = a + b*dx + c*dx^2 + d*dx^3 (dx = x - x_i)
+      // to global coefficients S_i(x) = A x^3 + B x^2 + C x + D for each interval [x_i, x_{i+1}]
+      const segs = [];
+      const n = numericPoints.length - 1;
+      for (let i = 0; i < n; i++) {
+        const xi = numericPoints[i].x;
+        const xl = numericPoints[i].x;
+        const xr = numericPoints[i + 1].x;
+        const a = res.a?.[i] ?? 0;
+        const b = res.b?.[i] ?? 0;
+        const c = res.c?.[i] ?? 0;
+        const d = res.d?.[i] ?? 0;
+        const A = d;
+        const B = c - 3 * d * xi;
+        const C = b - 2 * c * xi + 3 * d * xi * xi;
+        const D = a - b * xi + c * xi * xi - d * xi * xi * xi;
+        segs.push({ i: i + 1, A, B, C, D, xl, xr });
+      }
+      setSegments(segs);
       setStatus("สถานะ: คำนวณสำเร็จ");
     } catch (e) {
       console.error(e);
@@ -47,20 +79,14 @@ export default function CubicSpline() {
 
   const handleReset = () => {
     setPoints([
-      { x: 0, y: 0 },
-      { x: 1, y: 1 },
-      { x: 2, y: 4 },
-      { x: 3, y: 9 },
+      { x: "", y: "" },
+      { x: "", y: "" },
+      { x: "", y: "" },
     ]);
     setXValue("");
     setYResult(null);
+    setSegments([]);
     setStatus("สถานะ: รีเซ็ตแล้ว");
-  };
-
-  const handleAddPoint = () => setPoints([...points, { x: 0, y: 0 }]);
-  const handleRemovePoint = (index) => {
-    if (points.length <= 3) return alert("ต้องมีอย่างน้อย 3 จุด");
-    setPoints(points.filter((_, i) => i !== index));
   };
 
   const handleSaveProblem = async () => {
@@ -100,6 +126,16 @@ export default function CubicSpline() {
       <PageHeader title="Cubic Spline" subtitle="ประมาณค่า y ด้วย Cubic Spline Interpolation" />
 
       <div className="bg-slate-800 rounded-lg p-4 shadow">
+        <label className="block text-sm text-gray-400 mb-1">จำนวนจุดข้อมูล (≥ 3)</label>
+        <input
+          type="number"
+          value={points.length}
+          onChange={(e) => {
+            const n = Math.max(3, parseInt(e.target.value) || 3);
+            setPoints(Array.from({ length: n }, () => ({ x: "", y: "" })));
+          }}
+          className="w-24 px-3 py-2 rounded bg-slate-900 border border-slate-700 mb-3"
+        />
         <label className="block text-sm text-gray-400 mb-1">จุดข้อมูล (x, y)</label>
         <table className="text-sm border-collapse mb-3">
           <tbody>
@@ -111,7 +147,7 @@ export default function CubicSpline() {
                     value={p.x}
                     onChange={(e) => {
                       const newPts = [...points];
-                      newPts[i].x = parseFloat(e.target.value) || 0;
+                      newPts[i].x = e.target.value;
                       setPoints(newPts);
                     }}
                     className="w-20 px-2 py-1 rounded bg-slate-900 border border-slate-700"
@@ -123,28 +159,16 @@ export default function CubicSpline() {
                     value={p.y}
                     onChange={(e) => {
                       const newPts = [...points];
-                      newPts[i].y = parseFloat(e.target.value) || 0;
+                      newPts[i].y = e.target.value;
                       setPoints(newPts);
                     }}
                     className="w-20 px-2 py-1 rounded bg-slate-900 border border-slate-700"
                   />
                 </td>
-                <td className="p-1">
-                  <button
-                    onClick={() => handleRemovePoint(i)}
-                    className="text-red-400 hover:text-red-300 text-xs"
-                  >
-                    ลบ
-                  </button>
-                </td>
               </tr>
             ))}
           </tbody>
         </table>
-
-        <button onClick={handleAddPoint} className="w-full btn-primary glow-btn py-2 rounded mb-3">
-          เพิ่มจุด
-        </button>
 
         <div className="mb-3">
           <label className="block text-sm text-gray-400 mb-1">ค่า x ที่ต้องการหาค่า y</label>
@@ -172,7 +196,21 @@ export default function CubicSpline() {
         <div className="text-sm mb-2 text-gray-300">{status}</div>
 
         {yResult !== null && (
-          <div className="mt-4 text-sm text-gray-300">ผลลัพธ์: y = {formatNum(yResult)}</div>
+          <div className="mt-4 text-sm text-gray-200">
+            <div className="mb-2">ผลลัพธ์ y = {formatNum(yResult)}</div>
+            {segments && segments.length > 0 && (
+              <div className="mt-3 text-sm text-gray-300">
+                <div className="mb-2">ฟังก์ชันในแต่ละช่วง:</div>
+                <ul className="space-y-1">
+                  {segments.map((s, idx) => (
+                    <li key={idx} className="whitespace-pre-wrap">
+                      {`f${s.i}(x) = (${formatNum(s.A)})x^3 + (${formatNum(s.B)})x^2 + (${formatNum(s.C)})x + (${formatNum(s.D)});  ${formatNum(s.xl)} ≤ x ≤ ${formatNum(s.xr)}`}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         )}
 
         <div className="mt-4">

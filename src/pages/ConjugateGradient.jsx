@@ -8,16 +8,11 @@ import { formatNum } from "../utils/math";
 import conjugateGradient from "../algorithms/conjugateGradient";
 
 // ✅ ระบบ unified ใหม่
-import GraphConjugateGradient from "../components/graphs/GraphConjugateGradient";
 import TableConjugateGradient from "../components/tables/TableConjugateGradient";
 
 export default function ConjugateGradient() {
   const [size, setSize] = useState(3);
-  const [A, setA] = useState([
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-  ]);
+  const [A, setA] = useState(Array(size).fill().map(() => Array(size).fill("")));
   const [b, setB] = useState([0, 0, 0]);
   const [x0, setX0] = useState([0, 0, 0]);
   const [tol, setTol] = useState(1e-6);
@@ -53,9 +48,9 @@ export default function ConjugateGradient() {
   };
 
   const handleReset = () => {
-    setA(Array(size).fill().map(() => Array(size).fill(0)));
-    setB(Array(size).fill(0));
-    setX0(Array(size).fill(0));
+  setA(Array(size).fill().map(() => Array(size).fill("")));
+  setB(Array(size).fill(""));
+  setX0(Array(size).fill(0));
     setSolution([]);
     setStatus("สถานะ: รีเซ็ตแล้ว");
   };
@@ -104,15 +99,13 @@ export default function ConjugateGradient() {
 
   // ---------- UI ----------
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6">
       <PageHeader
         title="Conjugate Gradient Method"
         subtitle="การหาคำตอบของระบบสมการเชิงเส้น (เฉพาะเมทริกซ์สมมาตรบวกกำหนดแน่นอน SPD)"
       />
-
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* ===== Input Section ===== */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay1">
+      <div className="bg-slate-800 rounded-lg p-4 shadow">
+        {/* ===== Input Section (combined single column like Jacobi) ===== */}
           <label className="block text-sm text-gray-400 mb-1">ขนาดเมทริกซ์ (n × n)</label>
           <input
             type="number"
@@ -233,19 +226,11 @@ export default function ConjugateGradient() {
           <div className="text-sm mb-2 text-gray-300">{status}</div>
 
           <SavedProblems problems={problems} onLoad={handleLoadProblem} onDelete={handleDeleteProblem} removingIds={removingIds} />
-        </div>
 
-        {/* ===== Graph Section ===== */}
-        <div className="bg-slate-800 rounded-lg p-4 shadow fade-in-delay2">
-          <label className="block text-sm text-gray-400 mb-2">
-            การกระจายและการลู่เข้าสู่คำตอบ
-          </label>
-            <div className="w-full h-72 bg-slate-900 rounded">
-              <GraphConjugateGradient iterations={iterationsState} className="w-full h-72" />
-            </div>
-
-          {solution.length > 0 && (
-            <div className="mt-4 text-sm text-gray-300">
+        {/* ===== Results (table + solution) ===== */}
+        {solution.length > 0 && (
+          <div className="mt-4">
+            <div className="mt-2 text-sm text-gray-300">
               <div className="mb-2">ผลลัพธ์ (x):</div>
               <ul>
                 {solution.map((x, i) => (
@@ -255,16 +240,16 @@ export default function ConjugateGradient() {
                 ))}
               </ul>
             </div>
-          )}
-        </div>
+
+            <div className="mt-6">
+              <TableConjugateGradient iterations={iterationsState} />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ===== Results Table ===== */}
-      {solution.length > 0 && (
-        <div className="mt-6">
-          <TableConjugateGradient iterations={iterationsState} />
-        </div>
-      )}
+      {/* table moved inside the main panel; no duplicate here */}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>

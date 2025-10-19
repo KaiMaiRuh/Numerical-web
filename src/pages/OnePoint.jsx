@@ -53,8 +53,9 @@ export default function OnePoint() {
     const its = [];
     its.push({ iter: 0, x0: x0v, y: x0v, error: null });
     for (const it of res.iterations || []) {
+      // shift iteration index by +1 so iter 0 is the initial x0 row
       its.push({
-        iter: it.iter,
+        iter: (it.iter ?? 0) + 1,
         x1: it.x1,
         y: it.x1, // plot (x_k, x_k)
         error: it.error,
@@ -195,8 +196,8 @@ export default function OnePoint() {
 
         {/* ===== Graph Panel ===== */}
         <div className="bg-slate-800 rounded-lg p-4 shadow">
-          <label className="block text-sm text-gray-400 mb-2">กราฟ y = x</label>
-          <div className="w-full h-72 bg-slate-900 rounded">
+          <label className="block text-sm text-gray-400 mb-2">กราฟฟังก์ชัน</label>
+          <div className="w-full h-72 bg-slate-900 rounded overflow-hidden">
             <GraphRoot
               func={identityFunc}
               xl={xlForGraph}

@@ -197,8 +197,20 @@ export default function LinearSpline() {
         {/* Inline result */}
         {result && (
           <div className="mt-4 text-sm text-gray-200">
-            <div>ผลลัพธ์ f(x) = {formatNum(result.fx)}</div>
-            <div>พบในช่วง: {result.found ? "ใช่" : "ไม่พบ"}</div>
+            <div className="mb-2">ผลลัพธ์ f(x) = {formatNum(result.fx)}</div>
+            <div className="mb-2">พบในช่วง: {result.found ? "ใช่" : "ไม่พบ"}</div>
+            {segments && segments.length > 0 && (
+              <div className="mt-3 text-sm text-gray-300">
+                <div className="mb-2">ฟังก์ชันในแต่ละช่วง:</div>
+                <ul className="space-y-1">
+                  {segments.map((s, idx) => (
+                    <li key={idx} className="whitespace-pre-wrap">
+                      {`f${s.i + 1}(x) = (${formatNum(s.slope)})x + (${formatNum(s.intercept)});  ${formatNum(s.x1)} ≤ x ≤ ${formatNum(s.x2)}`}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </div>

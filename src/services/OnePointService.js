@@ -18,3 +18,9 @@ export async function saveOnePointProblem(problem) {
 export async function deleteOnePointProblem(id) {
   return dbRemove(COL, id);
 }
+
+// Generic aliases for useProblems fallback names
+export const get = getOnePointProblems;
+export const save = saveOnePointProblem;
+export const remove = deleteOnePointProblem;
+export const deleteProblem = deleteOnePointProblem;

@@ -14,8 +14,8 @@ export function jacobiIteration(A, b, x0, tol = 1e-6, maxIter = 50) {
       xNew[i] = (b[i] - sum) / A[i][i];
     }
 
-    const error = Math.max(...xNew.map((xi, i) => Math.abs((xi - xOld[i]) / (xi || 1))));
-    results.push({ iter, values: [...xNew], error });
+  const error = Math.max(...xNew.map((xi, i) => Math.abs((xi - xOld[i]) / (xi || 1))));
+  results.push({ iter, x: [...xNew], error });
 
     if (error < tol) return { solution: xNew, iterations: results, converged: true };
     xOld = [...xNew];
