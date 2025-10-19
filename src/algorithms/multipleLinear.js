@@ -61,28 +61,19 @@ export function matMul(A, B) {
 }
 
 export default function fitMultipleLinear(dataRows) {
-  const n = dataRows.length;
-  if (n < 2) return { error: "ต้องมีข้อมูลอย่างน้อย 2 แถว" };
-  const m = dataRows[0].x.length;
-
-  const X = dataRows.map((r) => [1, ...r.x]);
-  const y = dataRows.map((r) => [r.y]);
-
-  const Xt = transpose(X);
-  const XtX = matMul(Xt, X);
-  const Xty = matMul(Xt, y).map((row) => row[0]);
-
-  const w = gaussianSolve(XtX, Xty);
-
-  const yHat = X.map((row) => row.reduce((s, val, i) => s + val * w[i], 0));
-  const yArr = y.map((r) => r[0]);
-  const yMean = yArr.reduce((s, v) => s + v, 0) / n;
-
-  const ssTot = yArr.reduce((s, v) => s + (v - yMean) ** 2, 0);
-  const ssRes = yArr.reduce((s, v, i) => s + (v - yHat[i]) ** 2, 0);
-  const r2 = ssTot > 0 ? 1 - ssRes / ssTot : 1;
-
-  return { coef: w, r2, yHat };
+  try {
+    const n = dataRows.length; if (n < 2) return { error: "ต้องมีข้อมูลอย่างน้อย 2 แถว" };
+    const X = dataRows.map((r) => [1, ...r.x]);
+    const y = dataRows.map((r) => [r.y]);
+    const Xt = transpose(X), XtX = matMul(Xt, X), Xty = matMul(Xt, y).map((row) => row[0]);
+    const w = gaussianSolve(XtX, Xty);
+    const yHat = X.map((row) => row.reduce((s, val, i) => s + val * w[i], 0));
+    const yArr = y.map((r) => r[0]);
+    const yMean = yArr.reduce((s, v) => s + v, 0) / n;
+    const ssTot = yArr.reduce((s, v) => s + (v - yMean) ** 2, 0);
+    const ssRes = yArr.reduce((s, v, i) => s + (v - yHat[i]) ** 2, 0);
+    return { coef: w, r2: ssTot > 0 ? 1 - ssRes / ssTot : 1, yHat };
+  } catch (e) { return { error: String(e) }; }
 }
 
 export function predict(w, xVec) {

@@ -17,15 +17,13 @@ export function evalF(f, x) {
 // direction: 'forward' | 'backward' | 'centered'
 // accuracy: 'O(h)' | 'O(h^2)' | 'O(h^4)'
 export function differentiate(f, x, h, order, direction, accuracy) {
-  const o = String(order).trim();
-  const dir = String(direction).toLowerCase();
-  const acc = String(accuracy).replace(/\s+/g, '');
-
-  if (!(h > 0)) throw new Error('h must be > 0');
-
-  // Map helpers
-  const F = (t) => evalF(f, t);
-  const fx = F(x);
+  try {
+    const o = String(order).trim();
+    const dir = String(direction).toLowerCase();
+    const acc = String(accuracy).replace(/\s+/g, '');
+    if (!(h > 0)) throw new Error('h must be > 0');
+    const F = (t) => evalF(f, t);
+    const fx = F(x);
 
   if (o === '1' || /first/i.test(o)) {
     // First derivative
@@ -85,7 +83,6 @@ export function differentiate(f, x, h, order, direction, accuracy) {
       }
     }
   }
-
   if (o === '2' || /second/i.test(o)) {
     // Second derivative
     if (dir === 'forward') {
@@ -122,6 +119,6 @@ export function differentiate(f, x, h, order, direction, accuracy) {
       }
     }
   }
-
   throw new Error('Unsupported combination of order/direction/accuracy');
+  } catch (e) { return { error: String(e) }; }
 }

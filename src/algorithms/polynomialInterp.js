@@ -34,9 +34,10 @@ export function newtonPolynomial(xs, table, x) {
 }
 
 export default function polynomialInterpolation(xs, ys, x) {
-  const table = dividedDifferences(xs, ys);
-  const fx = newtonPolynomial(xs, table, x);
-  // coefficients are the first row of the divided-difference table
-  const coeff = table[0].slice(0, xs.length);
-  return { fx, table, coeff };
+  try {
+    const table = dividedDifferences(xs, ys);
+    const fx = newtonPolynomial(xs, table, x);
+    const coeff = table[0].slice(0, xs.length);
+    return { fx, table, coeff };
+  } catch (e) { return { error: String(e) }; }
 }

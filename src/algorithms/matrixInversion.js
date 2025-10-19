@@ -6,31 +6,22 @@ export function identityMatrix(n) {
 }
 
 export function invertMatrix(A) {
-  const n = A.length;
-  const I = identityMatrix(n);
-  const M = A.map((row, i) => [...row, ...I[i]]);
-
-  // Gauss–Jordan elimination on [A | I]
-  for (let i = 0; i < n; i++) {
-    let pivot = M[i][i];
-    if (Math.abs(pivot) < 1e-12) return { error: "Pivot = 0 (ไม่สามารถหา Inverse ได้)" };
-
-    // Normalize pivot row
-    for (let j = 0; j < 2 * n; j++) M[i][j] /= pivot;
-
-    // Eliminate other rows
-    for (let k = 0; k < n; k++) {
-      if (k === i) continue;
-      const factor = M[k][i];
-      for (let j = 0; j < 2 * n; j++) {
-        M[k][j] -= factor * M[i][j];
+  try {
+    const n = A.length;
+    const I = identityMatrix(n);
+    const M = A.map((row, i) => [...row, ...I[i]]);
+    for (let i = 0; i < n; i++) {
+      let pivot = M[i][i];
+      if (Math.abs(pivot) < 1e-12) return { error: "Pivot = 0 (ไม่สามารถหา Inverse ได้)" };
+      for (let j = 0; j < 2 * n; j++) M[i][j] /= pivot;
+      for (let k = 0; k < n; k++) {
+        if (k === i) continue;
+        const factor = M[k][i];
+        for (let j = 0; j < 2 * n; j++) M[k][j] -= factor * M[i][j];
       }
     }
-  }
-
-  // Extract inverse (right half)
-  const inverse = M.map((row) => row.slice(n));
-  return { inverse };
+    return { inverse: M.map((row) => row.slice(n)) };
+  } catch (e) { return { error: String(e) }; }
 }
 
 export function multiplyMatrixVector(A, b) {
@@ -45,10 +36,11 @@ export function multiplyMatrixVector(A, b) {
 }
 
 export function solveByMatrixInversion(A, b) {
-  const res = invertMatrix(A);
-  if (res.error) return { error: res.error };
-  const x = multiplyMatrixVector(res.inverse, b);
-  return { solution: x, inverse: res.inverse };
+  try {
+    const res = invertMatrix(A);
+    if (res.error) return { error: res.error };
+    return { solution: multiplyMatrixVector(res.inverse, b), inverse: res.inverse };
+  } catch (e) { return { error: String(e) }; }
 }
 
 export default solveByMatrixInversion;
