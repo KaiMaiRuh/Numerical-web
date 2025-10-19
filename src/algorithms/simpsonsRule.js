@@ -1,4 +1,4 @@
-import { evaluate } from "mathjs";
+import { evalx } from "../utils/math";
 
 // Composite Simpson's 1/3 Rule
 // Supports two signatures:
@@ -14,11 +14,8 @@ export default function simpsonsRule(arg1, arg2, arg3, arg4) {
     b = arg3;
     n = arg4;
     f = (x) => {
-      try {
-        return evaluate(expr, { x });
-      } catch (e) {
-        throw new Error("ไม่สามารถประเมินสมการได้");
-      }
+      try { return evalx(expr, x); }
+      catch { throw new Error("ไม่สามารถประเมินสมการได้"); }
     };
   } else if (typeof arg4 === "function") {
     // (a, b, n, f)

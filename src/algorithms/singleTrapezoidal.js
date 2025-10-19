@@ -1,4 +1,4 @@
-import { evaluate } from "mathjs";
+import { evalx } from "../utils/math";
 
 // Supports two signatures:
 // 1) trapezoidal(exprString, a, b)
@@ -12,11 +12,8 @@ export default function trapezoidal(arg1, arg2, arg3) {
     a = arg2;
     b = arg3;
     f = (x) => {
-      try {
-        return evaluate(expr, { x });
-      } catch (e) {
-        throw new Error("ไม่สามารถประเมินสมการได้");
-      }
+      try { return evalx(expr, x); }
+      catch { throw new Error("ไม่สามารถประเมินสมการได้"); }
     };
   } else if (typeof arg3 === "function") {
     // (a, b, f)

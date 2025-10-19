@@ -4,8 +4,7 @@ import * as CompositeSimpsonService from "../services/CompositeSimpsonService";
 import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
-import { evaluate } from "mathjs";
-import { formatNum, makeFunc } from "../utils/math";
+import { formatNum, makeFunc, evalx } from "../utils/math";
 import compositeSimpson from "../algorithms/compositeSimpson";
 
 // ✅ ระบบ unified ใหม่
@@ -28,7 +27,7 @@ export default function CompositeSimpson() {
   }, [refresh]);
 
   // ---------------- Calculation ----------------
-  const safeFunc = makeFunc(expr) || ((x) => evaluate(expr, { x }));
+  const safeFunc = makeFunc(expr) || ((x) => evalx(expr, x));
 
   // ---------------- Handlers ----------------
   const handleRun = () => {

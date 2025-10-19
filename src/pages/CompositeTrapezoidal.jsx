@@ -4,8 +4,7 @@ import * as CompositeTrapService from "../services/CompositeTrapezoidalService";
 import useProblems from "../hooks/useProblems";
 import PageHeader from "../components/PageHeader";
 import SavedProblems from "../components/SavedProblems";
-import { evaluate } from "mathjs";
-import { formatNum, makeFunc } from "../utils/math";
+import { formatNum, makeFunc, evalx } from "../utils/math";
 import compositeTrapezoidal from "../algorithms/compositeTrapezoidal";
 
 // ✅ ระบบ unified ใหม่
@@ -31,11 +30,8 @@ export default function CompositeTrapezoidal() {
 
   // ---------------- Calculation ----------------
   const f = (x) => {
-    try {
-      return evaluate(expr, { x });
-    } catch {
-      throw new Error("ไม่สามารถประเมินสมการได้");
-    }
+    try { return evalx(expr, x); }
+    catch { throw new Error("ไม่สามารถประเมินสมการได้"); }
   };
 
   // ---------------- Handlers ----------------
@@ -84,7 +80,7 @@ export default function CompositeTrapezoidal() {
     if (confirm("ลบโจทย์นี้ไหม?")) deleteProblem(p.id);
   };
 
-  const safeFunc = makeFunc(expr) || ((x) => x);
+  const safeFunc = makeFunc(expr) || f;
 
   // ---------------- UI ----------------
   return (

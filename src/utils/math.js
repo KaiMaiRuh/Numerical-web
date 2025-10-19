@@ -1,40 +1,26 @@
-export function formatNum(x, sig = 6) {
-  // Returns a human-friendly numeric string. Default: 6 significant digits.
-  if (x === null || Number.isNaN(x)) return "-";
-  if (!isFinite(x)) return String(x);
-  // Use Number(toPrecision) then strip trailing zeros where appropriate
-  return Number(x).toPrecision(sig).replace(/(?:\.0+$)|(?:(?<=\.[0-9]*[1-9])0+$)/, "");
-}
+import { evaluate as E, compile as C, format as F, factorial, derivative } from "mathjs";
 
-export function makeFunc(expr) {
-  if (!expr || !expr.trim()) return null;
-  let s = expr.replace(/\^/g, "**");
-  s = s.replace(/\bln\s*\(/gi, "log(");
-  s = s.replace(/\bpi\b/gi, "PI");
-  s = s.replace(/\be\b/gi, "E");
+// tiny, memorable helpers
+export const formatNum = (x, sig = 6) => x == null || Number.isNaN(x) ? "-" : !isFinite(x) ? String(x) : F(Number(x), { precision: sig });
 
-  // Insert implicit multiplication where appropriate:
-  // - between a number and x / PI / E or '('
-  // - between x/PI/E and '('
-  // - between ')' and '(', number, or variable
-  try {
-    // number followed by x or PI/E
-    s = s.replace(/(\d(?:\.\d+)?)(\s*)(?=(x|X|PI|pi|E|e)\b)/g, "$1*");
-    // number followed by (
-    s = s.replace(/(\d(?:\.\d+)?)(\s*)(?=\()/g, "$1*");
-    // x followed by number or (
-    s = s.replace(/(x|X)\s*(?=\d|\()/g, "$1*");
-    // PI/E/variable followed by (
-    s = s.replace(/(PI|pi|E|e)\s*(?=\()/g, "$1*");
-    // ) followed by ( or x or number or PI/E
-    s = s.replace(/\)\s*(?=\(|x|X|\d|PI|pi|E|e)/g, ")*");
-  } catch (e) {
-    // if regex fails for any reason, keep original s
-  }
+const prep = (e = "") => {
+  let s = e.trim();
+  if (!s) return s;
+  s = s.replace(/\bln\s*\(/gi, "log(").replace(/\bPI\b/g, "pi").replace(/\bE\b/g, "e");
+  return s
+    .replace(/(\d(?:\.\d+)?)(\s*)(?=(x|pi|e)\b)/gi, "$1*")
+    .replace(/(\d(?:\.\d+)?)(\s*)(?=\()/g, "$1*")
+    .replace(/(x)\s*(?=\d|\()/gi, "$1*")
+    .replace(/(pi|e)\s*(?=\()/gi, "$1*")
+    .replace(/\)\s*(?=\(|x|\d|pi|e)/gi, ")*");
+};
 
-  try {
-    return new Function("x", "with(Math){ return (" + s + "); }");
-  } catch (err) {
-    return null;
-  }
-}
+export const makeFunc = (expr) => {
+  const s = prep(expr);
+  if (!s) return null;
+  try { const c = C(s); return (x) => c.evaluate({ x }); } catch { return null; }
+};
+
+export const evalx = (expr, x) => E(prep(expr), { x });
+
+export { factorial, derivative };
