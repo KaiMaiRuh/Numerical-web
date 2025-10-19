@@ -246,34 +246,36 @@ export default function Bisection() {
       </div>
 
       {/* ===== Results Table (Bisection-specific) ===== */}
-      <div className="mt-6">
-        <div className="bg-slate-800 rounded-xl shadow-md p-4 mt-6 overflow-x-auto">
-          <table className="w-full text-sm border-collapse">
-            <thead className="bg-slate-700 text-gray-300">
-              <tr>
-                <th className="p-2 text-center">iter</th>
-                <th className="p-2 text-center">xl</th>
-                <th className="p-2 text-center">xr</th>
-                <th className="p-2 text-center">x1</th>
-                <th className="p-2 text-center">f(x1)</th>
-                <th className="p-2 text-center">error</th>
-              </tr>
-            </thead>
-            <tbody>
-              {iterations.map((it, i) => (
-                <tr key={i} className="border-b border-slate-700 hover:bg-slate-900 transition-colors">
-                  <td className="p-2 text-center font-medium">{it.iter ?? i}</td>
-                  <td className="p-2 text-center">{it.xl !== undefined ? formatNum(it.xl) : "-"}</td>
-                  <td className="p-2 text-center">{it.xr !== undefined ? formatNum(it.xr) : "-"}</td>
-                  <td className="p-2 text-center">{it.x1 !== undefined ? formatNum(it.x1) : "-"}</td>
-                  <td className="p-2 text-center">{it.fx1 !== undefined ? formatNum(it.fx1) : "-"}</td>
-                  <td className="p-2 text-center">{it.error !== undefined && it.error !== null ? formatNum(it.error) : "-"}</td>
+      {iterations.length > 0 && (
+        <div className="mt-6">
+          <div className="bg-slate-800 rounded-xl shadow-md p-4 mt-6 overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead className="bg-slate-700 text-gray-300">
+                <tr>
+                  <th className="p-2 text-center">iter</th>
+                  <th className="p-2 text-center">xl</th>
+                  <th className="p-2 text-center">xr</th>
+                  <th className="p-2 text-center">x1</th>
+                  <th className="p-2 text-center">f(x1)</th>
+                  <th className="p-2 text-center">error</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {iterations.map((it, i) => (
+                  <tr key={i} className="border-b border-slate-700 hover:bg-slate-900 transition-colors">
+                    <td className="p-2 text-center font-medium">{it.iter ?? i}</td>
+                    <td className="p-2 text-center">{it.xl !== undefined ? formatNum(it.xl) : "-"}</td>
+                    <td className="p-2 text-center">{it.xr !== undefined ? formatNum(it.xr) : "-"}</td>
+                    <td className="p-2 text-center">{it.x1 !== undefined ? formatNum(it.x1) : "-"}</td>
+                    <td className="p-2 text-center">{it.fx1 !== undefined ? formatNum(it.fx1) : "-"}</td>
+                    <td className="p-2 text-center">{it.error !== undefined && it.error !== null ? formatNum(it.error) : "-"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="text-sm text-gray-400 mt-6 fade-in-delay3">© By KaiMaiRuh</div>
     </div>

@@ -7,6 +7,7 @@ export default function Home() {
     {
       title: "1. Root of Equation",
       topics: [
+        { id: "graphicalmethod", name: "Graphical Method", path: "/graphicalmethod" },
         { id: "bisection", name: "Bisection search", path: "/bisection" },
         { id: "falseposition", name: "False-position methods", path: "/falseposition" },
         { id: "onepoint", name: "One-point Iteration methods", path: "/onepoint" },
@@ -55,7 +56,7 @@ export default function Home() {
     {
       title: "6. Differentiation",
       topics: [
-        { id: "numericaldiff", name: "Numerical Differentiation", path: "/firstdivided" },
+        { id: "numericaldiff", name: "Numerical Differentiation", path: "/differentiation" },
       ],
     },
   ];

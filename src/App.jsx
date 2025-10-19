@@ -7,6 +7,7 @@ import FalsePosition from "./pages/FalsePosition";
 import OnePoint from "./pages/OnePoint";
 import NewtonRaphson from "./pages/NewtonRaphson";
 import Secant from "./pages/Secant";
+import GraphicalMethod from "./pages/GraphicalMethod";
 // Linear Algebra
 import Cramer from "./pages/Cramer";
 import Gaussian from "./pages/Gaussian";
@@ -30,7 +31,7 @@ import CompositeTrapezoidal from "./pages/CompositeTrapezoidal";
 import SimpsonsRule from "./pages/SimpsonsRule";
 import CompositeSimpson from "./pages/CompositeSimpson";
 // Differentiation
-import FirstDivided from "./pages/FirstDivided";
+import Differentiation from "./pages/Differentiation";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
         {/* Root of Equation */}
         <Route path="/bisection" element={<Bisection />} />
           <Route path="/falseposition" element={<FalsePosition />} />
+        <Route path="/graphicalmethod" element={<GraphicalMethod />} />
         <Route path="/onepoint" element={<OnePoint />} />
         <Route path="/newtonraphson" element={<NewtonRaphson />} />
         <Route path="/secant" element={<Secant />} />
@@ -66,7 +68,7 @@ function App() {
   <Route path="/simpsonsrule" element={<SimpsonsRule />} />
   <Route path="/compositesimpson" element={<CompositeSimpson />} />
   {/* Differentiation */}
-  <Route path="/firstdivided" element={<FirstDivided />} />
+  <Route path="/differentiation" element={<Differentiation />} />
       </Routes>
     </BrowserRouter>
   );
